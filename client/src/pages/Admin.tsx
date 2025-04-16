@@ -11,11 +11,11 @@ const Admin = () => {
   const [, setLocation] = useLocation();
   
   useEffect(() => {
-    // Redirect if user is not admin
-    if (!isLoading && (!isAuthenticated || !user?.isAdmin)) {
+    // Redirect if not authenticated (but don't check for admin status for now)
+    if (!isLoading && !isAuthenticated) {
       setLocation("/login");
     }
-  }, [isAuthenticated, isLoading, user, setLocation]);
+  }, [isAuthenticated, isLoading, setLocation]);
   
   // Don't render the component until we've checked auth status
   if (isLoading) {
@@ -32,10 +32,13 @@ const Admin = () => {
     );
   }
   
-  // Redirect if not admin
-  if (!isAuthenticated || !user?.isAdmin) {
+  // Only check for authentication, not admin status
+  if (!isAuthenticated) {
     return null;
   }
+  
+  // Debug information
+  console.log("User in admin page:", user);
   
   return (
     <div className="container mx-auto px-4 py-6">

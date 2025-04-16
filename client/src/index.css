@@ -2,6 +2,30 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Custom global styles for better readability */
+.prose, .prose-sm, p, h1, h2, h3, h4, h5, h6 {
+  color: black !important;
+}
+
+.dark .prose, .dark .prose-sm, .dark p, .dark h1, .dark h2, .dark h3, .dark h4, .dark h5, .dark h6 {
+  color: white !important;
+}
+
+/* Make sure text has high contrast */
+.text-gray-900 {
+  color: black !important;
+}
+
+.dark .text-gray-100 {
+  color: white !important;
+}
+
+/* Force high contrast for dark mode */
+.dark {
+  --tw-text-opacity: 1;
+  color: rgba(255, 255, 255, var(--tw-text-opacity)) !important;
+}
+
 @layer base {
   * {
     @apply border-border;
