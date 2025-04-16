@@ -62,6 +62,18 @@ const Header = () => {
         
         {/* Right actions */}
         <div className="flex items-center space-x-4">
+          {/* Admin Dashboard Button - only visible for admins */}
+          {isAuthenticated && user?.isAdmin && (
+            <Button
+              variant="default"
+              className="hidden md:flex items-center gap-1 bg-red-600 hover:bg-red-700 text-white"
+              onClick={() => navigate("/admin")}
+            >
+              <i className="fas fa-user-shield mr-1"></i>
+              Admin Dashboard
+            </Button>
+          )}
+        
           {/* Dark mode toggle */}
           <Button 
             variant="ghost" 
@@ -165,13 +177,14 @@ const Header = () => {
                 </div>
                 {user?.isAdmin && (
                   <Button
-                    variant="ghost"
-                    className="w-full justify-start"
+                    variant="default"
+                    className="w-full justify-start bg-red-600 hover:bg-red-700 text-white"
                     onClick={() => {
                       navigate("/admin");
                       setMobileMenuOpen(false);
                     }}
                   >
+                    <i className="fas fa-user-shield mr-2"></i>
                     Admin Dashboard
                   </Button>
                 )}

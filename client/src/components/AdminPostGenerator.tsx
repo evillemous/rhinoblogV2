@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -58,21 +58,16 @@ const AdminPostGenerator = () => {
   
   // Query to get current schedule settings
   const { data: schedule, isLoading: scheduleLoading } = useQuery({
-    queryKey: ["/api/admin/schedule"],
-    onSettled: (data) => {
-      if (data) {
-        scheduleForm.setValue("enabled", data.enabled || false);
-        scheduleForm.setValue("cronExpression", data.cronExpression || "0 12 * * *");
-      }
-    },
-    onError: () => {
-      toast({
-        title: "Error",
-        description: "Failed to load schedule settings",
-        variant: "destructive"
-      });
-    }
+    queryKey: ["/api/admin/schedule"]
   });
+  
+  // Update form when schedule data is loaded
+  useEffect(() => {
+    if (schedule) {
+      scheduleForm.setValue("enabled", schedule.enabled || false);
+      scheduleForm.setValue("cronExpression", schedule.cronExpression || "0 12 * * *");
+    }
+  }, [schedule, scheduleForm]);
   
   // Mutation for generating posts
   const generateMutation = useMutation({
