@@ -16,7 +16,7 @@ import { Input } from "@/components/ui/input";
 
 const Header = () => {
   const [searchQuery, setSearchQuery] = useState("");
-  const [, navigate] = useLocation();
+  const [, setLocation] = useLocation();
   const { isAuthenticated, user, logout } = useAuth();
   const { theme, toggleTheme } = useTheme();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -65,9 +65,9 @@ const Header = () => {
           {/* Admin Dashboard Button - only visible for admins */}
           {isAuthenticated && user?.isAdmin && (
             <Button
-              variant="default"
-              className="hidden md:flex items-center gap-1 bg-red-600 hover:bg-red-700 text-white"
-              onClick={() => navigate("/admin")}
+              variant="destructive"
+              className="hidden md:flex items-center gap-1"
+              onClick={() => setLocation("/admin")}
             >
               <i className="fas fa-user-shield mr-1"></i>
               Admin Dashboard
@@ -112,11 +112,11 @@ const Header = () => {
                 </DropdownMenuLabel>
                 <DropdownMenuSeparator />
                 {user?.isAdmin && (
-                  <DropdownMenuItem onClick={() => navigate("/admin")}>
+                  <DropdownMenuItem onClick={() => setLocation("/admin")}>
                     Admin Dashboard
                   </DropdownMenuItem>
                 )}
-                <DropdownMenuItem onClick={() => navigate("/")}>
+                <DropdownMenuItem onClick={() => setLocation("/")}>
                   My Profile
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
@@ -130,13 +130,13 @@ const Header = () => {
               <Button 
                 variant="outline" 
                 className="text-reddit-blue border border-reddit-blue hover:bg-gray-50 dark:hover:bg-reddit-darkHover px-4 py-1 rounded-full text-sm font-medium"
-                onClick={() => navigate("/login")}
+                onClick={() => setLocation("/login")}
               >
                 Log In
               </Button>
               <Button
                 className="bg-reddit-blue hover:bg-blue-600 px-4 py-1 rounded-full text-sm font-medium"
-                onClick={() => navigate("/login?tab=register")}
+                onClick={() => setLocation("/login?tab=register")}
               >
                 Sign Up
               </Button>
