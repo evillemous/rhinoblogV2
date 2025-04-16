@@ -59,9 +59,11 @@ const AdminPostGenerator = () => {
   // Query to get current schedule settings
   const { data: schedule, isLoading: scheduleLoading } = useQuery({
     queryKey: ["/api/admin/schedule"],
-    onSuccess: (data) => {
-      scheduleForm.setValue("enabled", data.enabled || false);
-      scheduleForm.setValue("cronExpression", data.cronExpression || "0 12 * * *");
+    onSettled: (data) => {
+      if (data) {
+        scheduleForm.setValue("enabled", data.enabled || false);
+        scheduleForm.setValue("cronExpression", data.cronExpression || "0 12 * * *");
+      }
     },
     onError: () => {
       toast({
