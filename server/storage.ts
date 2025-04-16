@@ -95,6 +95,26 @@ export class MemStorage implements IStorage {
     
     // Initialize with some default tags
     this.seedTags();
+    
+    // Create default admin user
+    this.createDefaultAdmin();
+  }
+  
+  private async createDefaultAdmin() {
+    const admin = {
+      username: 'admin',
+      password: 'rhinoadmin123',
+      email: 'admin@rhinoplastyblogs.com',
+      avatarUrl: null,
+      isAdmin: true
+    };
+    
+    // Check if admin user already exists (for hot reloads)
+    const existingAdmin = await this.getUserByUsername('admin');
+    if (!existingAdmin) {
+      await this.createUser(admin);
+      console.log('Default admin user created');
+    }
   }
 
   private seedTags() {
