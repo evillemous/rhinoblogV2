@@ -1,0 +1,641 @@
+import express, { type Express } from "express";
+import { createServer, type Server } from "http";
+import { storage } from "./storage";
+import { z } from "zod";
+import { 
+  insertUserSchema, 
+  insertPostSchema, 
+  insertTagSchema,
+  insertPostTagSchema,
+  insertCommentSchema,
+  insertVoteSchema
+} from "@shared/schema";
+import { generatePost } from "./openai";
+import jwt from "jsonwebtoken";
+import cron from "node-cron";
+
+// Declare global types for schedule
+declare global {
+  var postSchedule: {
+    enabled: boolean;
+    cronExpression: string;
+  } | undefined;
+}
+
+// JWT Secret
+const JWT_SECRET = process.env.JWT_SECRET || "rhinoplastyblogs-jwt-secret";
+
+// Middleware for authentication
+const authenticate = (req: express.Request, res: express.Response, next: express.NextFunction) => {
+  const authHeader = req.headers.authorization;
+  
+  if (!authHeader) {
+    return res.status(401).json({ message: "Authorization header missing" });
+  }
+  
+  const token = authHeader.split(" ")[1];
+  
+  try {
+    const payload = jwt.verify(token, JWT_SECRET);
+    req.user = payload;
+    next();
+  } catch (error) {
+    return res.status(401).json({ message: "Invalid token" });
+  }
+};
+
+// Admin middleware
+const isAdmin = (req: express.Request, res: express.Response, next: express.NextFunction) => {
+  if (!req.user || !req.user.isAdmin) {
+    return res.status(403).json({ message: "Admin access required" });
+  }
+  next();
+};
+
+export async function registerRoutes(app: Express): Promise<Server> {
+  app.use(express.json());
+  
+  // Auth routes
+  app.post("/api/auth/register", async (req, res) => {
+    try {
+      const userData = insertUserSchema.parse(req.body);
+      
+      // Check if user already exists
+      const existingUser = await storage.getUserByUsername(userData.username);
+      if (existingUser) {
+        return res.status(400).json({ message: "Username already exists" });
+      }
+      
+      // Create user
+      const user = await storage.createUser(userData);
+      
+      // Generate JWT
+      const token = jwt.sign(
+        { id: user.id, username: user.username, isAdmin: user.isAdmin },
+        JWT_SECRET,
+        { expiresIn: "7d" }
+      );
+      
+      // Return user info and token (excluding password)
+      const { password, ...userWithoutPassword } = user;
+      return res.status(201).json({ user: userWithoutPassword, token });
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: error.errors });
+      }
+      return res.status(500).json({ message: "Error creating user" });
+    }
+  });
+  
+  app.post("/api/auth/login", async (req, res) => {
+    try {
+      const { username, password } = req.body;
+      
+      if (!username || !password) {
+        return res.status(400).json({ message: "Username and password required" });
+      }
+      
+      const user = await storage.getUserByUsername(username);
+      
+      if (!user || user.password !== password) {
+        return res.status(401).json({ message: "Invalid credentials" });
+      }
+      
+      // Generate JWT
+      const token = jwt.sign(
+        { id: user.id, username: user.username, isAdmin: user.isAdmin },
+        JWT_SECRET,
+        { expiresIn: "7d" }
+      );
+      
+      // Return user info and token (excluding password)
+      const { password: _, ...userWithoutPassword } = user;
+      return res.status(200).json({ user: userWithoutPassword, token });
+    } catch (error) {
+      return res.status(500).json({ message: "Error logging in" });
+    }
+  });
+  
+  // User routes
+  app.get("/api/users/:id", async (req, res) => {
+    try {
+      const userId = parseInt(req.params.id);
+      const user = await storage.getUser(userId);
+      
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
+      
+      // Return user info (excluding password)
+      const { password, ...userWithoutPassword } = user;
+      return res.status(200).json(userWithoutPassword);
+    } catch (error) {
+      return res.status(500).json({ message: "Error fetching user" });
+    }
+  });
+  
+  // Post routes
+  app.get("/api/posts", async (req, res) => {
+    try {
+      const limit = req.query.limit ? parseInt(req.query.limit as string) : 10;
+      const offset = req.query.offset ? parseInt(req.query.offset as string) : 0;
+      
+      const posts = await storage.getPostsWithTags(limit, offset);
+      return res.status(200).json(posts);
+    } catch (error) {
+      return res.status(500).json({ message: "Error fetching posts" });
+    }
+  });
+  
+  app.get("/api/posts/:id", async (req, res) => {
+    try {
+      const postId = parseInt(req.params.id);
+      const post = await storage.getPostWithTags(postId);
+      
+      if (!post) {
+        return res.status(404).json({ message: "Post not found" });
+      }
+      
+      return res.status(200).json(post);
+    } catch (error) {
+      return res.status(500).json({ message: "Error fetching post" });
+    }
+  });
+  
+  app.post("/api/posts", authenticate, async (req, res) => {
+    try {
+      const postData = insertPostSchema.parse(req.body);
+      
+      // Set user ID from authenticated user
+      postData.userId = req.user.id;
+      
+      // Create post
+      const post = await storage.createPost(postData);
+      
+      // Handle tags if provided
+      if (req.body.tags && Array.isArray(req.body.tags)) {
+        for (const tagName of req.body.tags) {
+          // Find or create tag
+          let tag = await storage.getTagByName(tagName);
+          
+          if (!tag) {
+            // Create a random color for the tag
+            const colors = ["blue", "green", "red", "yellow", "purple", "pink", "indigo", "gray", "orange"];
+            const randomColor = colors[Math.floor(Math.random() * colors.length)];
+            
+            tag = await storage.createTag({ name: tagName, color: randomColor });
+          }
+          
+          // Create post-tag association
+          await storage.createPostTag({ postId: post.id, tagId: tag.id });
+        }
+      }
+      
+      const postWithTags = await storage.getPostWithTags(post.id);
+      return res.status(201).json(postWithTags);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: error.errors });
+      }
+      return res.status(500).json({ message: "Error creating post" });
+    }
+  });
+  
+  app.put("/api/posts/:id", authenticate, async (req, res) => {
+    try {
+      const postId = parseInt(req.params.id);
+      const post = await storage.getPost(postId);
+      
+      if (!post) {
+        return res.status(404).json({ message: "Post not found" });
+      }
+      
+      // Check if user owns the post or is admin
+      if (post.userId !== req.user.id && !req.user.isAdmin) {
+        return res.status(403).json({ message: "Not authorized to update this post" });
+      }
+      
+      const updatedPost = await storage.updatePost(postId, req.body);
+      return res.status(200).json(updatedPost);
+    } catch (error) {
+      return res.status(500).json({ message: "Error updating post" });
+    }
+  });
+  
+  app.delete("/api/posts/:id", authenticate, async (req, res) => {
+    try {
+      const postId = parseInt(req.params.id);
+      const post = await storage.getPost(postId);
+      
+      if (!post) {
+        return res.status(404).json({ message: "Post not found" });
+      }
+      
+      // Check if user owns the post or is admin
+      if (post.userId !== req.user.id && !req.user.isAdmin) {
+        return res.status(403).json({ message: "Not authorized to delete this post" });
+      }
+      
+      const deleted = await storage.deletePost(postId);
+      if (deleted) {
+        return res.status(200).json({ message: "Post deleted successfully" });
+      } else {
+        return res.status(500).json({ message: "Failed to delete post" });
+      }
+    } catch (error) {
+      return res.status(500).json({ message: "Error deleting post" });
+    }
+  });
+  
+  // Vote routes
+  app.post("/api/posts/:id/vote", authenticate, async (req, res) => {
+    try {
+      const postId = parseInt(req.params.id);
+      const { voteType } = req.body;
+      
+      if (voteType !== "upvote" && voteType !== "downvote") {
+        return res.status(400).json({ message: "Invalid vote type" });
+      }
+      
+      const post = await storage.getPost(postId);
+      if (!post) {
+        return res.status(404).json({ message: "Post not found" });
+      }
+      
+      // Check if user already voted
+      const existingVote = await storage.getVote(req.user.id, postId);
+      
+      if (existingVote) {
+        // If vote type is the same, remove vote (toggle)
+        if (existingVote.voteType === voteType) {
+          await storage.deleteVote(existingVote.id);
+          
+          // Update post vote counts
+          const updatedPost = await storage.updatePost(postId, {
+            [voteType === "upvote" ? "upvotes" : "downvotes"]: 
+              post[voteType === "upvote" ? "upvotes" : "downvotes"] - 1
+          });
+          
+          return res.status(200).json(updatedPost);
+        } else {
+          // Change vote type
+          await storage.updateVote(existingVote.id, voteType);
+          
+          // Update post vote counts
+          const updatedPost = await storage.updatePost(postId, {
+            upvotes: voteType === "upvote" ? post.upvotes + 1 : post.upvotes - 1,
+            downvotes: voteType === "downvote" ? post.downvotes + 1 : post.downvotes - 1
+          });
+          
+          return res.status(200).json(updatedPost);
+        }
+      } else {
+        // Create new vote
+        await storage.createVote({
+          userId: req.user.id,
+          postId,
+          commentId: null,
+          voteType
+        });
+        
+        // Update post vote count
+        const updatedPost = await storage.updatePost(postId, {
+          [voteType === "upvote" ? "upvotes" : "downvotes"]: 
+            post[voteType === "upvote" ? "upvotes" : "downvotes"] + 1
+        });
+        
+        return res.status(200).json(updatedPost);
+      }
+    } catch (error) {
+      return res.status(500).json({ message: "Error voting on post" });
+    }
+  });
+  
+  // Comment routes
+  app.get("/api/posts/:id/comments", async (req, res) => {
+    try {
+      const postId = parseInt(req.params.id);
+      const comments = await storage.getCommentsWithUsers(postId);
+      return res.status(200).json(comments);
+    } catch (error) {
+      return res.status(500).json({ message: "Error fetching comments" });
+    }
+  });
+  
+  app.post("/api/posts/:id/comments", authenticate, async (req, res) => {
+    try {
+      const postId = parseInt(req.params.id);
+      const commentData = insertCommentSchema.parse({
+        ...req.body,
+        postId,
+        userId: req.user.id
+      });
+      
+      const comment = await storage.createComment(commentData);
+      
+      // Get user data for response
+      const user = await storage.getUser(req.user.id);
+      
+      return res.status(201).json({
+        ...comment,
+        user: {
+          id: user?.id,
+          username: user?.username,
+          avatarUrl: user?.avatarUrl
+        }
+      });
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: error.errors });
+      }
+      return res.status(500).json({ message: "Error creating comment" });
+    }
+  });
+  
+  app.delete("/api/comments/:id", authenticate, async (req, res) => {
+    try {
+      const commentId = parseInt(req.params.id);
+      const comment = await storage.getComment(commentId);
+      
+      if (!comment) {
+        return res.status(404).json({ message: "Comment not found" });
+      }
+      
+      // Check if user owns the comment or is admin
+      if (comment.userId !== req.user.id && !req.user.isAdmin) {
+        return res.status(403).json({ message: "Not authorized to delete this comment" });
+      }
+      
+      const deleted = await storage.deleteComment(commentId);
+      if (deleted) {
+        return res.status(200).json({ message: "Comment deleted successfully" });
+      } else {
+        return res.status(500).json({ message: "Failed to delete comment" });
+      }
+    } catch (error) {
+      return res.status(500).json({ message: "Error deleting comment" });
+    }
+  });
+  
+  // Comment vote routes
+  app.post("/api/comments/:id/vote", authenticate, async (req, res) => {
+    try {
+      const commentId = parseInt(req.params.id);
+      const { voteType } = req.body;
+      
+      if (voteType !== "upvote" && voteType !== "downvote") {
+        return res.status(400).json({ message: "Invalid vote type" });
+      }
+      
+      const comment = await storage.getComment(commentId);
+      if (!comment) {
+        return res.status(404).json({ message: "Comment not found" });
+      }
+      
+      // Check if user already voted
+      const existingVote = await storage.getVote(req.user.id, undefined, commentId);
+      
+      if (existingVote) {
+        // If vote type is the same, remove vote (toggle)
+        if (existingVote.voteType === voteType) {
+          await storage.deleteVote(existingVote.id);
+          
+          // Update comment vote counts
+          const updatedComment = await storage.getComment(commentId);
+          return res.status(200).json(updatedComment);
+        } else {
+          // Change vote type
+          await storage.updateVote(existingVote.id, voteType);
+          
+          // Update comment vote counts
+          const updatedComment = await storage.getComment(commentId);
+          return res.status(200).json(updatedComment);
+        }
+      } else {
+        // Create new vote
+        await storage.createVote({
+          userId: req.user.id,
+          postId: null,
+          commentId,
+          voteType
+        });
+        
+        // Update comment vote count
+        const updatedComment = await storage.updateCommentVotes(
+          commentId, 
+          voteType === "upvote"
+        );
+        
+        return res.status(200).json(updatedComment);
+      }
+    } catch (error) {
+      return res.status(500).json({ message: "Error voting on comment" });
+    }
+  });
+  
+  // Tag routes
+  app.get("/api/tags", async (req, res) => {
+    try {
+      const tags = await storage.getTags();
+      return res.status(200).json(tags);
+    } catch (error) {
+      return res.status(500).json({ message: "Error fetching tags" });
+    }
+  });
+  
+  // Admin routes (AI post generation)
+  app.post("/api/admin/generate-post", authenticate, isAdmin, async (req, res) => {
+    try {
+      const { age, gender, procedure, reason } = req.body;
+      
+      if (!age || !gender || !procedure || !reason) {
+        return res.status(400).json({ message: "Missing required fields" });
+      }
+      
+      // Get admin user
+      const user = await storage.getUser(req.user.id);
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
+      
+      // Generate post using OpenAI
+      const generatedPost = await generatePost(age, gender, procedure, reason);
+      
+      if (!generatedPost) {
+        return res.status(500).json({ message: "Failed to generate post" });
+      }
+      
+      // Create post in database
+      const post = await storage.createPost({
+        userId: user.id,
+        title: generatedPost.title,
+        content: generatedPost.content,
+        imageUrl: null,
+        isAiGenerated: true
+      });
+      
+      // Add tags
+      for (const tagName of generatedPost.tags) {
+        // Find or create tag
+        let tag = await storage.getTagByName(tagName);
+        
+        if (!tag) {
+          // Create a random color for the tag
+          const colors = ["blue", "green", "red", "yellow", "purple", "pink", "indigo", "gray", "orange"];
+          const randomColor = colors[Math.floor(Math.random() * colors.length)];
+          
+          tag = await storage.createTag({ name: tagName, color: randomColor });
+        }
+        
+        // Create post-tag association
+        await storage.createPostTag({ postId: post.id, tagId: tag.id });
+      }
+      
+      const postWithTags = await storage.getPostWithTags(post.id);
+      return res.status(201).json(postWithTags);
+    } catch (error) {
+      return res.status(500).json({ message: "Error generating post" });
+    }
+  });
+  
+  // Schedule daily post generation
+  app.post("/api/admin/schedule", authenticate, isAdmin, async (req, res) => {
+    try {
+      const { enabled, cronExpression } = req.body;
+      
+      // Store schedule settings (in-memory for this implementation)
+      global.postSchedule = {
+        enabled: enabled === true,
+        cronExpression: cronExpression || "0 12 * * *" // Default: daily at 12 PM
+      };
+      
+      return res.status(200).json(global.postSchedule);
+    } catch (error) {
+      return res.status(500).json({ message: "Error updating schedule" });
+    }
+  });
+  
+  app.get("/api/admin/schedule", authenticate, isAdmin, async (req, res) => {
+    try {
+      // Return schedule settings
+      return res.status(200).json(global.postSchedule || {
+        enabled: false,
+        cronExpression: "0 12 * * *" // Default: daily at 12 PM
+      });
+    } catch (error) {
+      return res.status(500).json({ message: "Error fetching schedule" });
+    }
+  });
+
+  // Setup scheduled post generation
+  let scheduledTask: cron.ScheduledTask | null = null;
+
+  function setupScheduledTask() {
+    // Cancel existing task if any
+    if (scheduledTask) {
+      scheduledTask.stop();
+    }
+
+    // Skip if not enabled
+    if (!global.postSchedule || !global.postSchedule.enabled) {
+      return;
+    }
+
+    // Setup new cron job
+    scheduledTask = cron.schedule(global.postSchedule.cronExpression, async () => {
+      try {
+        // Find an admin user
+        const users = await storage.getUsers();
+        const adminUser = users.find(user => user.isAdmin);
+
+        if (!adminUser) {
+          console.error("No admin user found for scheduled post generation");
+          return;
+        }
+
+        // Generate random parameters for the post
+        const ages = ["18", "21", "24", "27", "30", "35", "40", "45"];
+        const genders = ["male", "female", "non-binary"];
+        const procedures = ["closed", "open", "ethnic", "revision", "tip plasty"];
+        const reasons = [
+          "fixing a deviated septum", 
+          "correcting a dorsal hump", 
+          "refining a bulbous tip",
+          "improving breathing",
+          "fixing a previous surgery",
+          "reshaping after injury",
+          "ethnic refinement"
+        ];
+
+        const randomAge = ages[Math.floor(Math.random() * ages.length)];
+        const randomGender = genders[Math.floor(Math.random() * genders.length)];
+        const randomProcedure = procedures[Math.floor(Math.random() * procedures.length)];
+        const randomReason = reasons[Math.floor(Math.random() * reasons.length)];
+
+        // Generate post
+        const generatedPost = await generatePost(randomAge, randomGender, randomProcedure, randomReason);
+
+        if (!generatedPost) {
+          console.error("Failed to generate scheduled post");
+          return;
+        }
+
+        // Create post in database
+        const post = await storage.createPost({
+          userId: adminUser.id,
+          title: generatedPost.title,
+          content: generatedPost.content,
+          imageUrl: null,
+          isAiGenerated: true
+        });
+
+        // Add tags
+        for (const tagName of generatedPost.tags) {
+          // Find or create tag
+          let tag = await storage.getTagByName(tagName);
+          
+          if (!tag) {
+            // Create a random color for the tag
+            const colors = ["blue", "green", "red", "yellow", "purple", "pink", "indigo", "gray", "orange"];
+            const randomColor = colors[Math.floor(Math.random() * colors.length)];
+            
+            tag = await storage.createTag({ name: tagName, color: randomColor });
+          }
+          
+          // Create post-tag association
+          await storage.createPostTag({ postId: post.id, tagId: tag.id });
+        }
+
+        console.log(`Scheduled post generated: ${generatedPost.title}`);
+      } catch (error) {
+        console.error("Error in scheduled post generation:", error);
+      }
+    });
+  }
+
+  // Setup initial task if needed
+  setupScheduledTask();
+
+  // Watch for changes to the schedule
+  setInterval(() => {
+    setupScheduledTask();
+  }, 60000); // Check every minute
+
+  // Create HTTP server
+  const httpServer = createServer(app);
+  
+  // Initialize with an admin user
+  const adminUser = await storage.getUserByUsername("admin");
+  if (!adminUser) {
+    await storage.createUser({
+      username: "admin",
+      password: "rhinoadmin123",
+      email: "admin@rhinoplastyblogs.com",
+      avatarUrl: null,
+      isAdmin: true
+    });
+    console.log("Admin user created: admin/rhinoadmin123");
+  }
+  
+  return httpServer;
+}
