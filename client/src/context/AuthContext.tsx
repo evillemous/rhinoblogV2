@@ -37,8 +37,8 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   
   // Check for existing token on component mount
   useEffect(() => {
-    const token = localStorage.getItem("token");
-    const storedUser = localStorage.getItem("user");
+    const token = localStorage.getItem("auth_token");
+    const storedUser = localStorage.getItem("auth_user");
     
     if (token && storedUser) {
       try {
@@ -47,8 +47,8 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
         setIsAuthenticated(true);
       } catch (error) {
         // Invalid user data, clear storage
-        localStorage.removeItem("token");
-        localStorage.removeItem("user");
+        localStorage.removeItem("auth_token");
+        localStorage.removeItem("auth_user");
       }
     }
     
@@ -56,15 +56,15 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   }, []);
   
   const login = (token: string, userData: User) => {
-    localStorage.setItem("token", token);
-    localStorage.setItem("user", JSON.stringify(userData));
+    localStorage.setItem("auth_token", token);
+    localStorage.setItem("auth_user", JSON.stringify(userData));
     setUser(userData);
     setIsAuthenticated(true);
   };
   
   const logout = () => {
-    localStorage.removeItem("token");
-    localStorage.removeItem("user");
+    localStorage.removeItem("auth_token");
+    localStorage.removeItem("auth_user");
     setUser(null);
     setIsAuthenticated(false);
   };

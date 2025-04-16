@@ -66,7 +66,7 @@ const Login = () => {
             username: "admin",
             email: "admin@rhinoplastyblogs.com",
             isAdmin: true,
-            avatarUrl: null
+            avatarUrl: undefined
           }
         };
       } else {
