@@ -42,6 +42,11 @@ const Header = () => {
             </div>
             <span className="font-ibm-plex font-bold text-xl hidden sm:block">RhinoplastyBlogs</span>
           </Link>
+          
+          {/* Direct Admin Link - Always Visible */}
+          <Link href="/admin-link" className="ml-4 px-3 py-1 bg-red-600 text-white rounded-md font-bold text-sm border-2 border-white shadow-lg hover:bg-red-700">
+            ADMIN ACCESS
+          </Link>
         </div>
         
         {/* Search bar */}
@@ -169,6 +174,19 @@ const Header = () => {
       {mobileMenuOpen && (
         <div className="sm:hidden bg-white dark:bg-gray-800 shadow-md">
           <div className="p-4 space-y-3">
+            {/* Direct Admin Access - Always visible in mobile menu */}
+            <Button
+              variant="destructive"
+              className="w-full justify-start font-bold bg-red-600 hover:bg-red-700 text-white border border-white"
+              onClick={() => {
+                setLocation("/admin-link");
+                setMobileMenuOpen(false);
+              }}
+            >
+              <i className="fas fa-user-shield mr-2"></i>
+              ADMIN ACCESS
+            </Button>
+            
             {isAuthenticated ? (
               <>
                 <div className="flex items-center space-x-2 mb-2">
