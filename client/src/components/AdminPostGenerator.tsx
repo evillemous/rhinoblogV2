@@ -57,7 +57,12 @@ const AdminPostGenerator = () => {
   });
   
   // Query to get current schedule settings
-  const { data: schedule, isLoading: scheduleLoading } = useQuery({
+  interface ScheduleData {
+    enabled: boolean;
+    cronExpression: string;
+  }
+  
+  const { data: schedule, isLoading: scheduleLoading } = useQuery<ScheduleData>({
     queryKey: ["/api/admin/schedule"]
   });
   

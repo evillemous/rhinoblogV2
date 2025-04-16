@@ -180,7 +180,7 @@ const Header = () => {
                     variant="default"
                     className="w-full justify-start bg-red-600 hover:bg-red-700 text-white"
                     onClick={() => {
-                      navigate("/admin");
+                      setLocation("/admin");
                       setMobileMenuOpen(false);
                     }}
                   >
@@ -192,7 +192,7 @@ const Header = () => {
                   variant="ghost"
                   className="w-full justify-start"
                   onClick={() => {
-                    navigate("/");
+                    setLocation("/");
                     setMobileMenuOpen(false);
                   }}
                 >
@@ -214,7 +214,7 @@ const Header = () => {
                 <Button
                   className="w-full"
                   onClick={() => {
-                    navigate("/login");
+                    setLocation("/login");
                     setMobileMenuOpen(false);
                   }}
                 >
@@ -224,7 +224,7 @@ const Header = () => {
                   variant="outline"
                   className="w-full"
                   onClick={() => {
-                    navigate("/login?tab=register");
+                    setLocation("/login?tab=register");
                     setMobileMenuOpen(false);
                   }}
                 >
