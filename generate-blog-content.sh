@@ -1,3 +1,3 @@
 #!/bin/bash
 echo "Starting blog content generation..."
-NODE_ENV=development npx tsx scripts/populate-content.ts
+node scripts/run-content-generator.js
