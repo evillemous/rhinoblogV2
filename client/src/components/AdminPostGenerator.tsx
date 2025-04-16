@@ -7,12 +7,14 @@ import { apiRequest } from "@/lib/queryClient";
 import { queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage, FormDescription } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { Switch } from "@/components/ui/switch";
+import { AlertCircle, Info } from "lucide-react";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
 const generatorSchema = z.object({
   age: z.string().min(1, "Age is required"),
@@ -32,6 +34,7 @@ type ScheduleFormValues = z.infer<typeof scheduleSchema>;
 const AdminPostGenerator = () => {
   const { toast } = useToast();
   const [isGenerating, setIsGenerating] = useState(false);
+  const [isBatchGenerating, setIsBatchGenerating] = useState(false);
   
   // Form for generating posts
   const generatorForm = useForm<GeneratorFormValues>({
@@ -117,6 +120,32 @@ const AdminPostGenerator = () => {
         description: error.message || "Failed to update schedule",
         variant: "destructive",
       });
+    }
+  });
+  
+  // Mutation for batch generating posts
+  const batchGenerateMutation = useMutation({
+    mutationFn: async () => {
+      setIsBatchGenerating(true);
+      const res = await apiRequest("POST", "/api/admin/generate-batch", {});
+      return res.json();
+    },
+    onSuccess: (data) => {
+      toast({
+        title: "Batch generation completed",
+        description: `Successfully generated ${data.posts?.length || 0} posts`,
+      });
+      // Refetch posts in the admin list
+      queryClient.invalidateQueries({ queryKey: ["/api/posts"] });
+      setIsBatchGenerating(false);
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "Batch generation failed",
+        description: error.message || "Failed to generate batch content",
+        variant: "destructive",
+      });
+      setIsBatchGenerating(false);
     }
   });
   
@@ -249,6 +278,43 @@ const AdminPostGenerator = () => {
               </Button>
             </form>
           </Form>
+        </CardContent>
+      </Card>
+      
+      <Separator />
+      
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-xl">Batch Content Generation</CardTitle>
+          <CardDescription>
+            Populate the site with multiple rhinoplasty posts at once
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <Alert className="mb-4">
+            <AlertCircle className="h-4 w-4" />
+            <AlertTitle>Batch Generation</AlertTitle>
+            <AlertDescription>
+              This will generate 4 posts at once: 2 informational posts about rhinoplasty and 2 personal experience stories. 
+              This process may take a few minutes.
+            </AlertDescription>
+          </Alert>
+          
+          <Button
+            onClick={() => batchGenerateMutation.mutate()}
+            className="w-full"
+            disabled={isBatchGenerating}
+            variant="secondary"
+          >
+            {isBatchGenerating ? (
+              <>
+                <i className="fas fa-spinner fa-spin mr-2"></i>
+                Generating Batch Content...
+              </>
+            ) : (
+              "Generate Multiple Posts"
+            )}
+          </Button>
         </CardContent>
       </Card>
       
