@@ -113,9 +113,13 @@ const PostCard = ({ post, expanded = false }: PostCardProps) => {
         {/* Post header */}
         <div className="flex items-center text-xs text-gray-500 dark:text-gray-400 mb-2">
           <span className="font-medium">Posted by</span>
-          <Link href={`/user/${post.user.id}`} className="ml-1 hover:underline">
-            u/{post.user.username}
-          </Link>
+          {post.user ? (
+            <Link href={`/user/${post.user.id}`} className="ml-1 hover:underline">
+              u/{post.user.username}
+            </Link>
+          ) : (
+            <span className="ml-1">u/admin</span>
+          )}
           <span className="mx-1">•</span>
           <span>{formattedDate}</span>
           {post.isAiGenerated && (
@@ -145,26 +149,42 @@ const PostCard = ({ post, expanded = false }: PostCardProps) => {
         
         {/* Tags */}
         <div className="flex flex-wrap mb-3">
-          {post.tags.map((tag) => (
-            <Badge
-              key={tag.id}
-              variant="outline"
-              className={`mr-2 mb-1 bg-${tag.color}-100 dark:bg-${tag.color}-900 text-${tag.color}-800 dark:text-${tag.color}-200`}
-            >
-              #{tag.name}
+          {post.tags && post.tags.length > 0 ? (
+            post.tags.map((tag) => (
+              <Badge
+                key={tag.id}
+                variant="outline"
+                className={`mr-2 mb-1 bg-${tag.color || 'gray'}-100 dark:bg-${tag.color || 'gray'}-900 text-${tag.color || 'gray'}-800 dark:text-${tag.color || 'gray'}-200`}
+              >
+                #{tag.name}
+              </Badge>
+            ))
+          ) : (
+            <Badge variant="outline" className="mr-2 mb-1 bg-gray-100 dark:bg-gray-800 text-gray-800 dark:text-gray-200">
+              #rhinoplasty
             </Badge>
-          ))}
+          )}
         </div>
         
         {/* Post content */}
         {expanded ? (
           <div className="mb-4 prose dark:prose-invert prose-sm max-w-none text-gray-900 dark:text-gray-100">
-            <ReactMarkdown>{post.content}</ReactMarkdown>
+            {post.content ? (
+              <ReactMarkdown>{post.content}</ReactMarkdown>
+            ) : (
+              <p className="italic text-gray-500">No content available for this post.</p>
+            )}
           </div>
         ) : (
           <p className="text-sm mb-4 line-clamp-3 text-gray-900 dark:text-gray-100">
-            {post.content.substring(0, 300)}
-            {post.content.length > 300 && "..."}
+            {post.content ? (
+              <>
+                {post.content.substring(0, 300)}
+                {post.content.length > 300 && "..."}
+              </>
+            ) : (
+              <span className="italic text-gray-500">No content available for this post.</span>
+            )}
           </p>
         )}
         
