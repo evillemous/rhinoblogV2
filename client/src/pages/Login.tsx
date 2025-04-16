@@ -103,7 +103,7 @@ const Login = () => {
           username: userData.username,
           email: `${userData.username}@example.com`,
           isAdmin: false,
-          avatarUrl: null
+          avatarUrl: undefined
         }
       };
       
