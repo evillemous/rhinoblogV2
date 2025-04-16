@@ -1,0 +1,137 @@
+📁 Project: rhinoplastyblogs.com
+✅ Stack Overview
+Frontend: Next.js (React) + Tailwind CSS
+
+Backend: Node.js (or Next.js API routes) + Prisma + PostgreSQL
+
+AI Engine: OpenAI (or local LLM with cron jobs)
+
+Auth: NextAuth.js (OAuth/email)
+
+Deployment: Vercel or Render
+
+CMS/Editor: MDX or custom WYSIWYG (for real user submissions)
+
+📁 Project Structure
+python
+Copy
+Edit
+rhinoplastyblogs.com/
+├── public/                       # Static assets (favicons, logo, OG images)
+├── src/
+│   ├── app/                     # App directory (Next.js 13+)
+│   │   ├── layout.tsx          # Root layout
+│   │   ├── page.tsx            # Landing page
+│   │   ├── posts/              # Dynamic route: /posts/[slug]
+│   │   └── api/
+│   │       ├── posts/          # GET/POST routes for post creation
+│   │       └── ai/
+│   │           └── generate.ts # Endpoint to generate AI content
+│   ├── components/             # UI Components
+│   │   ├── Navbar.tsx
+│   │   ├── PostCard.tsx
+│   │   ├── CommentBox.tsx
+│   │   ├── UpvoteButton.tsx
+│   │   └── AIAvatar.tsx
+│   ├── lib/                    # Utilities (db, AI calls, formatting)
+│   │   ├── prisma.ts
+│   │   ├── openai.ts
+│   │   └── aiPrompt.ts         # Mega prompt logic
+│   ├── styles/                 # Tailwind config & global styles
+│   │   └── globals.css
+│   └── types/                  # TypeScript types/interfaces
+│       └── post.ts
+├── prisma/
+│   ├── schema.prisma           # DB schema
+│   └── seed.ts                 # Seed initial AI posts
+├── scripts/
+│   └── generatePosts.ts        # Node script to generate AI posts on schedule
+├── .env                        # API keys, DB creds, etc.
+├── tailwind.config.js
+├── next.config.js
+├── package.json
+└── README.md
+🧠 schema.prisma
+prisma
+Copy
+Edit
+model Post {
+  id          String   @id @default(cuid())
+  title       String
+  content     String
+  tags        String[]
+  slug        String   @unique
+  isAI        Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  upvotes     Int      @default(0)
+  comments    Comment[]
+}
+
+model Comment {
+  id        String   @id @default(cuid())
+  postId    String
+  post      Post     @relation(fields: [postId], references: [id])
+  author    String
+  content   String
+  createdAt DateTime @default(now())
+}
+🧠 scripts/generatePosts.ts
+This can be triggered via a cron job or GitHub Action:
+
+ts
+Copy
+Edit
+import { generatePost } from '@/lib/openai'
+import { prisma } from '@/lib/prisma'
+
+async function main() {
+  const post = await generatePost()
+
+  await prisma.post.create({
+    data: {
+      title: post.title,
+      slug: post.slug,
+      content: post.content,
+      tags: post.tags,
+      isAI: true,
+    },
+  })
+}
+
+main()
+🔧 lib/openai.ts
+ts
+Copy
+Edit
+import OpenAI from 'openai'
+
+const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY! })
+
+export async function generatePost() {
+  const prompt = `Write a Reddit-style rhinoplasty journey...` // insert mega prompt logic here
+
+  const res = await openai.chat.completions.create({
+    model: 'gpt-4',
+    messages: [{ role: 'user', content: prompt }],
+    temperature: 0.8,
+  })
+
+  const content = res.choices[0].message.content!
+  const title = content.match(/^(.*)\n/)?.[1] || 'My Rhinoplasty Story'
+
+  return {
+    title,
+    slug: title.toLowerCase().replace(/\s+/g, '-'),
+    content,
+    tags: ['rhinoplasty', 'healing', 'recovery'],
+  }
+}
+🧪 Suggested Improvements
+Add Pinecone or Redis for AI memory caching or embeddings
+
+Add post scheduling dashboard for admins
+
+Add user profiles for real readers in v2
+
+Integrate SEO schema in each blog post (JSON-LD)
