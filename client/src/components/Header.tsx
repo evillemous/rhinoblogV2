@@ -32,7 +32,7 @@ const Header = () => {
   };
   
   return (
-    <header className="sticky top-0 z-50 bg-white dark:bg-reddit-darkBg shadow-sm">
+    <header className="sticky top-0 z-50 bg-white dark:bg-gray-900 shadow-sm">
       <div className="container mx-auto px-4 flex items-center justify-between h-14">
         {/* Logo */}
         <div className="flex items-center">
@@ -51,7 +51,7 @@ const Header = () => {
               <Input
                 type="text"
                 placeholder="Search for posts, topics, experiences..."
-                className="bg-gray-100 dark:bg-reddit-darkCard w-full py-1.5 pl-10 pr-3 rounded-full text-sm"
+                className="bg-gray-100 dark:bg-gray-800 w-full py-1.5 pl-10 pr-3 rounded-full text-sm"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
               />
@@ -66,7 +66,7 @@ const Header = () => {
           <Button 
             variant="ghost" 
             size="icon"
-            className="text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-reddit-darkCard rounded-full"
+            className="text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-full"
             onClick={toggleTheme}
           >
             {theme === "dark" ? (
@@ -146,7 +146,7 @@ const Header = () => {
       
       {/* Mobile menu dropdown */}
       {mobileMenuOpen && (
-        <div className="sm:hidden bg-white dark:bg-reddit-darkCard shadow-md">
+        <div className="sm:hidden bg-white dark:bg-gray-800 shadow-md">
           <div className="p-4 space-y-3">
             {isAuthenticated ? (
               <>
