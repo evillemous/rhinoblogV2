@@ -134,6 +134,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
   
+  // Get all users (for admin purposes)
+  app.get("/api/users", authenticate, isAdmin, async (req, res) => {
+    try {
+      const users = await storage.getUsers();
+      // Return users without passwords
+      const usersWithoutPasswords = users.map(user => {
+        const { password, ...userWithoutPassword } = user;
+        return userWithoutPassword;
+      });
+      return res.status(200).json(usersWithoutPasswords);
+    } catch (error) {
+      return res.status(500).json({ message: "Error fetching users" });
+    }
+  });
+  
   // Post routes
   app.get("/api/posts", async (req, res) => {
     try {

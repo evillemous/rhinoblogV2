@@ -66,7 +66,8 @@ const Header = () => {
           {isAuthenticated && user?.isAdmin && (
             <Button
               variant="destructive"
-              className="hidden md:flex items-center gap-1"
+              className="flex items-center gap-1 text-white"
+              size="default"
               onClick={() => setLocation("/admin")}
             >
               <i className="fas fa-user-shield mr-1"></i>
