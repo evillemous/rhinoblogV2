@@ -98,6 +98,52 @@ export class MemStorage implements IStorage {
     
     // Create default admin user
     this.createDefaultAdmin();
+    
+    // Add some demo content (after a short delay to ensure admin is created)
+    setTimeout(() => {
+      this.createDemoContent();
+    }, 500);
+  }
+  
+  private async createDemoContent() {
+    try {
+      // Get admin user (should have been created by now)
+      const admin = await this.getUserByUsername('admin');
+      if (!admin) {
+        console.log('Admin user not found. Demo content creation skipped.');
+        return;
+      }
+
+      // Create a demo post
+      const demoPost = await this.createPost({
+        title: "My Rhinoplasty Journey: One Month Update",
+        content: "# My Rhinoplasty Journey\n\nJust wanted to share my experience after one month post-op. The swelling has gone down significantly and I'm really happy with the results so far!",
+        imageUrl: null,
+        isAiGenerated: false,
+        userId: admin.id
+      });
+      
+      // Add tags to demo post
+      const demoTags = ['recovery', '1month', 'closedrhinoplasty'];
+      for (const tagName of demoTags) {
+        let tag = await this.getTagByName(tagName);
+        if (tag) {
+          await this.createPostTag({ postId: demoPost.id, tagId: tag.id });
+        }
+      }
+      
+      // Add a comment to the demo post
+      await this.createComment({
+        userId: admin.id,
+        postId: demoPost.id,
+        content: "This is a sample comment on the demo post!",
+        parentId: null
+      });
+      
+      console.log('Demo content created successfully');
+    } catch (error) {
+      console.error('Error creating demo content:', error);
+    }
   }
   
   private async createDefaultAdmin() {

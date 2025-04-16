@@ -1,5 +1,5 @@
-const { storage } = require('../server/storage');
-const { generatePost } = require('../server/openai');
+import { storage } from '../server/storage.js';
+import { generatePost } from '../server/openai.js';
 
 async function generateTestPosts() {
   console.log('Starting test content generation...');

@@ -225,8 +225,13 @@ const Login = () => {
             </TabsContent>
           </Tabs>
         </CardContent>
-        <CardFooter className="flex justify-center text-sm text-gray-500">
-          Admin login: admin/rhinoadmin123
+        <CardFooter className="flex flex-col items-center space-y-2">
+          <div className="text-sm text-gray-500">
+            Admin login: <span className="font-bold">admin</span> / <span className="font-bold">rhinoadmin123</span>
+          </div>
+          <div className="text-xs text-gray-500">
+            After logging in as admin, click the red "Admin Dashboard" button in the header
+          </div>
         </CardFooter>
       </Card>
     </div>
