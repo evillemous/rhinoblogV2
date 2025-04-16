@@ -63,16 +63,24 @@ const Header = () => {
         {/* Right actions */}
         <div className="flex items-center space-x-4">
           {/* Admin Dashboard Button - only visible for admins */}
-          {isAuthenticated && user?.isAdmin && (
-            <Button
-              variant="destructive"
-              className="flex items-center gap-1 text-white"
-              size="default"
-              onClick={() => setLocation("/admin")}
-            >
-              <i className="fas fa-user-shield mr-1"></i>
-              Admin Dashboard
-            </Button>
+          {isAuthenticated && (
+            <>
+              {/* Debug button to show current admin status */}
+              <div className="text-xs text-gray-500 mr-2">
+                {user?.isAdmin ? "Admin Mode" : "User Mode"}
+              </div>
+              
+              {/* Always visible Admin Dashboard Button for logged in users */}
+              <Button
+                variant="destructive"
+                className="flex items-center gap-1 text-white font-bold border-2 border-white"
+                size="default"
+                onClick={() => setLocation("/admin")}
+              >
+                <i className="fas fa-user-shield mr-1"></i>
+                Admin Dashboard
+              </Button>
+            </>
           )}
         
           {/* Dark mode toggle */}

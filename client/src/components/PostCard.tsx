@@ -23,7 +23,9 @@ const PostCard = ({ post, expanded = false }: PostCardProps) => {
   const [isDownvoted, setIsDownvoted] = useState(false);
   
   // Format the date
-  const formattedDate = formatDistanceToNow(new Date(post.createdAt), { addSuffix: true });
+  const formattedDate = post.createdAt 
+    ? formatDistanceToNow(new Date(post.createdAt), { addSuffix: true })
+    : "recently";
   
   // Mutation for voting
   const voteMutation = useMutation({
@@ -94,7 +96,7 @@ const PostCard = ({ post, expanded = false }: PostCardProps) => {
           <i className="fas fa-arrow-up"></i>
         </Button>
         <span className={`text-xs font-medium my-1 ${isUpvoted ? "text-reddit-orange" : isDownvoted ? "text-blue-600" : ""}`}>
-          {post.upvotes - post.downvotes}
+          {(post.upvotes || 0) - (post.downvotes || 0)}
         </span>
         <Button 
           variant="ghost" 
@@ -122,7 +124,7 @@ const PostCard = ({ post, expanded = false }: PostCardProps) => {
               <span className="text-blue-600 dark:text-blue-400 font-medium">AI Generated</span>
             </div>
           )}
-          {post.upvotes > 100 && (
+          {(post.upvotes || 0) > 100 && (
             <div className="ml-2 flex items-center">
               <i className="fas fa-award text-yellow-400 mr-1"></i>
               <span className="text-yellow-600 dark:text-yellow-400 font-medium">Top Post</span>
@@ -156,11 +158,11 @@ const PostCard = ({ post, expanded = false }: PostCardProps) => {
         
         {/* Post content */}
         {expanded ? (
-          <div className="mb-4 prose dark:prose-invert prose-sm max-w-none">
+          <div className="mb-4 prose dark:prose-invert prose-sm max-w-none text-gray-900 dark:text-gray-100">
             <ReactMarkdown>{post.content}</ReactMarkdown>
           </div>
         ) : (
-          <p className="text-sm mb-4 line-clamp-3">
+          <p className="text-sm mb-4 line-clamp-3 text-gray-900 dark:text-gray-100">
             {post.content.substring(0, 300)}
             {post.content.length > 300 && "..."}
           </p>
@@ -171,7 +173,7 @@ const PostCard = ({ post, expanded = false }: PostCardProps) => {
           <Link href={expanded ? `#comments` : `/post/${post.id}#comments`}>
             <Button variant="ghost" size="sm" className="flex items-center mr-4 hover:bg-gray-100 dark:hover:bg-reddit-darkHover p-1 rounded">
               <i className="far fa-comment mr-1"></i>
-              <span>{post.commentCount} comments</span>
+              <span>{post.commentCount || 0} comments</span>
             </Button>
           </Link>
           <Button variant="ghost" size="sm" className="flex items-center mr-4 hover:bg-gray-100 dark:hover:bg-reddit-darkHover p-1 rounded">
