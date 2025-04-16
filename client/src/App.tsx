@@ -10,8 +10,7 @@ import AdminLink from "@/pages/AdminLink";
 import Login from "@/pages/Login";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
-import { useTheme } from "@/context/ThemeContext";
-import { ThemeProvider } from "@/context/ThemeContext";
+import { ThemeProvider, useTheme } from "@/context/ThemeContext";
 import { AuthProvider } from "@/context/AuthContext";
 
 function Router() {
@@ -20,13 +19,9 @@ function Router() {
       <Route path="/" component={Home} />
       <Route path="/popular" component={Home} />
       <Route path="/post/:id" component={PostDetail} />
-      <Route path="/tag/:tagName" component={Home} />
-      <Route path="/community/:communityName" component={Home} />
-      <Route path="/my-profile" component={Home} />
-      <Route path="/auth" component={Login} />
+      <Route path="/login" component={Login} />
       <Route path="/admin" component={Admin} />
       <Route path="/admin-link" component={AdminLink} />
-      <Route path="/login" component={Login} />
       <Route component={NotFound} />
     </Switch>
   );
@@ -49,14 +44,14 @@ function AppContent() {
   
   return (
     <div className={theme === "dark" ? "dark" : ""}>
-      <div className="bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-gray-100 transition-colors duration-200 min-h-screen flex flex-col">
+      <div className="bg-white dark:bg-gray-900 min-h-screen flex flex-col">
         <Header />
-        <main className="flex-grow py-2">
+        <main className="flex-grow">
           <Router />
         </main>
         <Footer />
+        <Toaster />
       </div>
-      <Toaster />
     </div>
   );
 }
