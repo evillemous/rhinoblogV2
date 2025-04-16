@@ -26,6 +26,129 @@
   color: rgba(255, 255, 255, var(--tw-text-opacity)) !important;
 }
 
+/* Reddit-like styling */
+.bg-reddit-lightBg {
+  background-color: #DAE0E6;
+}
+
+.bg-reddit-darkBg {
+  background-color: #030303;
+}
+
+.bg-reddit-lightCard {
+  background-color: #FFFFFF;
+}
+
+.bg-reddit-darkCard {
+  background-color: #1A1A1B;
+}
+
+.text-reddit-blue {
+  color: #0079D3;
+}
+
+.bg-reddit-blue {
+  background-color: #0079D3;
+}
+
+.text-reddit-orange {
+  color: #FF4500;
+}
+
+.bg-reddit-orange {
+  background-color: #FF4500;
+}
+
+.hover\:bg-reddit-hover:hover {
+  background-color: rgba(26, 26, 27, 0.1);
+}
+
+.dark .hover\:bg-reddit-hover:hover {
+  background-color: rgba(215, 218, 220, 0.1);
+}
+
+/* Upvote/Downvote animations */
+@keyframes upvote {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.2); }
+  100% { transform: scale(1); }
+}
+
+@keyframes downvote {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.2); }
+  100% { transform: scale(1); }
+}
+
+.upvote-animation {
+  animation: upvote 0.3s ease-in-out;
+}
+
+.downvote-animation {
+  animation: downvote 0.3s ease-in-out;
+}
+
+/* Card hover effects */
+.card-hover-effect {
+  transition: all 0.2s ease-in-out;
+}
+
+.card-hover-effect:hover {
+  border-color: #878A8C;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+/* Community tag pills */
+.community-tag {
+  display: inline-flex;
+  align-items: center;
+  background-color: #F6F7F8;
+  border-radius: 9999px;
+  padding: 0.25rem 0.75rem;
+  font-size: 0.75rem;
+  font-weight: 500;
+  transition: background-color 0.2s ease;
+}
+
+.community-tag:hover {
+  background-color: #E9F5FD;
+}
+
+.dark .community-tag {
+  background-color: #272729;
+}
+
+.dark .community-tag:hover {
+  background-color: #353538;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #878A8C;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #575757;
+}
+
+.dark ::-webkit-scrollbar-thumb {
+  background: #4E4E4E;
+}
+
+.dark ::-webkit-scrollbar-thumb:hover {
+  background: #636363;
+}
+
 @layer base {
   * {
     @apply border-border;
