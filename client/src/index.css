@@ -43,20 +43,46 @@
   background-color: #1A1A1B;
 }
 
+/* Rhinoplasty Blogs Color Scheme based on logo */
+.text-rhino-navy {
+  color: #1A2E3B;
+}
+
+.bg-rhino-navy {
+  background-color: #1A2E3B;
+}
+
+.text-rhino-orange {
+  color: #F4884A;
+}
+
+.bg-rhino-orange {
+  background-color: #F4884A;
+}
+
+.text-rhino-peach {
+  color: #F2E4D0;
+}
+
+.bg-rhino-peach {
+  background-color: #F2E4D0;
+}
+
+/* Reddit Compatibility Colors */
 .text-reddit-blue {
-  color: #0079D3;
+  color: #1A2E3B; /* Mapped to navy */
 }
 
 .bg-reddit-blue {
-  background-color: #0079D3;
+  background-color: #1A2E3B; /* Mapped to navy */
 }
 
 .text-reddit-orange {
-  color: #FF4500;
+  color: #F4884A; /* Mapped to orange */
 }
 
 .bg-reddit-orange {
-  background-color: #FF4500;
+  background-color: #F4884A; /* Mapped to orange */
 }
 
 .hover\:bg-reddit-hover:hover {

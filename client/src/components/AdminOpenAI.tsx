@@ -97,8 +97,8 @@ const AdminOpenAI = () => {
       // Refetch status
       queryClient.invalidateQueries({ queryKey: ["/api/admin/openai-status"] });
       
-      // Clear form
-      apiKeyForm.reset();
+      // Don't reset the form so key remains visible
+      // Keep the current value in the form
       
       // Clear test result
       setTestResult(null);
@@ -132,6 +132,12 @@ const AdminOpenAI = () => {
     
     // Update the API key without requiring a test
     updateApiKeyMutation.mutate({ apiKey });
+    
+    // Show feedback toast
+    toast({
+      title: "Updating API Key",
+      description: "Please wait while we update your OpenAI API key...",
+    });
   };
   
   return (
