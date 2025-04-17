@@ -13,7 +13,9 @@ export async function generatePost(
   age: string,
   gender: string,
   procedure: string,
-  reason: string
+  reason: string,
+  contentType: 'personal' | 'educational' = 'personal',
+  topic?: string
 ): Promise<GeneratedPost | null> {
   try {
     if (!openaiClient) {
@@ -21,7 +23,31 @@ export async function generatePost(
       throw new Error("OpenAI client is not initialized");
     }
 
-    const prompt = `Write a personal rhinoplasty story in the style of a Reddit post. The narrator is a ${age}-year-old ${gender} who got ${procedure} rhinoplasty due to ${reason}. They describe the whole journey: research, consult, surgery day, recovery, and how they feel now. Write in an honest, relatable tone like someone posting on r/PlasticSurgery. Add a mini FAQ, bolded section headers, and tag suggestions. 
+    let prompt = '';
+    
+    if (contentType === 'educational') {
+      // Educational/informational content written by an expert
+      prompt = `Write an expert, educational article about rhinoplasty on the topic: "${topic}". 
+      
+This should be written from a medical expert's perspective (plastic surgeon or medical professional), not as a personal story. Include factual information, medical terminology where appropriate, and evidence-based explanations. The tone should be professional, authoritative, and informative.
+
+Include the following sections:
+- Introduction explaining the topic's importance
+- Detailed medical information with proper terminology
+- Evidence-based explanations and statistics where relevant
+- Professional recommendations and considerations
+- Structured with clear headings and subheadings
+- Conclusion with key takeaways
+
+Format the response as a JSON object with the following structure:
+{
+  "title": "A professional, informative title for this educational article",
+  "content": "The full article content with markdown formatting, including proper section headers, medical terminology, and educational content",
+  "tags": ["tag1", "tag2", "tag3"] - array of 3-5 relevant medical/educational tags based on the content
+}`;
+    } else {
+      // Personal story/experience content
+      prompt = `Write a personal rhinoplasty story in the style of a Reddit post. The narrator is a ${age}-year-old ${gender} who got ${procedure} rhinoplasty due to ${reason}. They describe the whole journey: research, consult, surgery day, recovery, and how they feel now. Write in an honest, relatable tone like someone posting on r/PlasticSurgery. Add a mini FAQ, bolded section headers, and tag suggestions. 
 
 Format the response as a JSON object with the following structure:
 {
@@ -29,14 +55,15 @@ Format the response as a JSON object with the following structure:
   "content": "The full post content with markdown formatting, including section headers, mini FAQ, and conclusion with 3 takeaways",
   "tags": ["tag1", "tag2", "tag3"] - array of 3-5 relevant hashtags based on the content
 }`;
+    }
 
-    console.log("Sending request to OpenAI to generate rhinoplasty story...");
+    console.log(`Sending request to OpenAI to generate ${contentType === 'educational' ? 'educational article' : 'rhinoplasty story'}...`);
     const response = await openaiClient.chat.completions.create({
       model: "gpt-4o",
       messages: [{ role: "user", content: prompt }],
       response_format: { type: "json_object" },
       temperature: 0.7,
-      max_tokens: 1500
+      max_tokens: contentType === 'educational' ? 2000 : 1500
     });
 
     // Parse the response

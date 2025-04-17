@@ -700,7 +700,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
             "30", // Generic age
             "N/A", // No specific gender for informational posts
             "informational", // Mark as informational
-            topic.topic // Use the topic as the reason
+            topic.topic, // Use the topic as the reason
+            'educational', // Mark as educational content type
+            topic.topic // Pass the topic for educational content
           );
           
           if (!generatedPost) {
