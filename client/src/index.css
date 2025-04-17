@@ -11,6 +11,31 @@
   color: white !important;
 }
 
+/* Fix for ReactMarkdown rendering */
+.prose p, .prose h1, .prose h2, .prose h3, .prose h4, .prose h5, .prose h6, 
+.prose ul, .prose ol, .prose blockquote {
+  margin-bottom: 1em !important;
+  white-space: pre-wrap !important;
+}
+
+.prose ul {
+  list-style-type: disc !important;
+  padding-left: 1.5em !important;
+}
+
+.prose ol {
+  list-style-type: decimal !important;
+  padding-left: 1.5em !important;
+}
+
+.prose strong, .prose b {
+  font-weight: 700 !important;
+}
+
+.prose em, .prose i {
+  font-style: italic !important;
+}
+
 /* Make sure text has high contrast */
 .text-gray-900 {
   color: black !important;

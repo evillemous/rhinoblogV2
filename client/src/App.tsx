@@ -5,6 +5,8 @@ import { Toaster } from "@/components/ui/toaster";
 import NotFound from "@/pages/not-found";
 import Home from "@/pages/Home";
 import PostDetail from "@/pages/PostDetail";
+import Articles from "@/pages/Articles";
+import ArticleDetail from "@/pages/ArticleDetail";
 import Admin from "@/pages/Admin";
 import AdminLink from "@/pages/AdminLink";
 import Login from "@/pages/Login";
@@ -19,6 +21,8 @@ function Router() {
       <Route path="/" component={Home} />
       <Route path="/popular" component={Home} />
       <Route path="/post/:id" component={PostDetail} />
+      <Route path="/articles" component={Articles} />
+      <Route path="/article/:id" component={ArticleDetail} />
       <Route path="/login" component={Login} />
       <Route path="/admin" component={Admin} />
       <Route path="/admin-link" component={AdminLink} />
