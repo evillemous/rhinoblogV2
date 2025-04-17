@@ -40,10 +40,17 @@ const AdminOpenAI = () => {
   const { data: apiStatus, isLoading: apiStatusLoading, error: apiStatusError } = useQuery<{
     configured: boolean;
     key?: string;
+    fullKey?: string;
   }>({
     queryKey: ["/api/admin/openai-status"],
     refetchInterval: false,
-    retry: 1
+    retry: 1,
+    onSuccess: (data) => {
+      // If we have a full key from the server, update the form
+      if (data?.fullKey) {
+        apiKeyForm.setValue("apiKey", data.fullKey);
+      }
+    }
   });
   
   // Test API key mutation

@@ -561,10 +561,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(200).json({ configured: false });
       }
       
-      // Just report if an API key exists (don't actually return the key)
+      // Report that an API key exists with a masked version for display
+      // Also send the full key so the form can be populated
       return res.status(200).json({ 
         configured: true,
-        key: `${apiKey.substring(0, 3)}...${apiKey.substring(apiKey.length - 4)}` 
+        key: `${apiKey.substring(0, 3)}...${apiKey.substring(apiKey.length - 4)}`,
+        fullKey: apiKey // This will be used to populate the form
       });
     } catch (error) {
       return res.status(500).json({ message: "Error checking OpenAI API status" });
