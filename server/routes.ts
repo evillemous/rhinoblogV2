@@ -65,7 +65,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.use(express.json());
   
   // Auth routes
-  app.post("/api/auth/register", async (req, res) => {
+  app.post("/api/register", async (req, res) => {
     try {
       const userData = insertUserSchema.parse(req.body);
       
@@ -96,7 +96,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
   
-  app.post("/api/auth/login", async (req, res) => {
+  app.post("/api/login", async (req, res) => {
     try {
       const { username, password } = req.body;
       
