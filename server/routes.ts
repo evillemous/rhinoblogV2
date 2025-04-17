@@ -543,6 +543,91 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
   
   // Generate multiple posts (batch content creation)
+  // API key management
+  app.get("/api/admin/openai-status", authenticate, isAdmin, async (req, res) => {
+    try {
+      // Check if OpenAI API key is available
+      const apiKey = process.env.OPENAI_API_KEY;
+      if (!apiKey) {
+        return res.status(200).json({ configured: false });
+      }
+      
+      // Just report if an API key exists (don't actually return the key)
+      return res.status(200).json({ 
+        configured: true,
+        key: `${apiKey.substring(0, 3)}...${apiKey.substring(apiKey.length - 4)}` 
+      });
+    } catch (error) {
+      return res.status(500).json({ message: "Error checking OpenAI API status" });
+    }
+  });
+
+  app.post("/api/admin/test-openai", authenticate, isAdmin, async (req, res) => {
+    try {
+      // If a test key is provided, use it temporarily (but don't save it)
+      const testKey = req.body.apiKey;
+      
+      // Simple test prompt
+      const testPrompt = "Generate a one-sentence tagline for a rhinoplasty blog.";
+      
+      try {
+        // Create a temporary OpenAI instance with the test key
+        const tempOpenAI = new (await import("openai")).default({ 
+          apiKey: testKey || process.env.OPENAI_API_KEY 
+        });
+        
+        // Test the connection with a simple request
+        const response = await tempOpenAI.chat.completions.create({
+          model: "gpt-4o",
+          messages: [{ role: "user", content: testPrompt }],
+          temperature: 0.7,
+          max_tokens: 60
+        });
+        
+        const content = response.choices[0].message.content;
+        return res.status(200).json({ 
+          success: true, 
+          message: "OpenAI connection successful",
+          tagline: content
+        });
+      } catch (apiError) {
+        console.error("OpenAI API test failed:", apiError);
+        return res.status(200).json({ 
+          success: false, 
+          message: `OpenAI connection failed: ${apiError.message}` 
+        });
+      }
+    } catch (error) {
+      console.error("Error in test-openai route:", error);
+      return res.status(500).json({ 
+        success: false,
+        message: "Error testing OpenAI connection" 
+      });
+    }
+  });
+
+  app.post("/api/admin/update-openai-key", authenticate, isAdmin, async (req, res) => {
+    try {
+      const { apiKey } = req.body;
+      
+      if (!apiKey || typeof apiKey !== 'string' || apiKey.trim() === '') {
+        return res.status(400).json({ message: "Valid API key is required" });
+      }
+      
+      // In a real production app, you would store this securely
+      // For our demo, we're setting the environment variable (note: this won't persist between restarts)
+      process.env.OPENAI_API_KEY = apiKey.trim();
+      
+      // Update the OpenAI instance with the new key
+      const OpenAI = (await import("openai")).default;
+      global.openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+      
+      return res.status(200).json({ message: "OpenAI API key updated successfully" });
+    } catch (error) {
+      return res.status(500).json({ message: "Error updating OpenAI API key" });
+    }
+  });
+
   app.post("/api/admin/generate-batch", authenticate, isAdmin, async (req, res) => {
     try {
       // Get admin user

@@ -1,6 +1,7 @@
 import { useState } from "react";
 import AdminPostGenerator from "@/components/AdminPostGenerator";
 import AdminPostList from "@/components/AdminPostList";
+import AdminOpenAI from "@/components/AdminOpenAI";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 
@@ -21,15 +22,19 @@ const Admin = () => {
         </CardHeader>
         <CardContent>
           <Tabs defaultValue="generate">
-            <TabsList className="grid w-full grid-cols-2">
+            <TabsList className="grid w-full grid-cols-3">
               <TabsTrigger value="generate">Content Generator</TabsTrigger>
               <TabsTrigger value="manage">Manage Posts</TabsTrigger>
+              <TabsTrigger value="openai">OpenAI Settings</TabsTrigger>
             </TabsList>
             <TabsContent value="generate">
               <AdminPostGenerator />
             </TabsContent>
             <TabsContent value="manage">
               <AdminPostList />
+            </TabsContent>
+            <TabsContent value="openai">
+              <AdminOpenAI />
             </TabsContent>
           </Tabs>
         </CardContent>
