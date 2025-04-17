@@ -37,7 +37,10 @@ const AdminOpenAI = () => {
   });
   
   // Check current API key status
-  const { data: apiStatus, isLoading: apiStatusLoading, error: apiStatusError } = useQuery({
+  const { data: apiStatus, isLoading: apiStatusLoading, error: apiStatusError } = useQuery<{
+    configured: boolean;
+    key?: string;
+  }>({
     queryKey: ["/api/admin/openai-status"],
     refetchInterval: false,
     retry: 1

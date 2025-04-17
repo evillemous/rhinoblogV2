@@ -25,6 +25,15 @@ declare global {
 // JWT Secret
 const JWT_SECRET = process.env.JWT_SECRET || "rhinoplastyblogs-jwt-secret";
 
+// Add type definition for the request with user
+declare global {
+  namespace Express {
+    interface Request {
+      user?: any;
+    }
+  }
+}
+
 // Middleware for authentication
 const authenticate = (req: express.Request, res: express.Response, next: express.NextFunction) => {
   const authHeader = req.headers.authorization;

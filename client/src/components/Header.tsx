@@ -37,10 +37,11 @@ const Header = () => {
         {/* Logo */}
         <div className="flex items-center">
           <Link href="/" className="flex items-center space-x-2">
-            <div className="h-8 w-8 rounded-full bg-reddit-orange flex items-center justify-center">
-              <i className="fas fa-nose text-white"></i>
-            </div>
-            <span className="font-ibm-plex font-bold text-xl hidden sm:block">RhinoplastyBlogs</span>
+            <img 
+              src="/attached_assets/image_1744885216269.png" 
+              alt="RhinoplastyBlogs.com" 
+              className="h-10" 
+            />
           </Link>
           
           {/* Direct Admin Link - Always Visible */}
