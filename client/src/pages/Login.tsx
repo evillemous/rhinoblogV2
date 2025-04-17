@@ -56,7 +56,7 @@ const Login = () => {
   // Login mutation using the real API
   const loginMutation = useMutation({
     mutationFn: async (data: z.infer<typeof loginSchema>) => {
-      const res = await apiRequest("POST", "/api/auth/login", data);
+      const res = await apiRequest("POST", "/api/login", data);
       return await res.json();
     },
     onSuccess: (data) => {
@@ -80,7 +80,7 @@ const Login = () => {
   const registerMutation = useMutation({
     mutationFn: async (data: z.infer<typeof registerSchema>) => {
       const { confirmPassword, ...userData } = data;
-      const res = await apiRequest("POST", "/api/auth/register", userData);
+      const res = await apiRequest("POST", "/api/register", userData);
       return await res.json();
     },
     onSuccess: (data) => {
