@@ -44,13 +44,13 @@ const FeaturedArticle = ({ post }: { post: PostWithTags }) => {
         <div className="md:w-2/5 bg-gray-100 p-4 flex items-center justify-center">
           <div className="relative w-full h-48 md:h-full max-h-80">
             <img 
-              src={image.src || "https://i.imgur.com/Y0PX7Kq.jpg"} 
+              src={image.src || "data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='600' height='400' viewBox='0 0 600 400'%3E%3Crect width='600' height='400' fill='%23F4884A'/%3E%3Ctext x='300' y='200' font-family='Arial' font-size='32' text-anchor='middle' fill='white'%3ERhinoplasty Information%3C/text%3E%3C/svg%3E"} 
               alt={image.alt} 
               className="w-full h-full object-contain"
               onError={(e) => {
                 const target = e.target as HTMLImageElement;
                 target.onerror = null;
-                target.src = "https://i.imgur.com/Y0PX7Kq.jpg";
+                target.src = "data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='600' height='400' viewBox='0 0 600 400'%3E%3Crect width='600' height='400' fill='%23F4884A'/%3E%3Ctext x='300' y='200' font-family='Arial' font-size='32' text-anchor='middle' fill='white'%3ERhinoplasty Information%3C/text%3E%3C/svg%3E";
               }}
             />
             {image.caption && (
@@ -133,13 +133,13 @@ const ArticleCard = ({ post }: { post: PostWithTags }) => {
       {/* Image Header */}
       <div className="relative h-48 bg-gray-100">
         <img 
-          src={image.src || "https://i.imgur.com/xdpGtZ9.jpg"} 
+          src={image.src || "data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='600' height='400' viewBox='0 0 600 400'%3E%3Crect width='600' height='400' fill='%231A2E3B'/%3E%3Ctext x='300' y='200' font-family='Arial' font-size='32' text-anchor='middle' fill='white'%3ERhinoplasty Article%3C/text%3E%3C/svg%3E"} 
           alt={image.alt} 
           className="w-full h-full object-contain"
           onError={(e) => {
             const target = e.target as HTMLImageElement;
             target.onerror = null;
-            target.src = "https://i.imgur.com/xdpGtZ9.jpg";
+            target.src = "data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='600' height='400' viewBox='0 0 600 400'%3E%3Crect width='600' height='400' fill='%231A2E3B'/%3E%3Ctext x='300' y='200' font-family='Arial' font-size='32' text-anchor='middle' fill='white'%3ERhinoplasty Article%3C/text%3E%3C/svg%3E";
           }}
         />
       </div>

@@ -172,13 +172,13 @@ const ArticleDetail = () => {
               <div className="bg-white p-6 rounded-md shadow-md">
                 <div className="relative max-h-[400px] overflow-hidden flex justify-center">
                   <img 
-                    src={articleImage.src || "https://i.imgur.com/Y0PX7Kq.jpg"} 
+                    src={articleImage.src || "data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='800' height='500' viewBox='0 0 800 500'%3E%3Crect width='800' height='500' fill='%23F4884A'/%3E%3Ctext x='400' y='250' font-family='Arial' font-size='40' text-anchor='middle' fill='white'%3ERhinoplasty Article%3C/text%3E%3C/svg%3E"} 
                     alt={articleImage.alt}
                     className="max-w-full h-auto object-contain"
                     onError={(e) => {
                       const target = e.target as HTMLImageElement;
                       target.onerror = null;
-                      target.src = "https://i.imgur.com/Y0PX7Kq.jpg";
+                      target.src = "data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='800' height='500' viewBox='0 0 800 500'%3E%3Crect width='800' height='500' fill='%23F4884A'/%3E%3Ctext x='400' y='250' font-family='Arial' font-size='40' text-anchor='middle' fill='white'%3ERhinoplasty Article%3C/text%3E%3C/svg%3E";
                     }}
                   />
                 </div>
@@ -240,13 +240,13 @@ const ArticleDetail = () => {
                         <Card key={relatedPost.id} className="overflow-hidden h-full hover:shadow-md transition-all border-rhino-navy/10">
                           <div className="h-32 bg-gray-100 flex items-center justify-center p-2">
                             <img 
-                              src={relatedImage.src || "https://i.imgur.com/NBgjHnj.jpg"}
+                              src={relatedImage.src || "data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='200' viewBox='0 0 300 200'%3E%3Crect width='300' height='200' fill='%231A2E3B'/%3E%3Ctext x='150' y='100' font-family='Arial' font-size='20' text-anchor='middle' fill='white'%3ERelated Article%3C/text%3E%3C/svg%3E"}
                               alt={relatedImage.alt}
                               className="h-full w-auto object-contain"
                               onError={(e) => {
                                 const target = e.target as HTMLImageElement;
                                 target.onerror = null;
-                                target.src = "https://i.imgur.com/NBgjHnj.jpg";
+                                target.src = "data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='200' viewBox='0 0 300 200'%3E%3Crect width='300' height='200' fill='%231A2E3B'/%3E%3Ctext x='150' y='100' font-family='Arial' font-size='20' text-anchor='middle' fill='white'%3ERelated Article%3C/text%3E%3C/svg%3E";
                               }}
                             />
                           </div>
