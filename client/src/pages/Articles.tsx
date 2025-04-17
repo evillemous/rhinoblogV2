@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { PostWithTags } from "@shared/schema";
 import Sidebar from "@/components/Sidebar";
 import RightSidebar from "@/components/RightSidebar";
@@ -9,7 +9,8 @@ import { Badge } from "@/components/ui/badge";
 import { Link } from "wouter";
 import { getRelativeTimeString } from "@/lib/utils";
 import ReactMarkdown from "react-markdown";
-import { getArticleImage } from "@/lib/articleImageMapping";
+import { getArticleImage, getUnsplashImageForArticle } from "@/lib/articleImageMapping";
+import { isUnsplashConfigured } from "@/lib/unsplashApi";
 import { ChevronRight, BookOpen, Clock, User } from "lucide-react";
 
 // Component for Featured Article
@@ -18,11 +19,32 @@ const FeaturedArticle = ({ post }: { post: PostWithTags }) => {
     ? getRelativeTimeString(new Date(post.createdAt))
     : "recently";
 
-  // Get appropriate image for article
-  const image = getArticleImage(
+  // State for storing image
+  const [image, setImage] = useState(getArticleImage(
     post.title || "", 
     post.tags?.map(t => t.name) || []
-  );
+  ));
+    
+  // Fetch Unsplash image if available
+  useEffect(() => {
+    if (isUnsplashConfigured()) {
+      const fetchUnsplashImage = async () => {
+        try {
+          const unsplashImage = await getUnsplashImageForArticle(
+            post.title || "", 
+            post.tags?.map(t => t.name) || []
+          );
+          if (unsplashImage) {
+            setImage(unsplashImage);
+          }
+        } catch (error) {
+          console.error("Error fetching Unsplash image:", error);
+        }
+      };
+      
+      fetchUnsplashImage();
+    }
+  }, [post.title, post.tags]);
 
   // Extract first paragraph for preview
   const getFirstParagraph = () => {
@@ -115,11 +137,32 @@ const ArticleCard = ({ post }: { post: PostWithTags }) => {
     ? getRelativeTimeString(new Date(post.createdAt))
     : "recently";
 
-  // Get appropriate image for article
-  const image = getArticleImage(
+  // State for storing image
+  const [image, setImage] = useState(getArticleImage(
     post.title || "", 
     post.tags?.map(t => t.name) || []
-  );
+  ));
+  
+  // Fetch Unsplash image if available
+  useEffect(() => {
+    if (isUnsplashConfigured()) {
+      const fetchUnsplashImage = async () => {
+        try {
+          const unsplashImage = await getUnsplashImageForArticle(
+            post.title || "", 
+            post.tags?.map(t => t.name) || []
+          );
+          if (unsplashImage) {
+            setImage(unsplashImage);
+          }
+        } catch (error) {
+          console.error("Error fetching Unsplash image:", error);
+        }
+      };
+      
+      fetchUnsplashImage();
+    }
+  }, [post.title, post.tags]);
 
   // Extract first paragraph for preview
   const getFirstParagraph = () => {

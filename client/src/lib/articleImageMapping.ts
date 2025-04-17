@@ -1,5 +1,7 @@
 // This file maps article tags/keywords to appropriate images
 
+import { isUnsplashConfigured, getImageByTopic } from './unsplashApi';
+
 type ArticleImage = {
   src: string;
   alt: string;
@@ -149,4 +151,64 @@ export function getArticleImage(title: string, tags: string[]): ArticleImage {
   
   // If no match, return default image
   return defaultImage;
+}
+
+/**
+ * Gets an image from Unsplash for a specific article topic if configured,
+ * otherwise falls back to the SVG placeholder images
+ */
+export async function getUnsplashImageForArticle(title: string, tags: string[]): Promise<ArticleImage> {
+  // Return the SVG placeholder if Unsplash is not configured
+  if (!isUnsplashConfigured()) {
+    return getArticleImage(title, tags);
+  }
+  
+  // Try to find a matching tag or keyword to search for
+  let searchTerm = '';
+  
+  // Check tags first
+  if (tags && tags.length > 0) {
+    for (const tag of tags) {
+      if (Object.keys(articleImages).includes(tag.toLowerCase())) {
+        searchTerm = tag.toLowerCase();
+        break;
+      }
+    }
+  }
+  
+  // If no tag found, check title for keywords
+  if (!searchTerm && title) {
+    const titleLower = title.toLowerCase();
+    for (const key of Object.keys(articleImages)) {
+      if (titleLower.includes(key)) {
+        searchTerm = key;
+        break;
+      }
+    }
+  }
+  
+  // If we still don't have a search term, use the first tag or a default
+  if (!searchTerm) {
+    searchTerm = tags && tags.length > 0 
+      ? tags[0].toLowerCase() 
+      : 'rhinoplasty';
+  }
+  
+  try {
+    // Try to get an image from Unsplash
+    const unsplashImage = await getImageByTopic(searchTerm);
+    
+    if (unsplashImage) {
+      return {
+        src: unsplashImage.urls.regular,
+        alt: unsplashImage.alt_description || `${searchTerm} image`,
+        caption: `Photo by ${unsplashImage.user.name} on Unsplash`
+      };
+    }
+  } catch (error) {
+    console.error('Error fetching Unsplash image:', error);
+  }
+  
+  // Fall back to the SVG image if Unsplash image retrieval fails
+  return getArticleImage(title, tags);
 }
