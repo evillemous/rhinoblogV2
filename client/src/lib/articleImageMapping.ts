@@ -11,81 +11,81 @@ type ArticleImageMapping = {
 };
 
 export const articleImages: ArticleImageMapping = {
-  // By tag/category
+  // By tag/category - Using placeholder image URLs
   "beforeafter": {
-    src: "/assets/images/articles/rhinoplasty-before-after.svg",
+    src: "https://via.placeholder.com/600x400/F4884A/FFFFFF?text=Before+and+After+Rhinoplasty",
     alt: "Before and after rhinoplasty results comparison",
     caption: "Typical before and after changes from rhinoplasty"
   },
   "recovery": {
-    src: "/assets/images/articles/recovery-timeline.svg",
+    src: "https://via.placeholder.com/600x400/1A2E3B/FFFFFF?text=Rhinoplasty+Recovery+Timeline",
     alt: "Rhinoplasty recovery timeline",
     caption: "Timeline showing typical rhinoplasty recovery milestones"
   },
   "types": {
-    src: "/assets/images/articles/types-of-rhinoplasty.svg",
+    src: "https://via.placeholder.com/600x400/F4884A/FFFFFF?text=Types+of+Rhinoplasty",
     alt: "Different types of rhinoplasty procedures",
     caption: "Overview of rhinoplasty procedure types"
   },
   "cost": {
-    src: "/assets/images/articles/cost-factors.svg",
+    src: "https://via.placeholder.com/600x400/1A2E3B/FFFFFF?text=Rhinoplasty+Cost+Factors",
     alt: "Cost factors for rhinoplasty procedures",
     caption: "Factors affecting rhinoplasty procedure costs"
   },
   "consultation": {
-    src: "/assets/images/articles/medical-consultation.svg",
+    src: "https://via.placeholder.com/600x400/F4884A/FFFFFF?text=Medical+Consultation",
     alt: "Medical consultation for rhinoplasty",
     caption: "What to expect during your rhinoplasty consultation"
   },
   
   // By keywords in title
   "before": {
-    src: "/assets/images/articles/rhinoplasty-before-after.svg",
+    src: "https://via.placeholder.com/600x400/F4884A/FFFFFF?text=Before+and+After+Results",
     alt: "Before and after rhinoplasty results",
     caption: "Rhinoplasty results visualization"
   },
   "after": {
-    src: "/assets/images/articles/rhinoplasty-before-after.svg",
+    src: "https://via.placeholder.com/600x400/F4884A/FFFFFF?text=Rhinoplasty+Results",
     alt: "Before and after rhinoplasty comparison",
     caption: "Visual changes from rhinoplasty procedure"
   },
   "recover": {
-    src: "/assets/images/articles/recovery-timeline.svg",
+    src: "https://via.placeholder.com/600x400/1A2E3B/FFFFFF?text=Rhinoplasty+Recovery",
     alt: "Rhinoplasty recovery process",
     caption: "Recovery timeline after rhinoplasty surgery"
   },
   "healing": {
-    src: "/assets/images/articles/recovery-timeline.svg",
+    src: "https://via.placeholder.com/600x400/1A2E3B/FFFFFF?text=Rhinoplasty+Healing",
     alt: "Healing process after rhinoplasty",
     caption: "Timeline of healing after rhinoplasty procedure"
   },
   "type": {
-    src: "/assets/images/articles/types-of-rhinoplasty.svg",
+    src: "https://via.placeholder.com/600x400/F4884A/FFFFFF?text=Rhinoplasty+Procedures",
     alt: "Types of rhinoplasty procedures",
     caption: "Overview of different rhinoplasty approaches"
   },
   "procedure": {
-    src: "/assets/images/articles/types-of-rhinoplasty.svg",
+    src: "https://via.placeholder.com/600x400/F4884A/FFFFFF?text=Procedure+Options",
     alt: "Rhinoplasty procedure options",
     caption: "Different approaches to rhinoplasty surgery"
   },
   "costs": {
-    src: "/assets/images/articles/cost-factors.svg",
+    src: "https://via.placeholder.com/600x400/1A2E3B/FFFFFF?text=Procedure+Costs",
     alt: "Rhinoplasty procedure costs",
     caption: "Understanding rhinoplasty pricing factors"
   },
   "price": {
-    src: "/assets/images/articles/cost-factors.svg",
+    src: "https://via.placeholder.com/600x400/1A2E3B/FFFFFF?text=Pricing+Factors",
     alt: "Rhinoplasty pricing factors",
     caption: "Factors that determine rhinoplasty prices"
   },
   "consult": {
-    src: "/assets/images/articles/medical-consultation.svg",
+    src: "https://via.placeholder.com/600x400/F4884A/FFFFFF?text=Rhinoplasty+Consultation",
     alt: "Rhinoplasty consultation process",
     caption: "What happens during a rhinoplasty consultation"
   },
   "doctor": {
-    src: "/assets/images/articles/medical-consultation.svg",
+    src: "https://via.placeholder.com/600x400/F4884A/FFFFFF?text=Doctor+Consultation",
     alt: "Doctor consultation for rhinoplasty",
     caption: "Medical consultation for rhinoplasty procedure"
   }
@@ -97,7 +97,7 @@ export const articleImages: ArticleImageMapping = {
 export function getArticleImage(title: string, tags: string[]): ArticleImage {
   // Default image if no match is found
   const defaultImage: ArticleImage = {
-    src: "/assets/images/articles/types-of-rhinoplasty.svg",
+    src: "https://via.placeholder.com/600x400/1A2E3B/FFFFFF?text=Rhinoplasty+Information",
     alt: "Rhinoplasty informational image",
     caption: "Educational content about rhinoplasty procedures"
   };
