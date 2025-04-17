@@ -3,11 +3,14 @@
 @tailwind utilities;
 
 /* Custom global styles for better readability */
-.prose, .prose-sm, p, h1, h2, h3, h4, h5, h6 {
+.prose, .prose-sm, .prose p, .prose h1, .prose h2, .prose h3, .prose h4, .prose h5, .prose h6,
+.prose ul, .prose ol, .prose li, .prose strong, .prose em {
   color: black !important;
 }
 
-.dark .prose, .dark .prose-sm, .dark p, .dark h1, .dark h2, .dark h3, .dark h4, .dark h5, .dark h6 {
+.dark .prose, .dark .prose-sm, .dark .prose p, .dark .prose h1, .dark .prose h2, 
+.dark .prose h3, .dark .prose h4, .dark .prose h5, .dark .prose h6,
+.dark .prose ul, .dark .prose ol, .dark .prose li, .dark .prose strong, .dark .prose em {
   color: white !important;
 }
 
@@ -16,6 +19,22 @@
 .prose ul, .prose ol, .prose blockquote {
   margin-bottom: 1em !important;
   white-space: pre-wrap !important;
+}
+
+/* Fix for card content */
+.card-content p, .card-content h1, .card-content h2, .card-content h3, 
+.card-content h4, .card-content h5, .card-content h6, 
+.card-content ul, .card-content ol, .card-content li, 
+.card-content strong, .card-content em {
+  color: black !important;
+  margin-bottom: 0.75em;
+}
+
+.dark .card-content p, .dark .card-content h1, .dark .card-content h2, 
+.dark .card-content h3, .dark .card-content h4, .dark .card-content h5, 
+.dark .card-content h6, .dark .card-content ul, .dark .card-content ol, 
+.dark .card-content li, .dark .card-content strong, .dark .card-content em {
+  color: white !important;
 }
 
 .prose ul {

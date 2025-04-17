@@ -168,7 +168,7 @@ const PostCard = ({ post, expanded = false }: PostCardProps) => {
         
         {/* Post content */}
         {expanded ? (
-          <div className="mb-4 prose dark:prose-invert prose-sm max-w-none text-gray-900 dark:text-gray-100">
+          <div className="mb-4 prose dark:prose-invert prose-sm max-w-none card-content">
             {post.content ? (
               <ReactMarkdown>{post.content}</ReactMarkdown>
             ) : (

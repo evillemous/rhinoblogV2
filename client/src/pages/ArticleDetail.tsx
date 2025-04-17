@@ -92,7 +92,7 @@ const ArticleDetail = () => {
             </CardHeader>
             
             <CardContent className="pt-6">
-              <div className="prose max-w-none">
+              <div className="prose max-w-none card-content">
                 {article.content ? (
                   <ReactMarkdown>{article.content}</ReactMarkdown>
                 ) : (
