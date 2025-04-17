@@ -118,16 +118,20 @@ const AdminOpenAI = () => {
   };
   
   const onUpdateApiKey = () => {
-    // Only update if we've already tested and it was successful
-    if (testResult && testResult.success) {
-      updateApiKeyMutation.mutate(apiKeyForm.getValues());
-    } else {
+    // Get the API key value directly from the form
+    const apiKey = apiKeyForm.getValues().apiKey;
+    
+    if (!apiKey || apiKey.trim() === '') {
       toast({
-        title: "Test Required",
-        description: "Please test the API key before updating",
+        title: "API Key Required",
+        description: "Please enter an API key",
         variant: "destructive",
       });
+      return;
     }
+    
+    // Update the API key without requiring a test
+    updateApiKeyMutation.mutate({ apiKey });
   };
   
   return (
@@ -209,7 +213,7 @@ const AdminOpenAI = () => {
               <Button
                 type="button"
                 onClick={onUpdateApiKey}
-                disabled={!testResult?.success || updateApiKeyMutation.isPending}
+                disabled={updateApiKeyMutation.isPending}
               >
                 {updateApiKeyMutation.isPending ? "Updating..." : "Update API Key"}
               </Button>

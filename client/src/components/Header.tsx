@@ -38,7 +38,7 @@ const Header = () => {
         <div className="flex items-center">
           <Link href="/" className="flex items-center space-x-2">
             <img 
-              src="/attached_assets/image_1744885216269.png" 
+              src="/assets/logo.png" 
               alt="RhinoplastyBlogs.com" 
               className="h-10" 
             />
