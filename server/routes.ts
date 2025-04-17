@@ -583,7 +583,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       try {
         // Create a temporary OpenAI instance with the test key
-        const tempOpenAI = new (await import("openai")).default({ 
+        const { default: OpenAI } = await import("openai");
+        const tempOpenAI = new OpenAI({ 
           apiKey: testKey || process.env.OPENAI_API_KEY 
         });
         
@@ -630,8 +631,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       process.env.OPENAI_API_KEY = apiKey.trim();
       
       // Update the OpenAI instance with the new key
+      const indexModule = await import("./index");
       const OpenAI = (await import("openai")).default;
-      global.openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+      // Create a new OpenAI client with the updated key and update the exported reference
+      indexModule.openaiClient = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
       
       return res.status(200).json({ message: "OpenAI API key updated successfully" });
     } catch (error) {

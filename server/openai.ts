@@ -1,7 +1,7 @@
 import OpenAI from "openai";
+import { openaiClient } from "./index";
 
 // the newest OpenAI model is "gpt-4o" which was released May 13, 2024. do not change this unless explicitly requested by the user
-const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
 interface GeneratedPost {
   title: string;
@@ -16,9 +16,9 @@ export async function generatePost(
   reason: string
 ): Promise<GeneratedPost | null> {
   try {
-    if (!process.env.OPENAI_API_KEY) {
-      console.error("OPENAI_API_KEY is not set");
-      throw new Error("OpenAI API key is missing");
+    if (!openaiClient) {
+      console.error("OpenAI client is not initialized");
+      throw new Error("OpenAI client is not initialized");
     }
 
     const prompt = `Write a personal rhinoplasty story in the style of a Reddit post. The narrator is a ${age}-year-old ${gender} who got ${procedure} rhinoplasty due to ${reason}. They describe the whole journey: research, consult, surgery day, recovery, and how they feel now. Write in an honest, relatable tone like someone posting on r/PlasticSurgery. Add a mini FAQ, bolded section headers, and tag suggestions. 
@@ -31,7 +31,7 @@ Format the response as a JSON object with the following structure:
 }`;
 
     console.log("Sending request to OpenAI to generate rhinoplasty story...");
-    const response = await openai.chat.completions.create({
+    const response = await openaiClient.chat.completions.create({
       model: "gpt-4o",
       messages: [{ role: "user", content: prompt }],
       response_format: { type: "json_object" },

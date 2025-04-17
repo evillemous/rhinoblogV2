@@ -4,7 +4,7 @@ import { setupVite, serveStatic, log } from "./vite";
 import OpenAI from "openai";
 
 // OpenAI client instance to use throughout the server
-let openaiClient: OpenAI | null = null;
+export let openaiClient: OpenAI | null = null;
 
 const app = express();
 app.use(express.json());
@@ -44,7 +44,7 @@ app.use((req, res, next) => {
   // Initialize OpenAI with the API key from environment if available
   if (process.env.OPENAI_API_KEY) {
     log("OpenAI API key found in environment", "server");
-    global.openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+    openaiClient = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
   } else {
     log("WARNING: OpenAI API key not found in environment", "server");
   }
