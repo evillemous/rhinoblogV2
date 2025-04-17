@@ -53,25 +53,11 @@ const Login = () => {
     },
   });
   
-  // Login mutation with hardcoded admin access
+  // Login mutation using the real API
   const loginMutation = useMutation({
     mutationFn: async (data: z.infer<typeof loginSchema>) => {
-      // For now, bypass the API call and use hardcoded admin credentials
-      if (data.username === "admin" && data.password === "rhinoadmin123") {
-        // Return simulated admin user
-        return {
-          token: "simulated-token-12345",
-          user: {
-            id: 1,
-            username: "admin",
-            email: "admin@rhinoplastyblogs.com",
-            isAdmin: true,
-            avatarUrl: undefined
-          }
-        };
-      } else {
-        throw new Error("Invalid credentials. Use admin/rhinoadmin123 to login.");
-      }
+      const res = await apiRequest("POST", "/api/auth/login", data);
+      return await res.json();
     },
     onSuccess: (data) => {
       login(data.token, data.user);
@@ -90,24 +76,12 @@ const Login = () => {
     },
   });
   
-  // Register mutation with direct simulation
+  // Register mutation using the real API
   const registerMutation = useMutation({
     mutationFn: async (data: z.infer<typeof registerSchema>) => {
       const { confirmPassword, ...userData } = data;
-      
-      // For now, simulate a successful registration
-      const newUser = {
-        token: "simulated-register-token-12345",
-        user: {
-          id: Math.floor(Math.random() * 1000) + 10, // Random ID
-          username: userData.username,
-          email: `${userData.username}@example.com`,
-          isAdmin: false,
-          avatarUrl: undefined
-        }
-      };
-      
-      return newUser;
+      const res = await apiRequest("POST", "/api/auth/register", userData);
+      return await res.json();
     },
     onSuccess: (data) => {
       login(data.token, data.user);
