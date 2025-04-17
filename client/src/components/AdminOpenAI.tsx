@@ -37,21 +37,25 @@ const AdminOpenAI = () => {
   });
   
   // Check current API key status
-  const { data: apiStatus, isLoading: apiStatusLoading, error: apiStatusError } = useQuery<{
+  // Define the API status response type
+  type ApiStatusResponse = {
     configured: boolean;
     key?: string;
     fullKey?: string;
-  }>({
+  };
+
+  const { data: apiStatus, isLoading: apiStatusLoading, error: apiStatusError } = useQuery<ApiStatusResponse>({
     queryKey: ["/api/admin/openai-status"],
     refetchInterval: false,
-    retry: 1,
-    onSuccess: (data) => {
-      // If we have a full key from the server, update the form
-      if (data?.fullKey) {
-        apiKeyForm.setValue("apiKey", data.fullKey);
-      }
-    }
+    retry: 1
   });
+  
+  // Set the API key in the form when the data is loaded
+  useEffect(() => {
+    if (apiStatus?.fullKey) {
+      apiKeyForm.setValue("apiKey", apiStatus.fullKey);
+    }
+  }, [apiStatus, apiKeyForm]);
   
   // Test API key mutation
   const testApiKeyMutation = useMutation({
@@ -174,14 +178,14 @@ const AdminOpenAI = () => {
             <div className="flex items-center space-x-2">
               {apiStatus?.configured ? (
                 <>
-                  <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">
+                  <Badge variant="outline" className="bg-rhino-navy/10 text-rhino-navy border-rhino-navy/20">
                     <CheckCircle className="h-3 w-3 mr-1" />
                     Configured
                   </Badge>
                   <span className="text-sm text-gray-500">Key: {apiStatus.key}</span>
                 </>
               ) : (
-                <Badge variant="outline" className="bg-yellow-50 text-yellow-700 border-yellow-200">
+                <Badge variant="outline" className="bg-rhino-orange/10 text-rhino-orange border-rhino-orange/20">
                   <AlertTriangle className="h-3 w-3 mr-1" />
                   Not Configured
                 </Badge>
@@ -217,6 +221,7 @@ const AdminOpenAI = () => {
               <Button
                 type="button"
                 variant="outline"
+                className="border-rhino-navy text-rhino-navy hover:bg-rhino-navy/10"
                 onClick={apiKeyForm.handleSubmit(onTestApiKey)}
                 disabled={testApiKeyMutation.isPending}
               >
@@ -225,6 +230,7 @@ const AdminOpenAI = () => {
               
               <Button
                 type="button"
+                className="bg-rhino-navy hover:bg-rhino-navy/90"
                 onClick={onUpdateApiKey}
                 disabled={updateApiKeyMutation.isPending}
               >
@@ -238,19 +244,19 @@ const AdminOpenAI = () => {
         {testResult && (
           <div className="mt-4">
             {testResult.success ? (
-              <Alert className="bg-green-50 text-green-700 border-green-200">
+              <Alert className="bg-rhino-navy/10 text-rhino-navy border-rhino-navy/20">
                 <CheckCircle className="h-4 w-4" />
                 <AlertTitle>API Key is Valid</AlertTitle>
                 <AlertDescription>
                   {testResult.tagline && (
-                    <div className="mt-2 p-2 bg-white rounded-md border border-green-200 text-gray-700">
+                    <div className="mt-2 p-2 bg-white rounded-md border-rhino-navy/20 text-gray-700">
                       {testResult.tagline}
                     </div>
                   )}
                 </AlertDescription>
               </Alert>
             ) : (
-              <Alert variant="destructive">
+              <Alert className="bg-rhino-orange/10 border-rhino-orange/20 text-rhino-orange">
                 <AlertCircle className="h-4 w-4" />
                 <AlertTitle>API Key Test Failed</AlertTitle>
                 <AlertDescription>
@@ -267,7 +273,7 @@ const AdminOpenAI = () => {
         <div className="space-y-2 text-sm text-gray-600">
           <h3 className="text-sm font-medium text-gray-700">How to Get an OpenAI API Key</h3>
           <ol className="list-decimal pl-5 space-y-1">
-            <li>Go to <a href="https://platform.openai.com/api-keys" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">OpenAI API Keys</a></li>
+            <li>Go to <a href="https://platform.openai.com/api-keys" target="_blank" rel="noopener noreferrer" className="text-rhino-navy hover:underline">OpenAI API Keys</a></li>
             <li>Log in to your OpenAI account (or create one)</li>
             <li>Click "Create New Secret Key" and give it a name</li>
             <li>Copy the key immediately (it won't be shown again)</li>
