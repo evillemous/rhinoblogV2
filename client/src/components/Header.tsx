@@ -79,7 +79,7 @@ const Header = () => {
               {/* Always visible Admin Dashboard Button for logged in users */}
               <Button
                 variant="destructive"
-                className="flex items-center gap-1 text-white font-bold border-2 border-white"
+                className="flex items-center gap-1 text-white font-bold border bg-rhino-navy hover:bg-rhino-navy/90"
                 size="default"
                 onClick={() => setLocation("/admin")}
               >
@@ -144,13 +144,13 @@ const Header = () => {
             <div className="hidden sm:flex space-x-2">
               <Button 
                 variant="outline" 
-                className="text-reddit-blue border border-reddit-blue hover:bg-gray-50 dark:hover:bg-reddit-darkHover px-4 py-1 rounded-full text-sm font-medium"
+                className="text-rhino-navy border border-rhino-navy hover:bg-gray-50 dark:hover:bg-rhino-navy/10 px-4 py-1 rounded-full text-sm font-medium"
                 onClick={() => setLocation("/login")}
               >
                 Log In
               </Button>
               <Button
-                className="bg-reddit-blue hover:bg-blue-600 px-4 py-1 rounded-full text-sm font-medium"
+                className="bg-rhino-navy hover:bg-rhino-navy/90 px-4 py-1 rounded-full text-sm font-medium"
                 onClick={() => setLocation("/login?tab=register")}
               >
                 Sign Up
@@ -178,7 +178,7 @@ const Header = () => {
             {/* Direct Admin Access - Always visible in mobile menu */}
             <Button
               variant="destructive"
-              className="w-full justify-start font-bold bg-red-600 hover:bg-red-700 text-white border border-white"
+              className="w-full justify-start font-bold bg-rhino-navy hover:bg-rhino-navy/90 text-white border"
               onClick={() => {
                 setLocation("/admin-link");
                 setMobileMenuOpen(false);
@@ -206,7 +206,7 @@ const Header = () => {
                 {user?.isAdmin && (
                   <Button
                     variant="default"
-                    className="w-full justify-start bg-red-600 hover:bg-red-700 text-white"
+                    className="w-full justify-start bg-rhino-navy hover:bg-rhino-navy/90 text-white"
                     onClick={() => {
                       setLocation("/admin");
                       setMobileMenuOpen(false);
