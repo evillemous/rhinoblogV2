@@ -1,0 +1,30 @@
+<svg width="600" height="400" xmlns="http://www.w3.org/2000/svg">
+  <rect width="600" height="400" fill="#f8f9fa"/>
+  
+  <!-- Background elements -->
+  <rect x="50" y="50" width="500" height="300" rx="5" fill="#ffffff" stroke="#dddddd" stroke-width="1"/>
+
+  <!-- Decorative elements -->
+  <circle cx="200" cy="150" r="80" fill="#F4884A" opacity="0.1"/>
+  <circle cx="400" cy="200" r="120" fill="#1A2E3B" opacity="0.05"/>
+  
+  <!-- Before Image (left) -->
+  <rect x="100" y="100" width="175" height="175" rx="3" fill="#f0f0f0" stroke="#dddddd"/>
+  <text x="140" y="80" font-family="Arial" font-size="14" fill="#1A2E3B" font-weight="bold">BEFORE</text>
+  <ellipse cx="185" cy="180" rx="18" ry="24" fill="#b0b0b0"/>
+  <path d="M175 160 Q187 145 195 160" stroke="#b0b0b0" stroke-width="2" fill="none"/>
+  
+  <!-- After Image (right) -->
+  <rect x="325" y="100" width="175" height="175" rx="3" fill="#f0f0f0" stroke="#dddddd"/>
+  <text x="375" y="80" font-family="Arial" font-size="14" fill="#F4884A" font-weight="bold">AFTER</text>
+  <ellipse cx="410" cy="180" rx="18" ry="24" fill="#b0b0b0"/>
+  <path d="M400 160 Q410 152 420 160" stroke="#b0b0b0" stroke-width="2" fill="none"/>
+  
+  <!-- Arrow -->
+  <line x1="285" y1="175" x2="315" y2="175" stroke="#F4884A" stroke-width="2"/>
+  <polygon points="315,175 310,170 310,180" fill="#F4884A"/>
+
+  <!-- Title -->
+  <text x="300" y="340" font-family="Arial" font-size="18" text-anchor="middle" fill="#1A2E3B" font-weight="bold">Rhinoplasty Results</text>
+  <text x="300" y="360" font-family="Arial" font-size="12" text-anchor="middle" fill="#666">Before and After Comparison</text>
+</svg>

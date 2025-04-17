@@ -1,0 +1,49 @@
+<svg width="600" height="400" xmlns="http://www.w3.org/2000/svg">
+  <rect width="600" height="400" fill="#f8f9fa"/>
+  
+  <!-- Background elements -->
+  <rect x="50" y="50" width="500" height="300" rx="5" fill="#ffffff" stroke="#dddddd" stroke-width="1"/>
+  
+  <!-- Title -->
+  <text x="300" y="90" font-family="Arial" font-size="20" text-anchor="middle" fill="#1A2E3B" font-weight="bold">Rhinoplasty Cost Factors</text>
+  
+  <!-- Cost Factors: Left side icons and labels -->
+  <circle cx="150" cy="140" r="20" fill="#F4884A" opacity="0.2"/>
+  <text x="150" y="145" font-family="Arial" font-size="14" text-anchor="middle" fill="#F4884A">$</text>
+  <text x="210" y="145" font-family="Arial" font-size="14" fill="#1A2E3B" font-weight="bold">Surgeon Experience</text>
+  
+  <circle cx="150" cy="190" r="20" fill="#F4884A" opacity="0.2"/>
+  <text x="150" y="195" font-family="Arial" font-size="14" text-anchor="middle" fill="#F4884A">$</text>
+  <text x="210" y="195" font-family="Arial" font-size="14" fill="#1A2E3B" font-weight="bold">Geographic Location</text>
+  
+  <circle cx="150" cy="240" r="20" fill="#F4884A" opacity="0.2"/>
+  <text x="150" y="245" font-family="Arial" font-size="14" text-anchor="middle" fill="#F4884A">$</text>
+  <text x="210" y="245" font-family="Arial" font-size="14" fill="#1A2E3B" font-weight="bold">Procedure Complexity</text>
+  
+  <circle cx="150" cy="290" r="20" fill="#F4884A" opacity="0.2"/>
+  <text x="150" y="295" font-family="Arial" font-size="14" text-anchor="middle" fill="#F4884A">$</text>
+  <text x="210" y="295" font-family="Arial" font-size="14" fill="#1A2E3B" font-weight="bold">Facility Fees</text>
+  
+  <!-- Right side: Price Range Graph -->
+  <rect x="320" y="120" width="180" height="180" rx="5" fill="#f0f0f0"/>
+  <text x="410" y="145" font-family="Arial" font-size="14" text-anchor="middle" fill="#1A2E3B" font-weight="bold">TYPICAL PRICE RANGE</text>
+  
+  <!-- Price bars -->
+  <rect x="350" y="165" width="120" height="25" rx="3" fill="#1A2E3B" opacity="0.1"/>
+  <rect x="350" y="165" width="60" height="25" rx="3" fill="#F4884A" opacity="0.6"/>
+  <text x="410" y="182" font-family="Arial" font-size="12" text-anchor="middle" fill="#1A2E3B">$5,000 - $7,000</text>
+  <text x="340" y="182" font-family="Arial" font-size="10" text-anchor="end" fill="#666">Basic</text>
+  
+  <rect x="350" y="205" width="120" height="25" rx="3" fill="#1A2E3B" opacity="0.1"/>
+  <rect x="350" y="205" width="90" height="25" rx="3" fill="#F4884A" opacity="0.6"/>
+  <text x="410" y="222" font-family="Arial" font-size="12" text-anchor="middle" fill="#1A2E3B">$7,000 - $10,000</text>
+  <text x="340" y="222" font-family="Arial" font-size="10" text-anchor="end" fill="#666">Standard</text>
+  
+  <rect x="350" y="245" width="120" height="25" rx="3" fill="#1A2E3B" opacity="0.1"/>
+  <rect x="350" y="245" width="120" height="25" rx="3" fill="#F4884A" opacity="0.6"/>
+  <text x="410" y="262" font-family="Arial" font-size="12" text-anchor="middle" fill="#1A2E3B">$10,000 - $15,000+</text>
+  <text x="340" y="262" font-family="Arial" font-size="10" text-anchor="end" fill="#666">Complex</text>
+  
+  <!-- Footer -->
+  <text x="300" y="330" font-family="Arial" font-size="12" text-anchor="middle" fill="#666" font-style="italic">Prices may vary significantly based on location and specific needs</text>
+</svg>

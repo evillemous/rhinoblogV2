@@ -3,18 +3,118 @@ import { useState } from "react";
 import { PostWithTags } from "@shared/schema";
 import Sidebar from "@/components/Sidebar";
 import RightSidebar from "@/components/RightSidebar";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Link } from "wouter";
 import { getRelativeTimeString } from "@/lib/utils";
 import ReactMarkdown from "react-markdown";
+import { getArticleImage } from "@/lib/articleImageMapping";
+import { ChevronRight, BookOpen, Clock, User } from "lucide-react";
+
+// Component for Featured Article
+const FeaturedArticle = ({ post }: { post: PostWithTags }) => {
+  const formattedDate = post.createdAt 
+    ? getRelativeTimeString(new Date(post.createdAt))
+    : "recently";
+
+  // Get appropriate image for article
+  const image = getArticleImage(
+    post.title || "", 
+    post.tags?.map(t => t.name) || []
+  );
+
+  // Extract first paragraph for preview
+  const getFirstParagraph = () => {
+    if (!post.content) return "";
+    const firstParagraphMatch = post.content.match(/^(.*?)\n\n/);
+    const excerpt = firstParagraphMatch ? firstParagraphMatch[1] : post.content.substring(0, 200);
+    return excerpt.length > 200 ? excerpt.substring(0, 200) + "..." : excerpt;
+  };
+
+  return (
+    <Card className="mb-6 overflow-hidden border-none shadow-lg">
+      {/* Featured Banner */}
+      <div className="bg-rhino-orange text-white text-xs uppercase font-bold px-3 py-1">
+        Featured Article
+      </div>
+      
+      <div className="md:flex">
+        {/* Image Section */}
+        <div className="md:w-2/5 bg-gray-100 p-4 flex items-center justify-center">
+          <div className="relative w-full h-48 md:h-full max-h-80">
+            <img 
+              src={image.src} 
+              alt={image.alt} 
+              className="w-full h-full object-contain"
+            />
+            {image.caption && (
+              <div className="absolute bottom-0 left-0 right-0 bg-black/50 text-white text-xs p-1 text-center">
+                {image.caption}
+              </div>
+            )}
+          </div>
+        </div>
+        
+        {/* Content Section */}
+        <div className="md:w-3/5 p-6">
+          <div className="flex flex-wrap gap-2 mb-3">
+            {post.tags && post.tags.map((tag) => (
+              <Badge 
+                key={tag.id}
+                variant="outline" 
+                className="bg-rhino-navy/10 text-rhino-navy border-rhino-navy/20"
+              >
+                #{tag.name}
+              </Badge>
+            ))}
+          </div>
+          
+          <CardTitle className="text-2xl font-bold mb-3 text-rhino-navy">
+            {post.title}
+          </CardTitle>
+          
+          <CardDescription className="text-base mb-4 line-clamp-3">
+            {getFirstParagraph()}
+          </CardDescription>
+          
+          <div className="flex items-center text-sm text-gray-500 mb-4">
+            <div className="flex items-center mr-4">
+              <Clock className="h-4 w-4 mr-1" />
+              <span>{formattedDate}</span>
+            </div>
+            <div className="flex items-center">
+              <User className="h-4 w-4 mr-1" />
+              <span>Rhinoplasty Expert</span>
+            </div>
+          </div>
+          
+          <Button 
+            asChild 
+            className="bg-rhino-orange hover:bg-rhino-orange/90 text-white w-full md:w-auto"
+          >
+            <Link href={`/article/${post.id}`}>
+              Read Full Article
+              <ChevronRight className="h-4 w-4 ml-1" />
+            </Link>
+          </Button>
+        </div>
+      </div>
+    </Card>
+  );
+};
 
 // Component for Article previews
 const ArticleCard = ({ post }: { post: PostWithTags }) => {
   const formattedDate = post.createdAt 
     ? getRelativeTimeString(new Date(post.createdAt))
     : "recently";
+
+  // Get appropriate image for article
+  const image = getArticleImage(
+    post.title || "", 
+    post.tags?.map(t => t.name) || []
+  );
 
   // Extract first paragraph for preview
   const getFirstParagraph = () => {
@@ -24,14 +124,19 @@ const ArticleCard = ({ post }: { post: PostWithTags }) => {
   };
 
   return (
-    <Card className="mb-6 overflow-hidden border-rhino-navy/10 hover:border-rhino-orange/50 transition-all">
-      <CardHeader className="pb-2 bg-rhino-peach/30">
-        <div className="flex justify-between items-center mb-1">
-          <CardTitle className="text-xl text-rhino-navy">{post.title}</CardTitle>
-          <div className="text-sm text-gray-500">{formattedDate}</div>
-        </div>
-        <div className="flex flex-wrap gap-2 mt-2">
-          {post.tags && post.tags.map((tag) => (
+    <Card className="overflow-hidden border-rhino-navy/10 hover:border-rhino-orange/50 transition-all h-full flex flex-col">
+      {/* Image Header */}
+      <div className="relative h-48 bg-gray-100">
+        <img 
+          src={image.src} 
+          alt={image.alt} 
+          className="w-full h-full object-contain"
+        />
+      </div>
+      
+      <CardHeader className="pb-2">
+        <div className="flex flex-wrap gap-2 mb-2">
+          {post.tags && post.tags.slice(0, 3).map((tag) => (
             <Badge 
               key={tag.id} 
               variant="outline" 
@@ -41,18 +146,31 @@ const ArticleCard = ({ post }: { post: PostWithTags }) => {
             </Badge>
           ))}
         </div>
+        <CardTitle className="text-lg text-rhino-navy line-clamp-2">{post.title}</CardTitle>
       </CardHeader>
-      <CardContent className="pt-4">
-        <CardDescription className="text-base mb-4">
+      
+      <CardContent className="pt-0 pb-4 flex-grow">
+        <CardDescription className="text-sm mb-2 line-clamp-3">
           {getFirstParagraph()}...
         </CardDescription>
+      </CardContent>
+      
+      <CardFooter className="pt-0 pb-4 flex justify-between items-center text-xs text-gray-500 border-t border-gray-100 mt-auto">
+        <div className="flex items-center">
+          <Clock className="h-3 w-3 mr-1" />
+          <span>{formattedDate}</span>
+        </div>
         <Button 
           asChild 
-          className="bg-rhino-orange hover:bg-rhino-orange/90 text-white mt-2"
+          variant="ghost"
+          size="sm"
+          className="text-rhino-orange hover:text-rhino-orange/90 p-0 h-auto"
         >
-          <Link href={`/article/${post.id}`}>Read Full Article</Link>
+          <Link href={`/article/${post.id}`}>
+            Read More <ChevronRight className="h-3 w-3 ml-1" />
+          </Link>
         </Button>
-      </CardContent>
+      </CardFooter>
     </Card>
   );
 };
@@ -81,11 +199,11 @@ const Articles = () => {
   
   // Categories for filtering
   const categories = [
-    { id: "all", name: "All Articles" },
-    { id: "recovery", name: "Recovery" },
-    { id: "procedures", name: "Procedures" },
-    { id: "guides", name: "Guides" },
-    { id: "faq", name: "FAQ" }
+    { id: "all", name: "All Articles", icon: <BookOpen className="h-4 w-4 mr-1" /> },
+    { id: "recovery", name: "Recovery", icon: <i className="fas fa-band-aid mr-1"></i> },
+    { id: "procedures", name: "Procedures", icon: <i className="fas fa-user-md mr-1"></i> },
+    { id: "guides", name: "Guides", icon: <i className="fas fa-book-open mr-1"></i> },
+    { id: "faq", name: "FAQ", icon: <i className="fas fa-question-circle mr-1"></i> }
   ];
   
   // Apply category filter
@@ -100,6 +218,12 @@ const Articles = () => {
         )
       );
   
+  // Featured article is the first article, or filtered first article if filter applied
+  const featuredArticle = filteredPosts.length > 0 ? filteredPosts[0] : null;
+  
+  // Regular articles are all remaining articles
+  const regularArticles = filteredPosts.length > 1 ? filteredPosts.slice(1) : [];
+  
   return (
     <div className="container mx-auto px-4 py-6 flex flex-col lg:flex-row">
       {/* Left Sidebar */}
@@ -107,24 +231,35 @@ const Articles = () => {
       
       {/* Main Content */}
       <div className="flex-1 space-y-6">
-        <div className="bg-white dark:bg-reddit-darkCard shadow rounded-md p-4">
-          <h1 className="text-2xl font-ibm-plex font-bold text-rhino-navy mb-4">Rhinoplasty Articles & Guides</h1>
-          <p className="text-gray-600 mb-4">
-            Educational resources about rhinoplasty procedures, recovery, and experiences written by experts and curated for your journey.
-          </p>
+        {/* Header Section */}
+        <div className="bg-white dark:bg-reddit-darkCard shadow rounded-md p-4 sm:p-6">
+          <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-4">
+            <div>
+              <h1 className="text-2xl font-bold text-rhino-navy">
+                Rhinoplasty Articles & Guides
+              </h1>
+              <p className="text-gray-600 mt-1">
+                Expert information and resources about rhinoplasty procedures
+              </p>
+            </div>
+          </div>
           
-          {/* Category Filter */}
-          <div className="flex flex-wrap gap-2 my-4">
+          {/* Category Filter - Pill Style */}
+          <div className="flex flex-wrap gap-2 my-4 border-t border-b border-gray-100 py-4">
             {categories.map(category => (
               <Button 
                 key={category.id}
                 variant={filter === category.id ? "default" : "outline"}
+                size="sm"
                 className={filter === category.id 
-                  ? "bg-rhino-orange hover:bg-rhino-orange/90" 
-                  : "border-rhino-navy/20 hover:bg-rhino-navy/10"}
+                  ? "bg-rhino-orange hover:bg-rhino-orange/90 text-white rounded-full" 
+                  : "border-rhino-navy/20 hover:bg-rhino-navy/10 rounded-full"}
                 onClick={() => setFilter(category.id)}
               >
-                {category.name}
+                <span className="flex items-center">
+                  {category.icon}
+                  {category.name}
+                </span>
               </Button>
             ))}
           </div>
@@ -156,12 +291,22 @@ const Articles = () => {
           </Card>
         )}
         
-        {/* Articles grid */}
-        <div className="grid gap-6 md:grid-cols-1 lg:grid-cols-1">
-          {filteredPosts.map(post => (
-            <ArticleCard key={post.id} post={post} />
-          ))}
-        </div>
+        {/* Featured Article */}
+        {!isLoading && !error && featuredArticle && (
+          <FeaturedArticle post={featuredArticle} />
+        )}
+        
+        {/* Article Grid - 3 column on desktop, 2 on tablet, 1 on mobile */}
+        {!isLoading && !error && regularArticles.length > 0 && (
+          <div>
+            <h2 className="font-bold text-xl mb-4 text-rhino-navy">More Articles</h2>
+            <div className="grid gap-6 grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
+              {regularArticles.map(post => (
+                <ArticleCard key={post.id} post={post} />
+              ))}
+            </div>
+          </div>
+        )}
       </div>
       
       {/* Right Sidebar */}
