@@ -44,6 +44,16 @@ const Header = () => {
             />
           </Link>
           
+          {/* Navigation Links */}
+          <div className="hidden md:flex ml-6 space-x-6">
+            <Link href="/" className="text-rhino-navy hover:text-rhino-orange font-medium">
+              Community
+            </Link>
+            <Link href="/articles" className="text-rhino-navy hover:text-rhino-orange font-medium">
+              Articles
+            </Link>
+          </div>
+          
           {/* Direct Admin Link - Always Visible */}
           <Link href="/admin-link" className="ml-4 px-3 py-1 bg-red-600 text-white rounded-md font-bold text-sm border-2 border-white shadow-lg hover:bg-red-700">
             ADMIN ACCESS
@@ -175,6 +185,30 @@ const Header = () => {
       {mobileMenuOpen && (
         <div className="sm:hidden bg-white dark:bg-gray-800 shadow-md">
           <div className="p-4 space-y-3">
+            {/* Navigation Links */}
+            <div className="mb-3 space-y-2">
+              <Button
+                variant="ghost"
+                className="w-full justify-start"
+                onClick={() => {
+                  setLocation("/");
+                  setMobileMenuOpen(false);
+                }}
+              >
+                Community
+              </Button>
+              <Button
+                variant="ghost"
+                className="w-full justify-start"
+                onClick={() => {
+                  setLocation("/articles");
+                  setMobileMenuOpen(false);
+                }}
+              >
+                Articles
+              </Button>
+            </div>
+
             {/* Direct Admin Access - Always visible in mobile menu */}
             <Button
               variant="destructive"
