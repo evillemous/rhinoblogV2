@@ -11,81 +11,81 @@ type ArticleImageMapping = {
 };
 
 export const articleImages: ArticleImageMapping = {
-  // By tag/category - Using placeholder image URLs
+  // By tag/category - Using direct image URLs for reliability
   "beforeafter": {
-    src: "https://via.placeholder.com/600x400/F4884A/FFFFFF?text=Before+and+After+Rhinoplasty",
+    src: "https://i.imgur.com/Y0PX7Kq.jpg",
     alt: "Before and after rhinoplasty results comparison",
     caption: "Typical before and after changes from rhinoplasty"
   },
   "recovery": {
-    src: "https://via.placeholder.com/600x400/1A2E3B/FFFFFF?text=Rhinoplasty+Recovery+Timeline",
+    src: "https://i.imgur.com/V9LlJgT.jpg",
     alt: "Rhinoplasty recovery timeline",
     caption: "Timeline showing typical rhinoplasty recovery milestones"
   },
   "types": {
-    src: "https://via.placeholder.com/600x400/F4884A/FFFFFF?text=Types+of+Rhinoplasty",
+    src: "https://i.imgur.com/xdpGtZ9.jpg",
     alt: "Different types of rhinoplasty procedures",
     caption: "Overview of rhinoplasty procedure types"
   },
   "cost": {
-    src: "https://via.placeholder.com/600x400/1A2E3B/FFFFFF?text=Rhinoplasty+Cost+Factors",
+    src: "https://i.imgur.com/JwqjnIS.jpg",
     alt: "Cost factors for rhinoplasty procedures",
     caption: "Factors affecting rhinoplasty procedure costs"
   },
   "consultation": {
-    src: "https://via.placeholder.com/600x400/F4884A/FFFFFF?text=Medical+Consultation",
+    src: "https://i.imgur.com/ZC4Ow6W.jpg",
     alt: "Medical consultation for rhinoplasty",
     caption: "What to expect during your rhinoplasty consultation"
   },
   
   // By keywords in title
   "before": {
-    src: "https://via.placeholder.com/600x400/F4884A/FFFFFF?text=Before+and+After+Results",
+    src: "https://i.imgur.com/Y0PX7Kq.jpg",
     alt: "Before and after rhinoplasty results",
     caption: "Rhinoplasty results visualization"
   },
   "after": {
-    src: "https://via.placeholder.com/600x400/F4884A/FFFFFF?text=Rhinoplasty+Results",
+    src: "https://i.imgur.com/Y0PX7Kq.jpg",
     alt: "Before and after rhinoplasty comparison",
     caption: "Visual changes from rhinoplasty procedure"
   },
   "recover": {
-    src: "https://via.placeholder.com/600x400/1A2E3B/FFFFFF?text=Rhinoplasty+Recovery",
+    src: "https://i.imgur.com/V9LlJgT.jpg",
     alt: "Rhinoplasty recovery process",
     caption: "Recovery timeline after rhinoplasty surgery"
   },
   "healing": {
-    src: "https://via.placeholder.com/600x400/1A2E3B/FFFFFF?text=Rhinoplasty+Healing",
+    src: "https://i.imgur.com/V9LlJgT.jpg",
     alt: "Healing process after rhinoplasty",
     caption: "Timeline of healing after rhinoplasty procedure"
   },
   "type": {
-    src: "https://via.placeholder.com/600x400/F4884A/FFFFFF?text=Rhinoplasty+Procedures",
+    src: "https://i.imgur.com/xdpGtZ9.jpg",
     alt: "Types of rhinoplasty procedures",
     caption: "Overview of different rhinoplasty approaches"
   },
   "procedure": {
-    src: "https://via.placeholder.com/600x400/F4884A/FFFFFF?text=Procedure+Options",
+    src: "https://i.imgur.com/xdpGtZ9.jpg",
     alt: "Rhinoplasty procedure options",
     caption: "Different approaches to rhinoplasty surgery"
   },
   "costs": {
-    src: "https://via.placeholder.com/600x400/1A2E3B/FFFFFF?text=Procedure+Costs",
+    src: "https://i.imgur.com/JwqjnIS.jpg",
     alt: "Rhinoplasty procedure costs",
     caption: "Understanding rhinoplasty pricing factors"
   },
   "price": {
-    src: "https://via.placeholder.com/600x400/1A2E3B/FFFFFF?text=Pricing+Factors",
+    src: "https://i.imgur.com/JwqjnIS.jpg",
     alt: "Rhinoplasty pricing factors",
     caption: "Factors that determine rhinoplasty prices"
   },
   "consult": {
-    src: "https://via.placeholder.com/600x400/F4884A/FFFFFF?text=Rhinoplasty+Consultation",
+    src: "https://i.imgur.com/ZC4Ow6W.jpg",
     alt: "Rhinoplasty consultation process",
     caption: "What happens during a rhinoplasty consultation"
   },
   "doctor": {
-    src: "https://via.placeholder.com/600x400/F4884A/FFFFFF?text=Doctor+Consultation",
+    src: "https://i.imgur.com/ZC4Ow6W.jpg",
     alt: "Doctor consultation for rhinoplasty",
     caption: "Medical consultation for rhinoplasty procedure"
   }
@@ -97,7 +97,7 @@ export const articleImages: ArticleImageMapping = {
 export function getArticleImage(title: string, tags: string[]): ArticleImage {
   // Default image if no match is found
   const defaultImage: ArticleImage = {
-    src: "https://via.placeholder.com/600x400/1A2E3B/FFFFFF?text=Rhinoplasty+Information",
+    src: "https://i.imgur.com/NBgjHnj.jpg",
     alt: "Rhinoplasty informational image",
     caption: "Educational content about rhinoplasty procedures"
   };

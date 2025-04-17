@@ -44,13 +44,13 @@ const FeaturedArticle = ({ post }: { post: PostWithTags }) => {
         <div className="md:w-2/5 bg-gray-100 p-4 flex items-center justify-center">
           <div className="relative w-full h-48 md:h-full max-h-80">
             <img 
-              src={image.src || "https://via.placeholder.com/600x400/F4884A/FFFFFF?text=Rhinoplasty+Article"} 
+              src={image.src || "https://i.imgur.com/Y0PX7Kq.jpg"} 
               alt={image.alt} 
               className="w-full h-full object-contain"
               onError={(e) => {
                 const target = e.target as HTMLImageElement;
                 target.onerror = null;
-                target.src = "https://via.placeholder.com/600x400/F4884A/FFFFFF?text=Rhinoplasty+Article";
+                target.src = "https://i.imgur.com/Y0PX7Kq.jpg";
               }}
             />
             {image.caption && (
@@ -133,13 +133,13 @@ const ArticleCard = ({ post }: { post: PostWithTags }) => {
       {/* Image Header */}
       <div className="relative h-48 bg-gray-100">
         <img 
-          src={image.src || "https://via.placeholder.com/600x400/1A2E3B/FFFFFF?text=Rhinoplasty+Article"} 
+          src={image.src || "https://i.imgur.com/xdpGtZ9.jpg"} 
           alt={image.alt} 
           className="w-full h-full object-contain"
           onError={(e) => {
             const target = e.target as HTMLImageElement;
             target.onerror = null;
-            target.src = "https://via.placeholder.com/600x400/1A2E3B/FFFFFF?text=Rhinoplasty+Article";
+            target.src = "https://i.imgur.com/xdpGtZ9.jpg";
           }}
         />
       </div>

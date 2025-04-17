@@ -172,13 +172,13 @@ const ArticleDetail = () => {
               <div className="bg-white p-6 rounded-md shadow-md">
                 <div className="relative max-h-[400px] overflow-hidden flex justify-center">
                   <img 
-                    src={articleImage.src || "https://via.placeholder.com/800x500/F4884A/FFFFFF?text=Rhinoplasty+Article"} 
+                    src={articleImage.src || "https://i.imgur.com/Y0PX7Kq.jpg"} 
                     alt={articleImage.alt}
                     className="max-w-full h-auto object-contain"
                     onError={(e) => {
                       const target = e.target as HTMLImageElement;
                       target.onerror = null;
-                      target.src = "https://via.placeholder.com/800x500/F4884A/FFFFFF?text=Rhinoplasty+Article";
+                      target.src = "https://i.imgur.com/Y0PX7Kq.jpg";
                     }}
                   />
                 </div>
@@ -240,13 +240,13 @@ const ArticleDetail = () => {
                         <Card key={relatedPost.id} className="overflow-hidden h-full hover:shadow-md transition-all border-rhino-navy/10">
                           <div className="h-32 bg-gray-100 flex items-center justify-center p-2">
                             <img 
-                              src={relatedImage.src || "https://via.placeholder.com/300x200/1A2E3B/FFFFFF?text=Related+Article"}
+                              src={relatedImage.src || "https://i.imgur.com/NBgjHnj.jpg"}
                               alt={relatedImage.alt}
                               className="h-full w-auto object-contain"
                               onError={(e) => {
                                 const target = e.target as HTMLImageElement;
                                 target.onerror = null;
-                                target.src = "https://via.placeholder.com/300x200/1A2E3B/FFFFFF?text=Related+Article";
+                                target.src = "https://i.imgur.com/NBgjHnj.jpg";
                               }}
                             />
                           </div>
