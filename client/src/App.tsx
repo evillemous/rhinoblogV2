@@ -12,6 +12,7 @@ import AdminLink from "@/pages/AdminLink";
 import Login from "@/pages/Login";
 import TagPage from "@/pages/TagPage";
 import TopicPage from "@/pages/TopicPage";
+import Topics from "@/pages/Topics";
 import ProfileSettings from "@/pages/ProfileSettings";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
@@ -28,6 +29,7 @@ function Router() {
       <Route path="/article/:id" component={ArticleDetail} />
       <Route path="/tag/:tagName" component={TagPage} />
       <Route path="/topic/:topicSlug" component={TopicPage} />
+      <Route path="/topics" component={Topics} />
       <Route path="/login" component={Login} />
       <Route path="/profile/settings" component={ProfileSettings} />
       <Route path="/admin" component={Admin} />

@@ -95,17 +95,14 @@ const PostForm = ({ isOpen, onClose, defaultTopicId }: PostFormProps) => {
   });
   
   const onSubmit = (data: PostFormValues) => {
-    // Add default topic ID if one was provided and the form doesn't have one
-    const topicIdStr = data.topicId || (defaultTopicId ? defaultTopicId.toString() : "");
+    // If no topicId is selected but there's a default, use that
+    if (!data.topicId && defaultTopicId) {
+      data.topicId = defaultTopicId;
+    }
     
-    // Create the form data object with the properly converted topicId
-    const formData = {
-      ...data,
-      // Convert topicId to number or set it to undefined if empty
-      topicId: topicIdStr ? parseInt(topicIdStr, 10) : undefined
-    };
-    
-    postMutation.mutate(formData);
+    // The topicId should be properly transformed by the schema
+    // so we can submit the data directly
+    postMutation.mutate(data);
   };
   
   const addTag = () => {

@@ -246,7 +246,11 @@ const Home = () => {
               </div>
             </li>
           </ul>
-          <Button variant="outline" className="w-full mt-3 text-sm">
+          <Button 
+            variant="outline" 
+            className="w-full mt-3 text-sm" 
+            onClick={() => navigate("/topics")}
+          >
             View All Communities
           </Button>
         </div>
