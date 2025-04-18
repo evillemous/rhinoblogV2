@@ -4,16 +4,20 @@ import { PostWithTags } from "@shared/schema";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Loader2, ArrowUpCircle, MessageCircle, Award, Share2, ChevronUp, ChevronDown, Flame, TrendingUp, Clock } from "lucide-react";
+import { Loader2, ArrowUpCircle, MessageCircle, Award, Share2, ChevronUp, ChevronDown, Flame, TrendingUp, Clock, Plus } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Link, useLocation } from "wouter";
 import { getRelativeTimeString, getTagColor } from "@/lib/utils";
+import { useAuth } from "@/context/AuthContext";
+import PostForm from "@/components/PostForm";
 
 const Home = () => {
   const [offset] = useState(0);
   const limit = 20;
   const [sortBy, setSortBy] = useState<"hot" | "new" | "top">("hot");
   const [location, navigate] = useLocation();
+  const { isAuthenticated } = useAuth();
+  const [isPostFormOpen, setIsPostFormOpen] = useState(false);
   
   // Fetch posts
   const { data: posts, isLoading, error } = useQuery<PostWithTags[]>({
@@ -26,8 +30,28 @@ const Home = () => {
     setSortBy(value as "hot" | "new" | "top");
   };
   
+  // Handle create post button click
+  const handleCreatePost = () => {
+    if (isAuthenticated) {
+      setIsPostFormOpen(true);
+    } else {
+      navigate("/login");
+    }
+  };
+  
   return (
     <div className="flex">
+      {/* Post Form */}
+      <PostForm isOpen={isPostFormOpen} onClose={() => setIsPostFormOpen(false)} />
+      
+      {/* Floating Create Post Button (mobile-friendly) */}
+      <Button
+        onClick={handleCreatePost}
+        className="fixed bottom-6 right-6 z-50 rounded-full h-14 w-14 shadow-lg bg-reddit-orange hover:bg-orange-600 flex items-center justify-center p-0"
+      >
+        <Plus className="h-6 w-6" />
+      </Button>
+      
       {/* Left Sidebar */}
       <div className="hidden md:block w-64 bg-white dark:bg-gray-900 mr-4 border-r dark:border-gray-800 h-[calc(100vh-64px)] fixed left-0 top-16 p-4">
         <div className="space-y-2">
@@ -177,7 +201,11 @@ const Home = () => {
           !isLoading && (
             <div className="text-center p-12 bg-white dark:bg-gray-900 rounded-md border dark:border-gray-800">
               <p className="text-gray-500">No posts found</p>
-              <Button variant="outline" className="mt-4">
+              <Button 
+                variant="outline" 
+                className="mt-4"
+                onClick={handleCreatePost}
+              >
                 Create a Post
               </Button>
             </div>
