@@ -69,7 +69,7 @@ const PostForm = ({ isOpen, onClose, defaultTopicId }: PostFormProps) => {
     title: string;
     content: string;
     tags: string[];
-    topicId?: number;
+    topicId?: number; // Making topicId optional to match the server schema
   }
 
   const postMutation = useMutation({
@@ -108,12 +108,17 @@ const PostForm = ({ isOpen, onClose, defaultTopicId }: PostFormProps) => {
       title: data.title,
       content: data.content,
       tags: data.tags,
-      // Convert topicId to number if it exists, otherwise use the default or undefined
-      topicId: data.topicId 
-        ? parseInt(data.topicId, 10)
-        : (defaultTopicId || undefined)
     };
     
+    // Handle topicId conversion - ensure it's either a valid number or undefined
+    if (data.topicId && data.topicId.trim() !== '') {
+      submissionData.topicId = parseInt(data.topicId, 10);
+    } else if (defaultTopicId) {
+      submissionData.topicId = defaultTopicId;
+    }
+    // If neither data.topicId nor defaultTopicId exists, topicId will remain undefined
+    
+    console.log('Submitting post with data:', submissionData);
     postMutation.mutate(submissionData);
   };
   

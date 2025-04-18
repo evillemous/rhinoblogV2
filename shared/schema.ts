@@ -64,14 +64,18 @@ export const posts = pgTable("posts", {
   topicId: integer("topic_id"),
 });
 
-export const insertPostSchema = createInsertSchema(posts).pick({
-  userId: true,
-  title: true,
-  content: true,
-  imageUrl: true,
-  isAiGenerated: true,
-  topicId: true,
-});
+export const insertPostSchema = createInsertSchema(posts)
+  .pick({
+    userId: true,
+    title: true,
+    content: true,
+    imageUrl: true,
+    isAiGenerated: true,
+    topicId: true,
+  })
+  .partial({
+    topicId: true, // Make topicId optional
+  });
 
 // Tags Schema
 export const tags = pgTable("tags", {
