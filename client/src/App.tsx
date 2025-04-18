@@ -23,6 +23,10 @@ import { AuthProvider } from "@/context/AuthContext";
 import AIEngine from "@/pages/superuser/AIEngine";
 import PlatformSettings from "@/pages/superuser/PlatformSettings";
 import UserManagement from "@/pages/superuser/UserManagement";
+import Moderation from "@/pages/superuser/Moderation";
+import Analytics from "@/pages/superuser/Analytics";
+import DevTools from "@/pages/superuser/DevTools";
+import ContentManagement from "@/pages/superuser/ContentManagement";
 
 function Router() {
   return (
@@ -44,6 +48,10 @@ function Router() {
       <Route path="/super/ai-engine" component={AIEngine} />
       <Route path="/super/platform-settings" component={PlatformSettings} />
       <Route path="/super/users" component={UserManagement} />
+      <Route path="/super/moderation" component={Moderation} />
+      <Route path="/super/analytics" component={Analytics} />
+      <Route path="/super/dev-tools" component={DevTools} />
+      <Route path="/super/content" component={ContentManagement} />
       
       <Route component={NotFound} />
     </Switch>
