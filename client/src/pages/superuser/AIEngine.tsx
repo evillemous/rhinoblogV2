@@ -23,7 +23,7 @@ const AIEngine = () => {
     data: aiPosts, 
     isLoading: isLoadingPosts,
     refetch: refetchPosts
-  } = useQuery({
+  } = useQuery<any[]>({
     queryKey: ['/api/admin/ai-posts'],
     refetchInterval: false
   });
@@ -32,7 +32,7 @@ const AIEngine = () => {
   const { 
     data: apiStatus, 
     isLoading: isLoadingApiStatus 
-  } = useQuery({
+  } = useQuery<{configured: boolean, key: string}>({
     queryKey: ['/api/admin/openai-status'],
     refetchInterval: false
   });
@@ -41,7 +41,7 @@ const AIEngine = () => {
   const { 
     data: schedule, 
     isLoading: isLoadingSchedule 
-  } = useQuery({
+  } = useQuery<{enabled: boolean, cronExpression: string}>({
     queryKey: ['/api/admin/schedule'],
     refetchInterval: false
   });
@@ -225,7 +225,7 @@ const AIEngine = () => {
                   <div className="flex h-40 items-center justify-center">
                     <Loader2 className="h-8 w-8 animate-spin text-gray-400" />
                   </div>
-                ) : aiPosts && aiPosts.length > 0 ? (
+                ) : aiPosts && Array.isArray(aiPosts) && aiPosts.length > 0 ? (
                   <div className="space-y-4">
                     <div className="rounded-md border">
                       <div className="grid grid-cols-12 border-b bg-gray-50 px-4 py-3 text-sm font-medium">
@@ -241,7 +241,7 @@ const AIEngine = () => {
                             <div className="col-span-5 truncate">{post.title}</div>
                             <div className="col-span-2">{post.author || "AI"}</div>
                             <div className="col-span-2 text-gray-500">
-                              {format(new Date(post.createdAt || new Date()), "MMM d, yyyy")}
+                              {post.createdAt ? format(new Date(post.createdAt), "MMM d, yyyy") : "—"}
                             </div>
                             <div className="col-span-2">
                               <span className="inline-flex items-center rounded-full bg-green-100 px-2.5 py-0.5 text-xs font-medium text-green-800">
@@ -282,7 +282,7 @@ const AIEngine = () => {
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                <ScheduleForm currentSchedule={schedule} />
+                <ScheduleForm currentSchedule={schedule as {enabled: boolean, cronExpression: string} | undefined} />
               </CardContent>
             </Card>
           </TabsContent>

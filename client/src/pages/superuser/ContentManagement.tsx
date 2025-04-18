@@ -55,7 +55,7 @@ const ContentManagement = () => {
   const { 
     data: posts, 
     isLoading: isLoadingPosts,
-  } = useQuery({
+  } = useQuery<any[]>({
     queryKey: ['/api/posts'],
     refetchInterval: false
   });
@@ -64,7 +64,7 @@ const ContentManagement = () => {
   const { 
     data: articles, 
     isLoading: isLoadingArticles,
-  } = useQuery({
+  } = useQuery<any[]>({
     queryKey: ['/api/articles'],
     refetchInterval: false
   });
@@ -147,7 +147,7 @@ const ContentManagement = () => {
                     <div className="flex h-40 items-center justify-center">
                       <div className="h-8 w-8 animate-spin rounded-full border-2 border-primary border-t-transparent" />
                     </div>
-                  ) : posts && posts.length > 0 ? (
+                  ) : posts && Array.isArray(posts) && posts.length > 0 ? (
                     <div className="rounded-md border">
                       <Table>
                         <TableHeader>
