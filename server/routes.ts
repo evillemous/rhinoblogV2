@@ -651,8 +651,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         title: generatedPost.title,
         content: generatedPost.content,
         imageUrl: null,
-        upvotes: 0,
-        downvotes: 0
+        isAiGenerated: true
       });
       
       // Handle tags

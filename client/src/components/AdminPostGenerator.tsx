@@ -377,6 +377,84 @@ const AdminPostGenerator = () => {
       
       <Card>
         <CardHeader>
+          <CardTitle className="text-xl">Custom Content Generator</CardTitle>
+          <CardDescription>
+            Create highly customized content with your own specific prompt
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <Form {...customContentForm}>
+            <form onSubmit={customContentForm.handleSubmit(onCustomSubmit)} className="space-y-4">
+              <FormField
+                control={customContentForm.control}
+                name="contentType"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Content Type</FormLabel>
+                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select content type" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        <SelectItem value="educational">Educational Article</SelectItem>
+                        <SelectItem value="personal">Personal Story</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <FormDescription>
+                      Educational articles appear in the Articles section. Personal stories appear in the main feed.
+                    </FormDescription>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              
+              <FormField
+                control={customContentForm.control}
+                name="customPrompt"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Custom Prompt</FormLabel>
+                    <FormControl>
+                      <textarea 
+                        className="flex min-h-[120px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                        placeholder="Enter your detailed prompt for content generation. Be specific about the topic, structure, and style you want." 
+                        {...field} 
+                      />
+                    </FormControl>
+                    <FormDescription>
+                      Your prompt should be detailed. For example: "Write an article about the recovery process after closed rhinoplasty, focusing on the first month timeline, what to expect, and tips for easier healing."
+                    </FormDescription>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              
+              <Button
+                type="submit"
+                className="w-full"
+                disabled={isCustomGenerating}
+                variant="outline"
+              >
+                {isCustomGenerating ? (
+                  <>
+                    <i className="fas fa-spinner fa-spin mr-2"></i>
+                    Generating Custom Content...
+                  </>
+                ) : (
+                  "Generate Custom Content"
+                )}
+              </Button>
+            </form>
+          </Form>
+        </CardContent>
+      </Card>
+      
+      <Separator />
+      
+      <Card>
+        <CardHeader>
           <CardTitle className="text-xl">Automated Posting Schedule</CardTitle>
           <CardDescription>
             Configure automatic AI post generation schedule
