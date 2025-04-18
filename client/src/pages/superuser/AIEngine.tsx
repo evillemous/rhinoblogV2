@@ -13,6 +13,7 @@ import { ScheduleForm } from "@/components/superuser/ai-engine/ScheduleForm";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { format } from "date-fns";
+import { Link } from "wouter";
 
 const AIEngine = () => {
   const { toast } = useToast();
@@ -249,7 +250,14 @@ const AIEngine = () => {
                               </span>
                             </div>
                             <div className="col-span-1">
-                              <Button variant="ghost" size="sm">View</Button>
+                              <Link href={`/post/${post.id}`} target="_blank">
+                                <Button 
+                                  variant="ghost" 
+                                  size="sm"
+                                >
+                                  View
+                                </Button>
+                              </Link>
                             </div>
                           </div>
                         ))}
