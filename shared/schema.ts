@@ -1,4 +1,4 @@
-import { pgTable, text, serial, integer, boolean, timestamp } from "drizzle-orm/pg-core";
+import { pgTable, text, serial, integer, boolean, timestamp, varchar } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
@@ -130,3 +130,24 @@ export type CommentWithUser = Comment & {
   user: User;
   replies?: CommentWithUser[];
 };
+
+// Topic Schema
+export const topics = pgTable("topics", {
+  id: serial("id").primaryKey(),
+  name: varchar("name", { length: 100 }).notNull().unique(),
+  icon: varchar("icon", { length: 50 }).notNull(),
+  description: text("description"),
+  slug: varchar("slug", { length: 100 }).notNull().unique(),
+  sortOrder: integer("sort_order").default(0),
+});
+
+export const insertTopicSchema = createInsertSchema(topics).pick({
+  name: true,
+  icon: true,
+  description: true,
+  slug: true,
+  sortOrder: true,
+});
+
+export type Topic = typeof topics.$inferSelect;
+export type InsertTopic = z.infer<typeof insertTopicSchema>;

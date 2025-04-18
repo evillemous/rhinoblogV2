@@ -60,6 +60,14 @@ export interface IStorage {
   createVote(vote: InsertVote): Promise<Vote>;
   updateVote(id: number, voteType: string): Promise<Vote | undefined>;
   deleteVote(id: number): Promise<boolean>;
+  
+  // Topic operations
+  getTopic(id: number): Promise<Topic | undefined>;
+  getTopicBySlug(slug: string): Promise<Topic | undefined>;
+  createTopic(topic: InsertTopic): Promise<Topic>;
+  updateTopic(id: number, topic: Partial<Topic>): Promise<Topic | undefined>;
+  deleteTopic(id: number): Promise<boolean>;
+  getTopics(): Promise<Topic[]>;
 }
 
 export class MemStorage implements IStorage {
@@ -69,6 +77,7 @@ export class MemStorage implements IStorage {
   private postTags: Map<number, PostTag>;
   private comments: Map<number, Comment>;
   private votes: Map<number, Vote>;
+  private topics: Map<number, Topic>;
   
   private currentIds: {
     users: number;
@@ -77,6 +86,7 @@ export class MemStorage implements IStorage {
     postTags: number;
     comments: number;
     votes: number;
+    topics: number;
   };
 
   constructor() {
