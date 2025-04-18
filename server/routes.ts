@@ -8,7 +8,8 @@ import {
   insertTagSchema,
   insertPostTagSchema,
   insertCommentSchema,
-  insertVoteSchema
+  insertVoteSchema,
+  insertTopicSchema
 } from "@shared/schema";
 import { generatePost, generateCustomContent } from "./openai";
 import jwt from "jsonwebtoken";

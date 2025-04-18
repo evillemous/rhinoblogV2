@@ -12,7 +12,9 @@ import {
   type Vote,
   type InsertVote,
   type PostWithTags,
-  type CommentWithUser
+  type CommentWithUser,
+  type Topic,
+  type InsertTopic
 } from "@shared/schema";
 
 // Storage interface
@@ -96,6 +98,7 @@ export class MemStorage implements IStorage {
     this.postTags = new Map();
     this.comments = new Map();
     this.votes = new Map();
+    this.topics = new Map();
     
     this.currentIds = {
       users: 1,
@@ -103,11 +106,15 @@ export class MemStorage implements IStorage {
       tags: 1,
       postTags: 1,
       comments: 1,
-      votes: 1
+      votes: 1,
+      topics: 1
     };
     
     // Initialize with some default tags
     this.seedTags();
+    
+    // Initialize with some default topics
+    this.seedTopics();
     
     // Create default admin user
     this.createDefaultAdmin();
@@ -195,6 +202,44 @@ export class MemStorage implements IStorage {
     defaultTags.forEach(tag => {
       const id = this.currentIds.tags++;
       this.tags.set(id, { ...tag, id });
+    });
+  }
+  
+  private seedTopics() {
+    const defaultTopics = [
+      { 
+        name: 'Rhinoplasty', 
+        icon: '👃', 
+        description: 'General rhinoplasty discussions and experiences',
+        slug: 'rhinoplasty',
+        sortOrder: 1
+      },
+      { 
+        name: 'Recovery', 
+        icon: '🩹', 
+        description: 'Recovery experiences, tips, and timeline discussions',
+        slug: 'recovery',
+        sortOrder: 2
+      },
+      { 
+        name: 'Surgeons', 
+        icon: '👨‍⚕️', 
+        description: 'Surgeon reviews, recommendations, and consultations',
+        slug: 'surgeons',
+        sortOrder: 3
+      },
+      { 
+        name: 'Results', 
+        icon: '📸', 
+        description: 'Before & after results and transformations',
+        slug: 'results',
+        sortOrder: 4
+      }
+    ];
+
+    defaultTopics.forEach(topic => {
+      const id = this.currentIds.topics++;
+      this.topics.set(id, { ...topic, id });
     });
   }
 
@@ -486,6 +531,42 @@ export class MemStorage implements IStorage {
 
   async deleteVote(id: number): Promise<boolean> {
     return this.votes.delete(id);
+  }
+  
+  // Topic operations
+  async getTopic(id: number): Promise<Topic | undefined> {
+    return this.topics.get(id);
+  }
+
+  async getTopicBySlug(slug: string): Promise<Topic | undefined> {
+    return Array.from(this.topics.values()).find(
+      (topic) => topic.slug.toLowerCase() === slug.toLowerCase(),
+    );
+  }
+
+  async createTopic(insertTopic: InsertTopic): Promise<Topic> {
+    const id = this.currentIds.topics++;
+    const topic: Topic = { ...insertTopic, id };
+    this.topics.set(id, topic);
+    return topic;
+  }
+
+  async updateTopic(id: number, topicData: Partial<Topic>): Promise<Topic | undefined> {
+    const topic = this.topics.get(id);
+    if (!topic) return undefined;
+    
+    const updatedTopic = { ...topic, ...topicData };
+    this.topics.set(id, updatedTopic);
+    return updatedTopic;
+  }
+
+  async deleteTopic(id: number): Promise<boolean> {
+    return this.topics.delete(id);
+  }
+
+  async getTopics(): Promise<Topic[]> {
+    // Return topics sorted by sortOrder
+    return Array.from(this.topics.values()).sort((a, b) => a.sortOrder - b.sortOrder);
   }
 }
 
