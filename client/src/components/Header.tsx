@@ -80,12 +80,12 @@ const Header = () => {
         
         {/* Right actions */}
         <div className="flex items-center space-x-4">
-          {/* Admin Dashboard Button - only visible for logged-in users */}
-          {isAuthenticated && (
+          {/* Admin Dashboard Button - only visible for admin users */}
+          {isAuthenticated && user?.isAdmin && (
             <>
-              {/* Status indicator showing if user has admin privileges */}
+              {/* Status indicator showing admin mode */}
               <div className="text-xs text-gray-500 mr-2">
-                {user?.isAdmin ? "Admin Mode" : "User Mode"}
+                Admin Mode
               </div>
               
               {/* Admin Dashboard Button */}

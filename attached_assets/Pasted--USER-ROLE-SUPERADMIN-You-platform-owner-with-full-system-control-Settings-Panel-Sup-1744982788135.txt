@@ -1,0 +1,149 @@
+🧑‍💼 USER ROLE: SUPERADMIN
+🎯 You — platform owner with full system control
+
+🔧 Settings Panel: Superadmin Dashboard
+Account Settings
+
+Change email/password
+
+Set 2FA
+
+Platform Settings
+
+Toggle AI generation frequency (daily/weekly/disabled)
+
+Manage OpenAI API key & config
+
+Global tag management (add/remove)
+
+Feature post management (pin/unpin)
+
+User Management
+
+View, ban, promote, or demote users
+
+Assign contributor types
+
+Reset user passwords
+
+Content Oversight
+
+View/delete/edit any post or comment
+
+Moderate flagged content
+
+Analytics
+
+Daily/weekly user signup + post metrics
+
+Top tags
+
+AI vs real post breakdown
+
+✅ Has access to everything
+🚫 Nothing is restricted
+
+🛡️ USER ROLE: ADMIN
+🔧 Settings Panel: Admin Moderator Tools
+Account Settings
+
+Change email/password
+
+Moderation Tools
+
+Flag/feature/hide posts
+
+Approve new contributor applications
+
+View moderation queue (flagged posts/comments)
+
+Content Management
+
+Delete/edit posts/comments (except Superadmin’s)
+
+Limited User Management
+
+View users and roles
+
+Cannot promote/demote admins or superadmin
+
+✅ Access to content moderation and user review
+🚫 Cannot change system settings, run AI scripts, or alter contributor roles
+
+✨ USER ROLE: CONTRIBUTOR
+🔧 Settings Panel: Contributor Hub
+Account Settings
+
+Change email/password
+
+Edit avatar/bio
+
+Profile Enhancements
+
+Display contributor badge (based on subtype)
+
+Add website/social media links (if SURGEON or INFLUENCER)
+
+Display "Verified Contributor" badge
+
+Post Management
+
+View all posts submitted by user
+
+Edit/delete own posts
+
+View AI post suggestions (optional feature)
+
+Type-specific Add-ons
+
+SURGEON: “Link my Practice” section, choose specialties, embed Calendly/consultation links
+
+INFLUENCER: “Social Media Panel” with TikTok/Instagram/YT links
+
+PATIENT: "My Healing Journey" timeline view
+
+BLOGGER: Markdown-based editor with post scheduling
+
+✅ Can customize profile, submit high-trust content
+🚫 Cannot moderate others’ content or view analytics
+
+🙋 USER ROLE: USER (Registered Account)
+🔧 Settings Panel: My Account
+Account Settings
+
+Change email/password
+
+Set avatar, display name, bio
+
+Activity
+
+View own posts & comments
+
+Delete/edit own content
+
+Save favorite posts
+
+Follow specific tags (e.g., #healing, #tipwork)
+
+Contributor Application
+
+Submit request to become a CONTRIBUTOR (basic form + checkbox agreement)
+
+Upload optional verification (screenshot of post-op result, etc.)
+
+✅ Can manage their own content and customize their profile
+🚫 No moderation, admin access, AI generation
+
+👀 USER ROLE: GUEST (Anonymous Viewer)
+🔧 Settings Panel: Not available
+Instead of a settings panel, guests see a Call to Action Modal:
+
+“Create an account to save favorites”
+
+“Want to share your story? Sign up”
+
+“Join the community to comment and ask questions”
+
+✅ Can read public content
+🚫 No settings, posting, commenting, saving
+
