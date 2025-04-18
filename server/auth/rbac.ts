@@ -145,3 +145,22 @@ export function requireContributor(req: Request, res: Response, next: NextFuncti
   
   next();
 }
+
+// Middleware to check if user has one of the specified roles
+export function hasRole(allowedRoles: string[]) {
+  return (req: Request, res: Response, next: NextFunction) => {
+    if (!req.isAuthenticated || !req.isAuthenticated()) {
+      return res.status(401).json({ message: "Authentication required" });
+    }
+    
+    const userRole = req.user?.role || '';
+    
+    if (!allowedRoles.includes(userRole)) {
+      return res.status(403).json({ 
+        message: `Required role not found. You need one of these roles: ${allowedRoles.join(', ')}` 
+      });
+    }
+    
+    next();
+  };
+}

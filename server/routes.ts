@@ -768,7 +768,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
   
-  app.delete("/api/topics/:id", authenticate, isAdmin, async (req, res) => {
+  app.delete("/api/topics/:id", authenticate, hasRole(['admin', 'superadmin']), async (req, res) => {
     try {
       const topicId = parseInt(req.params.id);
       const topic = await storage.getTopic(topicId);
@@ -804,7 +804,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/tags", authenticate, isAdmin, async (req, res) => {
+  app.post("/api/tags", authenticate, hasRole(['admin', 'superadmin']), async (req, res) => {
     try {
       const tagData = insertTagSchema.parse(req.body);
       
@@ -824,7 +824,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.put("/api/tags/:id", authenticate, isAdmin, async (req, res) => {
+  app.put("/api/tags/:id", authenticate, hasRole(['admin', 'superadmin']), async (req, res) => {
     try {
       const tagId = parseInt(req.params.id);
       const tag = await storage.getTag(tagId);
@@ -848,7 +848,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.delete("/api/tags/:id", authenticate, isAdmin, async (req, res) => {
+  app.delete("/api/tags/:id", authenticate, hasRole(['admin', 'superadmin']), async (req, res) => {
     try {
       const tagId = parseInt(req.params.id);
       const tag = await storage.getTag(tagId);
@@ -874,7 +874,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
   
   // Admin routes (AI post generation)
-  app.post("/api/admin/generate-post", authenticate, isAdmin, async (req, res) => {
+  app.post("/api/admin/generate-post", authenticate, hasRole(['admin', 'superadmin']), async (req, res) => {
     try {
       const { age, gender, procedure, reason } = req.body;
       
@@ -929,7 +929,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
   
   // Schedule daily post generation
-  app.post("/api/admin/schedule", authenticate, isAdmin, async (req, res) => {
+  app.post("/api/admin/schedule", authenticate, hasRole(['admin', 'superadmin']), async (req, res) => {
     try {
       const { enabled, cronExpression } = req.body;
       
