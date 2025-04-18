@@ -136,27 +136,39 @@ export async function registerRoutes(app: Express): Promise<Server> {
   
   app.post("/api/login", async (req, res) => {
     try {
+      console.log("Login attempt with:", req.body);
       const { username, password } = req.body;
       
       if (!username || !password) {
+        console.log("Login failed: Missing username or password");
         return res.status(400).json({ message: "Username and password required" });
       }
       
       const user = await storage.getUserByUsername(username);
+      console.log("User found:", user ? `${user.username} (role: ${user.role})` : "none");
       
-      if (!user || user.password !== password) {
+      if (!user) {
+        console.log("Login failed: User not found");
+        return res.status(401).json({ message: "Invalid credentials" });
+      }
+      
+      if (user.password !== password) {
+        console.log("Login failed: Password mismatch");
         return res.status(401).json({ message: "Invalid credentials" });
       }
       
       // Generate JWT
+      const payload = { 
+        id: user.id, 
+        username: user.username, 
+        isAdmin: user.isAdmin || user.role === 'admin' || user.role === 'superadmin',
+        role: user.role || 'user',
+        contributorType: user.contributorType
+      };
+      console.log("Generating token with payload:", payload);
+      
       const token = jwt.sign(
-        { 
-          id: user.id, 
-          username: user.username, 
-          isAdmin: user.isAdmin,
-          role: user.role || 'user',
-          contributorType: user.contributorType
-        },
+        payload,
         JWT_SECRET,
         { expiresIn: "7d" }
       );
@@ -399,28 +411,51 @@ export async function registerRoutes(app: Express): Promise<Server> {
   
   app.post("/api/posts", authenticate, async (req, res) => {
     try {
+      console.log('User making post request:', req.user?.username, req.user?.id);
       console.log('Request body for post creation:', JSON.stringify(req.body));
+      
+      if (!req.user || !req.user.id) {
+        console.error('Authentication required or user ID missing');
+        return res.status(401).json({ message: "Authentication required" });
+      }
+      
+      // Prepare post data with defaults - critical to ensure userId is set
+      const postDataWithDefaults = {
+        userId: req.user.id,
+        title: req.body.title || '',
+        content: req.body.content || '',
+        imageUrl: req.body.imageUrl || null,
+        isAiGenerated: !!req.body.isAiGenerated,
+        topicId: null // Default to null
+      };
+      
+      // Convert topicId from string to number if needed
+      if (req.body.topicId) {
+        if (typeof req.body.topicId === 'string' && req.body.topicId.trim() !== '') {
+          postDataWithDefaults.topicId = parseInt(req.body.topicId, 10);
+        } else if (typeof req.body.topicId === 'number') {
+          postDataWithDefaults.topicId = req.body.topicId;
+        }
+      }
+      
+      console.log('Post data with defaults:', JSON.stringify(postDataWithDefaults));
       
       let postData;
       try {
-        postData = insertPostSchema.parse(req.body);
-        
-        // Set user ID from authenticated user
-        postData.userId = req.user.id;
-        
-        // Convert topicId from string to number if needed
-        if (typeof req.body.topicId === 'string' && req.body.topicId.trim() !== '') {
-          postData.topicId = parseInt(req.body.topicId, 10);
-        }
-        
+        // Validate with schema
+        postData = insertPostSchema.parse(postDataWithDefaults);
         console.log('Parsed post data:', JSON.stringify(postData));
       } catch (parseError: any) {
         console.error('Schema validation error:', parseError);
-        return res.status(400).json({ message: parseError.errors || 'Schema validation failed' });
+        return res.status(400).json({ 
+          message: parseError.errors || 'Schema validation failed',
+          details: parseError
+        });
       }
       
       // Create post
       const post = await storage.createPost(postData);
+      console.log('Post created with ID:', post.id);
       
       // Handle tags if provided
       if (req.body.tags && Array.isArray(req.body.tags)) {
@@ -443,11 +478,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       const postWithTags = await storage.getPostWithTags(post.id);
       return res.status(201).json(postWithTags);
-    } catch (error) {
+    } catch (error: any) {
+      console.error('Error creating post:', error);
       if (error instanceof z.ZodError) {
         return res.status(400).json({ message: error.errors });
       }
-      return res.status(500).json({ message: "Error creating post" });
+      return res.status(500).json({ 
+        message: "Error creating post",
+        details: error.message
+      });
     }
   });
   
@@ -976,11 +1015,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // API key management
   app.get("/api/admin/openai-status", authenticate, async (req, res) => {
     try {
-      console.log("OpenAI status check - User:", req.user?.username, "Role:", req.user?.role);
+      console.log("OpenAI status check - User:", req.user?.username, "Role:", req.user?.role, "isAdmin:", req.user?.isAdmin);
+      console.log("Full user info:", JSON.stringify(req.user));
       
-      // Check if user has admin or superadmin role
-      if (!(req.user?.role === 'admin' || req.user?.role === 'superadmin')) {
-        console.log("Access denied - insufficient role:", req.user?.role);
+      // More permissive checks for admin access - accept any indication of admin status
+      const isAdmin = req.user?.role === 'admin' || 
+                      req.user?.role === 'superadmin' || 
+                      req.user?.isAdmin === true || 
+                      req.user?.role?.includes('admin');
+      
+      if (!isAdmin) {
+        console.log("Access denied - insufficient role:", req.user?.role, "isAdmin:", req.user?.isAdmin);
         return res.status(403).json({ message: "Access denied. Required role: admin or superadmin" });
       }
 
@@ -1004,11 +1049,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   app.post("/api/admin/test-openai", authenticate, async (req, res) => {
-    console.log("Test OpenAI - User:", req.user?.username, "Role:", req.user?.role);
+    console.log("Test OpenAI - User:", req.user?.username, "Role:", req.user?.role, "isAdmin:", req.user?.isAdmin);
+    console.log("Full user info:", JSON.stringify(req.user));
     
-    // Check if user has admin or superadmin role
-    if (!(req.user?.role === 'admin' || req.user?.role === 'superadmin')) {
-      console.log("Access denied - insufficient role:", req.user?.role);
+    // More permissive checks for admin access - accept any indication of admin status
+    const isAdmin = req.user?.role === 'admin' || 
+                    req.user?.role === 'superadmin' || 
+                    req.user?.isAdmin === true || 
+                    req.user?.role?.includes('admin');
+    
+    if (!isAdmin) {
+      console.log("Access denied - insufficient role:", req.user?.role, "isAdmin:", req.user?.isAdmin);
       return res.status(403).json({ message: "Access denied. Required role: admin or superadmin" });
     }
     try {
@@ -1127,11 +1178,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   app.post("/api/admin/update-openai-key", authenticate, async (req, res) => {
-    console.log("Update OpenAI key - User:", req.user?.username, "Role:", req.user?.role);
+    console.log("Update OpenAI key - User:", req.user?.username, "Role:", req.user?.role, "isAdmin:", req.user?.isAdmin);
+    console.log("Full user info:", JSON.stringify(req.user));
     
-    // Check if user has admin or superadmin role
-    if (!(req.user?.role === 'admin' || req.user?.role === 'superadmin')) {
-      console.log("Access denied - insufficient role:", req.user?.role);
+    // More permissive checks for admin access - accept any indication of admin status
+    const isAdmin = req.user?.role === 'admin' || 
+                    req.user?.role === 'superadmin' || 
+                    req.user?.isAdmin === true || 
+                    req.user?.role?.includes('admin');
+    
+    if (!isAdmin) {
+      console.log("Access denied - insufficient role:", req.user?.role, "isAdmin:", req.user?.isAdmin);
       return res.status(403).json({ message: "Access denied. Required role: admin or superadmin" });
     }
     try {
