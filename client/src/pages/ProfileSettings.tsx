@@ -3,7 +3,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { useMutation } from "@tanstack/react-query";
-import { useAuth } from "@/context/AuthContext";
+import { useAuth, UserRole, ContributorType } from "@/context/AuthContext";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { 
@@ -33,12 +33,15 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Loader2 } from "lucide-react";
+import { Textarea } from "@/components/ui/textarea";
+import { UserRoleBadge } from "@/components/UserRoleBadge";
 
 // Validation schemas
 const profileSchema = z.object({
   username: z.string().min(3, "Username must be at least 3 characters"),
   email: z.string().email("Please enter a valid email").optional().or(z.literal("")),
   avatarUrl: z.string().optional().or(z.literal("")),
+  bio: z.string().max(500, "Bio must be less than 500 characters").optional().or(z.literal("")),
 });
 
 const passwordSchema = z.object({

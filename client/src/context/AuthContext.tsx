@@ -5,8 +5,29 @@ interface User {
   username: string;
   email?: string;
   avatarUrl?: string;
-  isAdmin: boolean;
+  isAdmin: boolean; // Keeping for backward compatibility
+  role?: string;
+  contributorType?: string;
+  verified?: boolean;
+  bio?: string;
+  trustScore?: number;
 }
+
+// Define role and contributor type constants
+export const UserRole = {
+  SUPERADMIN: 'superadmin',
+  ADMIN: 'admin',
+  CONTRIBUTOR: 'contributor',
+  USER: 'user',
+  GUEST: 'guest',
+} as const;
+
+export const ContributorType = {
+  SURGEON: 'surgeon',
+  PATIENT: 'patient',
+  INFLUENCER: 'influencer',
+  BLOGGER: 'blogger',
+} as const;
 
 interface AuthContextType {
   isAuthenticated: boolean;
@@ -14,6 +35,12 @@ interface AuthContextType {
   user: User | null;
   login: (token: string, user: User) => void;
   logout: () => void;
+  // Role-based helper methods
+  isSuperAdmin: () => boolean;
+  isAdmin: () => boolean;
+  isContributor: () => boolean;
+  hasRole: (role: string) => boolean;
+  isContributorType: (type: string) => boolean;
 }
 
 const AuthContext = createContext<AuthContextType>({
@@ -22,6 +49,11 @@ const AuthContext = createContext<AuthContextType>({
   user: null,
   login: () => {},
   logout: () => {},
+  isSuperAdmin: () => false,
+  isAdmin: () => false,
+  isContributor: () => false,
+  hasRole: () => false,
+  isContributorType: () => false,
 });
 
 export const useAuth = () => useContext(AuthContext);
@@ -69,6 +101,35 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     setIsAuthenticated(false);
   };
   
+  // Role-based helper functions
+  const isSuperAdmin = () => {
+    return user?.role === UserRole.SUPERADMIN || user?.isAdmin === true;
+  };
+
+  const isAdmin = () => {
+    return user?.role === UserRole.ADMIN || user?.role === UserRole.SUPERADMIN || user?.isAdmin === true;
+  };
+
+  const isContributor = () => {
+    return user?.role === UserRole.CONTRIBUTOR || isAdmin();
+  };
+
+  const hasRole = (role: string) => {
+    if (!user) return false;
+    
+    if (role === UserRole.SUPERADMIN) return isSuperAdmin();
+    if (role === UserRole.ADMIN) return isAdmin();
+    if (role === UserRole.CONTRIBUTOR) return isContributor();
+    if (role === UserRole.USER) return true; // If authenticated, at least a user
+    
+    return user.role === role;
+  };
+
+  const isContributorType = (type: string) => {
+    if (!user || !isContributor()) return false;
+    return user.contributorType === type;
+  };
+
   return (
     <AuthContext.Provider
       value={{
@@ -77,6 +138,11 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
         user,
         login,
         logout,
+        isSuperAdmin,
+        isAdmin,
+        isContributor,
+        hasRole,
+        isContributorType,
       }}
     >
       {children}
