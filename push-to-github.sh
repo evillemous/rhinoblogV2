@@ -63,19 +63,21 @@ git add .
 TIMESTAMP=$(date +"%Y-%m-%d %H:%M:%S")
 git commit -m "Update: RBAC implementation - $TIMESTAMP"
 
-# Try to determine the default branch
-default_branch=$(git remote show origin 2>/dev/null | grep "HEAD branch" | sed 's/.*: //')
+# Get current branch name
+current_branch=$(git branch --show-current || echo "main")
 
-# If we couldn't determine it, try both main and master
-if [ -z "$default_branch" ]; then
-  echo "Pushing to GitHub (trying main branch)..."
+# If current branch is empty, default to main
+if [ -z "$current_branch" ]; then
+  current_branch="main"
+fi
+
+echo "Pushing to GitHub (using $current_branch branch)..."
+git push -u origin $current_branch || {
+  echo "Failed with $current_branch, trying with 'main' branch..."
   git push -u origin main || {
-    echo "Pushing to GitHub (trying master branch)..."
+    echo "Failed with main, trying with 'master' branch..."
     git push -u origin master
   }
-else
-  echo "Pushing to GitHub (using $default_branch branch)..."
-  git push -u origin $default_branch
-fi
+}
 
 echo "Code pushed to GitHub successfully!"
