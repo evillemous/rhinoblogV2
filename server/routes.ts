@@ -404,6 +404,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Set user ID from authenticated user
       postData.userId = req.user.id;
       
+      // Convert topicId from string to number if needed
+      if (typeof req.body.topicId === 'string' && req.body.topicId.trim() !== '') {
+        postData.topicId = parseInt(req.body.topicId, 10);
+      }
+      
       // Create post
       const post = await storage.createPost(postData);
       
