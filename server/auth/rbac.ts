@@ -1,6 +1,20 @@
 import { UserRole } from "@shared/schema";
 import { Request, Response, NextFunction } from "express";
 
+// Extend the Express Request type to include isAuthenticated method and user property
+declare module "express" {
+  interface Request {
+    isAuthenticated(): boolean;
+    user?: {
+      id: number;
+      username: string;
+      role?: string;
+      isAdmin?: boolean;
+      [key: string]: any;
+    };
+  }
+}
+
 // Type for holding permissions
 export type Permission = 
   | "create:post" 

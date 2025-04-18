@@ -945,7 +945,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
   
-  app.get("/api/admin/schedule", authenticate, isAdmin, async (req, res) => {
+  app.get("/api/admin/schedule", authenticate, hasRole(['admin', 'superadmin']), async (req, res) => {
     try {
       // Return schedule settings
       return res.status(200).json(global.postSchedule || {
@@ -959,7 +959,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   
   // Generate multiple posts (batch content creation)
   // API key management
-  app.get("/api/admin/openai-status", authenticate, isAdmin, async (req, res) => {
+  app.get("/api/admin/openai-status", authenticate, hasRole(['admin', 'superadmin']), async (req, res) => {
     try {
       // Check if OpenAI API key is available
       const apiKey = process.env.OPENAI_API_KEY;
@@ -979,7 +979,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/admin/test-openai", authenticate, isAdmin, async (req, res) => {
+  app.post("/api/admin/test-openai", authenticate, hasRole(['admin', 'superadmin']), async (req, res) => {
     try {
       // If a test key is provided, use it temporarily (but don't save it)
       const testKey = req.body.apiKey;
@@ -1025,7 +1025,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
   
   // Custom content generator endpoint
-  app.post("/api/admin/generate-custom", authenticate, isAdmin, async (req, res) => {
+  app.post("/api/admin/generate-custom", authenticate, hasRole(['admin', 'superadmin']), async (req, res) => {
     try {
       const { customPrompt, contentType } = req.body;
       
@@ -1095,7 +1095,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/admin/update-openai-key", authenticate, isAdmin, async (req, res) => {
+  app.post("/api/admin/update-openai-key", authenticate, hasRole(['admin', 'superadmin']), async (req, res) => {
     try {
       const { apiKey } = req.body;
       
@@ -1119,7 +1119,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/admin/generate-batch", authenticate, isAdmin, async (req, res) => {
+  app.post("/api/admin/generate-batch", authenticate, hasRole(['admin', 'superadmin']), async (req, res) => {
     try {
       // Get admin user
       const user = await storage.getUser(req.user.id);
