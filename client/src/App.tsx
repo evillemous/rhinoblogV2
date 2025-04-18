@@ -1,4 +1,4 @@
-import { Switch, Route } from "wouter";
+import { Switch, Route, useLocation } from "wouter";
 import { queryClient } from "./lib/queryClient";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
@@ -19,6 +19,11 @@ import Footer from "@/components/Footer";
 import { ThemeProvider, useTheme } from "@/context/ThemeContext";
 import { AuthProvider } from "@/context/AuthContext";
 
+// Superuser Dashboard Pages
+import AIEngine from "@/pages/superuser/AIEngine";
+import PlatformSettings from "@/pages/superuser/PlatformSettings";
+import UserManagement from "@/pages/superuser/UserManagement";
+
 function Router() {
   return (
     <Switch>
@@ -34,6 +39,12 @@ function Router() {
       <Route path="/profile/settings" component={ProfileSettings} />
       <Route path="/admin" component={Admin} />
       <Route path="/admin-link" component={AdminLink} />
+      
+      {/* Superuser Dashboard Routes */}
+      <Route path="/super/ai-engine" component={AIEngine} />
+      <Route path="/super/platform-settings" component={PlatformSettings} />
+      <Route path="/super/users" component={UserManagement} />
+      
       <Route component={NotFound} />
     </Switch>
   );
@@ -53,15 +64,19 @@ function App() {
 
 function AppContent() {
   const { theme } = useTheme();
+  const [location] = useLocation();
+  
+  // Check if current route is a superuser dashboard route
+  const isSuperuserRoute = location.startsWith('/super/');
   
   return (
     <div className={theme === "dark" ? "dark" : ""}>
       <div className="bg-white dark:bg-gray-900 min-h-screen flex flex-col">
-        <Header />
-        <main className="flex-grow">
+        {!isSuperuserRoute && <Header />}
+        <main className={`flex-grow ${isSuperuserRoute ? '' : ''}`}>
           <Router />
         </main>
-        <Footer />
+        {!isSuperuserRoute && <Footer />}
         <Toaster />
       </div>
     </div>
