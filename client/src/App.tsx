@@ -67,13 +67,13 @@ function AppContent() {
   const [location] = useLocation();
   
   // Check if current route is a superuser dashboard route
-  const isSuperuserRoute = location.startsWith('/super/');
+  const isSuperuserRoute = location.includes('/super/');
   
   return (
     <div className={theme === "dark" ? "dark" : ""}>
       <div className="bg-white dark:bg-gray-900 min-h-screen flex flex-col">
         {!isSuperuserRoute && <Header />}
-        <main className={`flex-grow ${isSuperuserRoute ? '' : ''}`}>
+        <main className="flex-grow">
           <Router />
         </main>
         {!isSuperuserRoute && <Footer />}

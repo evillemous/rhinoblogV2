@@ -16,7 +16,7 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { useAuth } from "@/hooks/use-auth";
+import { useAuth } from "@/context/AuthContext";
 import { useState } from "react";
 
 interface SuperuserLayoutProps {
@@ -70,11 +70,12 @@ const navItems: NavItem[] = [
 
 const SuperuserLayout = ({ children, title }: SuperuserLayoutProps) => {
   const [location] = useLocation();
-  const { user, logoutMutation } = useAuth();
+  const auth = useAuth();
+  const user = auth.user;
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   const handleLogout = () => {
-    logoutMutation.mutate();
+    auth.logout();
   };
 
   return (

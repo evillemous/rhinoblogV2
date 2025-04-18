@@ -1,5 +1,5 @@
 import { ReactNode, useEffect } from "react";
-import { useAuth } from "@/hooks/use-auth";
+import { useAuth } from "@/context/AuthContext";
 import { Redirect } from "wouter";
 import { Loader2 } from "lucide-react";
 
@@ -8,7 +8,9 @@ interface SuperAdminGuardProps {
 }
 
 const SuperAdminGuard = ({ children }: SuperAdminGuardProps) => {
-  const { user, isLoading } = useAuth();
+  const auth = useAuth();
+  const user = auth.user;
+  const isLoading = auth.isLoading;
 
   useEffect(() => {
     // Additional logging for debugging access control
@@ -26,7 +28,7 @@ const SuperAdminGuard = ({ children }: SuperAdminGuardProps) => {
   }
 
   // Only allow superadmin role
-  if (!user || user.role !== 'superadmin') {
+  if (!auth.isSuperAdmin()) {
     console.log("Access denied - insufficient role:", user?.role);
     return <Redirect to="/" />;
   }
