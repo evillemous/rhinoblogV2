@@ -96,10 +96,15 @@ const PostForm = ({ isOpen, onClose, defaultTopicId }: PostFormProps) => {
   
   const onSubmit = (data: PostFormValues) => {
     // Add default topic ID if one was provided and the form doesn't have one
+    const topicIdStr = data.topicId || (defaultTopicId ? defaultTopicId.toString() : "");
+    
+    // Create the form data object with the properly converted topicId
     const formData = {
       ...data,
-      topicId: data.topicId || (defaultTopicId ? defaultTopicId.toString() : "")
+      // Convert topicId to number or set it to undefined if empty
+      topicId: topicIdStr ? parseInt(topicIdStr, 10) : undefined
     };
+    
     postMutation.mutate(formData);
   };
   

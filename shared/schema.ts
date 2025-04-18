@@ -61,6 +61,7 @@ export const posts = pgTable("posts", {
   commentCount: integer("comment_count").default(0),
   createdAt: timestamp("created_at").defaultNow(),
   isAiGenerated: boolean("is_ai_generated").default(false),
+  topicId: integer("topic_id"),
 });
 
 export const insertPostSchema = createInsertSchema(posts).pick({
@@ -69,6 +70,7 @@ export const insertPostSchema = createInsertSchema(posts).pick({
   content: true,
   imageUrl: true,
   isAiGenerated: true,
+  topicId: true,
 });
 
 // Tags Schema
