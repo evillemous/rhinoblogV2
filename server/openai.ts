@@ -19,16 +19,16 @@ export async function generateCustomContent(
       throw new Error("OpenAI client is not initialized");
     }
 
-    // Create a comprehensive prompt that ensures the response is detailed enough (at least 1200 words)
+    // Create a comprehensive prompt that encourages detailed content
     const prompt = `Create a comprehensive, well-structured article about rhinoplasty based on the following request:
     
 ${customPrompt}
 
 Important requirements:
-1. The article must be AT LEAST 1200 words in length
+1. Aim for approximately 1000-1500 words in length (longer is acceptable)
 2. Write it in a ${contentType === 'educational' ? 'professional, expert tone' : 'personal, conversational Reddit-style tone'}
 3. Include proper markdown formatting with headings (##), subheadings (###), and lists
-4. Include at least 5-7 distinct sections with headings
+4. Include multiple distinct sections with headings
 5. For educational content: include medical terminology, evidence-based explanations, and professional recommendations
 6. For personal stories: include emotional journey, specific timeline details, and personal reflections
 7. End with a conclusion summarizing key points
@@ -36,7 +36,7 @@ Important requirements:
 Format the response as a JSON object with the following structure:
 {
   "title": "A descriptive, engaging title for this article",
-  "content": "The full article content with markdown formatting (at least 1200 words)",
+  "content": "The full article content with markdown formatting",
   "tags": ["tag1", "tag2", "tag3", "tag4", "tag5"] - array of 5 relevant tags based on the content
 }`;
 
@@ -59,11 +59,13 @@ Format the response as a JSON object with the following structure:
     try {
       const parsedResponse = JSON.parse(content);
       
-      // Verify the content meets minimum word count (approximately 1200 words ≈ 6000-7000 characters)
+      // Log the word count but don't reject content based on length
       const wordCount = parsedResponse.content.split(/\s+/).length;
-      if (wordCount < 1000) {  // A bit of buffer below 1200 to account for different counting methods
-        console.error(`Generated content too short: ${wordCount} words`);
-        return null;
+      console.log(`Generated content word count: ${wordCount} words`);
+      
+      // If content is too short, we'll still accept it but log a warning
+      if (wordCount < 1000) {
+        console.warn(`Generated content shorter than preferred length (${wordCount} words)`);
       }
       
       return {
