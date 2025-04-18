@@ -3,14 +3,18 @@ import { useParams, Link } from "wouter";
 import { useQuery } from "@tanstack/react-query";
 import { PostWithTags, Topic } from "@shared/schema";
 import PostCard from "@/components/PostCard";
+import PostForm from "@/components/PostForm";
+import { useAuth } from "@/context/AuthContext";
 import { Separator } from "@/components/ui/separator";
 import { Button } from "@/components/ui/button";
-import { Loader2 } from "lucide-react";
+import { Loader2, PlusCircle } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 
 const TopicPage = () => {
   const { topicSlug } = useParams<{ topicSlug: string }>();
   const [currentPage, setCurrentPage] = useState(1);
+  const [isPostFormOpen, setIsPostFormOpen] = useState(false);
+  const { isAuthenticated } = useAuth();
   const postsPerPage = 5;
 
   // Fetch topic details
@@ -102,7 +106,27 @@ const TopicPage = () => {
           <p className="text-gray-600 dark:text-gray-400 mb-6">
             No posts found in this topic yet.
           </p>
-          <Button onClick={() => window.history.back()}>Go Back</Button>
+          
+          <div className="flex justify-center gap-4">
+            <Button onClick={() => window.history.back()}>Go Back</Button>
+            
+            {isAuthenticated && (
+              <Button
+                onClick={() => setIsPostFormOpen(true)}
+                className="bg-reddit-orange hover:bg-orange-600 text-white"
+              >
+                <PlusCircle className="mr-2 h-4 w-4" /> 
+                Create First Post
+              </Button>
+            )}
+          </div>
+          
+          {/* Post Form (appears when isPostFormOpen is true) */}
+          <PostForm
+            isOpen={isPostFormOpen}
+            onClose={() => setIsPostFormOpen(false)}
+            defaultTopicId={topic.id}
+          />
         </div>
       </div>
     );
@@ -111,15 +135,28 @@ const TopicPage = () => {
   return (
     <div className="container mx-auto px-4 py-8">
       <div className="mb-6">
-        <div className="flex items-center mb-3">
-          <h1 className="text-2xl font-bold mr-2">
-            <span className="mr-2">{topic.icon}</span>
-            {topic.name}
-          </h1>
-          <Badge variant="secondary" className="ml-2">
-            {posts.length} {posts.length === 1 ? "post" : "posts"}
-          </Badge>
+        <div className="flex items-center justify-between mb-3">
+          <div className="flex items-center">
+            <h1 className="text-2xl font-bold mr-2">
+              <span className="mr-2">{topic.icon}</span>
+              {topic.name}
+            </h1>
+            <Badge variant="secondary" className="ml-2">
+              {posts.length} {posts.length === 1 ? "post" : "posts"}
+            </Badge>
+          </div>
+          
+          {isAuthenticated && (
+            <Button 
+              onClick={() => setIsPostFormOpen(true)}
+              className="bg-reddit-orange hover:bg-orange-600 text-white"
+            >
+              <PlusCircle className="mr-2 h-4 w-4" /> 
+              Create Post
+            </Button>
+          )}
         </div>
+        
         {topic.description && (
           <p className="text-gray-600 dark:text-gray-400 mb-2">
             {topic.description}
@@ -181,6 +218,13 @@ const TopicPage = () => {
           </div>
         </div>
       )}
+
+      {/* Post Form (appears when isPostFormOpen is true) */}
+      <PostForm
+        isOpen={isPostFormOpen}
+        onClose={() => setIsPostFormOpen(false)}
+        defaultTopicId={topic.id}
+      />
     </div>
   );
 };
