@@ -2,11 +2,12 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import { queryClient } from "@/lib/queryClient";
 import { useAuth } from "@/context/AuthContext";
 import { useToast } from "@/hooks/use-toast";
+import { Topic } from "@shared/schema";
 import {
   Dialog,
   DialogContent,
@@ -19,31 +20,47 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 interface PostFormProps {
   isOpen: boolean;
   onClose: () => void;
+  defaultTopicId?: number; // Optional default topic ID
 }
 
 const postSchema = z.object({
   title: z.string().min(10, "Title must be at least 10 characters").max(300, "Title must be less than 300 characters"),
   content: z.string().min(30, "Content must be at least 30 characters"),
-  tags: z.array(z.string()).min(1, "Add at least one tag")
+  tags: z.array(z.string()).min(1, "Add at least one tag"),
+  topicId: z.string().optional() // Topic ID is optional
 });
 
 type PostFormValues = z.infer<typeof postSchema>;
 
-const PostForm = ({ isOpen, onClose }: PostFormProps) => {
+const PostForm = ({ isOpen, onClose, defaultTopicId }: PostFormProps) => {
   const { isAuthenticated, user } = useAuth();
   const { toast } = useToast();
   const [tagInput, setTagInput] = useState("");
+  
+  // Fetch all topics for the dropdown
+  const { data: topics, isLoading: topicsLoading } = useQuery<Topic[]>({
+    queryKey: ["/api/topics"],
+    staleTime: 60000,
+  });
   
   const form = useForm<PostFormValues>({
     resolver: zodResolver(postSchema),
     defaultValues: {
       title: "",
       content: "",
-      tags: []
+      tags: [],
+      topicId: defaultTopicId?.toString() || ""
     }
   });
   
@@ -78,7 +95,12 @@ const PostForm = ({ isOpen, onClose }: PostFormProps) => {
   });
   
   const onSubmit = (data: PostFormValues) => {
-    postMutation.mutate(data);
+    // Add default topic ID if one was provided and the form doesn't have one
+    const formData = {
+      ...data,
+      topicId: data.topicId || (defaultTopicId ? defaultTopicId.toString() : "")
+    };
+    postMutation.mutate(formData);
   };
   
   const addTag = () => {
@@ -140,6 +162,35 @@ const PostForm = ({ isOpen, onClose }: PostFormProps) => {
                       {...field} 
                     />
                   </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="topicId"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Topic</FormLabel>
+                  <Select 
+                    onValueChange={field.onChange} 
+                    defaultValue={field.value}
+                    disabled={topicsLoading || !!defaultTopicId}
+                  >
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select a topic" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      {topics?.map((topic) => (
+                        <SelectItem key={topic.id} value={topic.id.toString()}>
+                          {topic.icon} {topic.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                   <FormMessage />
                 </FormItem>
               )}
