@@ -69,6 +69,7 @@ const ProfileSettings = () => {
       username: user?.username || "",
       email: user?.email || "",
       avatarUrl: user?.avatarUrl || "",
+      bio: user?.bio || "",
     },
   });
   
@@ -194,6 +195,30 @@ const ProfileSettings = () => {
                 
                 {/* Profile form */}
                 <div className="flex-1">
+                  {/* User role badge */}
+                  <div className="mb-6">
+                    <h3 className="text-sm font-medium mb-2">Account Type</h3>
+                    <div className="flex items-center gap-2">
+                      <UserRoleBadge 
+                        role={user?.role} 
+                        contributorType={user?.contributorType}
+                        verified={user?.verified}
+                      />
+                      {user?.trustScore !== undefined && (
+                        <span className="text-xs text-muted-foreground ml-2">
+                          Trust Score: {user.trustScore}
+                        </span>
+                      )}
+                    </div>
+                    <p className="text-xs text-muted-foreground mt-1">
+                      {user?.isAdmin || user?.role === UserRole.ADMIN || user?.role === UserRole.SUPERADMIN
+                        ? "You have administrative privileges on this platform"
+                        : user?.role === UserRole.CONTRIBUTOR
+                        ? "You are a verified contributor to this community"
+                        : "You are a member of our community"}
+                    </p>
+                  </div>
+
                   <Form {...profileForm}>
                     <form onSubmit={profileForm.handleSubmit(onProfileSubmit)} className="space-y-4">
                       <FormField
@@ -230,8 +255,6 @@ const ProfileSettings = () => {
                         )}
                       />
                       
-                      {/* Display name removed as it's not in the user model */}
-                      
                       <FormField
                         control={profileForm.control}
                         name="avatarUrl"
@@ -250,6 +273,27 @@ const ProfileSettings = () => {
                             </FormControl>
                             <FormDescription>
                               Enter a URL to an image for your profile avatar
+                            </FormDescription>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      
+                      <FormField
+                        control={profileForm.control}
+                        name="bio"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Bio</FormLabel>
+                            <FormControl>
+                              <Textarea 
+                                placeholder="Tell us a bit about yourself..." 
+                                className="min-h-[120px]"
+                                {...field} 
+                              />
+                            </FormControl>
+                            <FormDescription>
+                              Share a little about yourself. This will be displayed on your profile.
                             </FormDescription>
                             <FormMessage />
                           </FormItem>

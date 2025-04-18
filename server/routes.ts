@@ -159,6 +159,116 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
   
+  // Update user profile
+  app.patch("/api/users/profile", authenticate, async (req, res) => {
+    try {
+      const userId = req.user.id;
+      const { username, email, avatarUrl, bio } = req.body;
+      
+      // Validate input
+      if (username && username.length < 3) {
+        return res.status(400).json({ message: "Username must be at least 3 characters long" });
+      }
+      
+      if (email && !email.includes('@')) {
+        return res.status(400).json({ message: "Invalid email format" });
+      }
+      
+      if (bio && bio.length > 500) {
+        return res.status(400).json({ message: "Bio must be less than 500 characters" });
+      }
+      
+      // Check if user exists
+      const user = await storage.getUser(userId);
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
+      
+      // Check if username is being changed and if it's already taken
+      if (username && username !== user.username) {
+        const existingUser = await storage.getUserByUsername(username);
+        if (existingUser && existingUser.id !== userId) {
+          return res.status(400).json({ message: "Username already exists" });
+        }
+      }
+      
+      // Update user
+      const updatedUser = await storage.updateUser(userId, {
+        username: username || user.username,
+        email,
+        avatarUrl,
+        bio,
+        updatedAt: new Date()
+      });
+      
+      if (!updatedUser) {
+        return res.status(500).json({ message: "Failed to update user" });
+      }
+      
+      // Generate new JWT with updated information
+      const token = jwt.sign(
+        { 
+          id: updatedUser.id, 
+          username: updatedUser.username, 
+          isAdmin: updatedUser.isAdmin,
+          role: updatedUser.role
+        },
+        JWT_SECRET,
+        { expiresIn: "7d" }
+      );
+      
+      // Return updated user without password
+      const { password, ...userWithoutPassword } = updatedUser;
+      return res.status(200).json({ user: userWithoutPassword, token });
+    } catch (error) {
+      console.error("Error updating profile:", error);
+      return res.status(500).json({ message: "Error updating profile" });
+    }
+  });
+  
+  // Update user password
+  app.patch("/api/users/password", authenticate, async (req, res) => {
+    try {
+      const userId = req.user.id;
+      const { currentPassword, newPassword } = req.body;
+      
+      // Validate input
+      if (!currentPassword || !newPassword) {
+        return res.status(400).json({ message: "Current password and new password are required" });
+      }
+      
+      if (newPassword.length < 6) {
+        return res.status(400).json({ message: "New password must be at least 6 characters long" });
+      }
+      
+      // Check if user exists
+      const user = await storage.getUser(userId);
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
+      
+      // Verify current password
+      if (user.password !== currentPassword) {
+        return res.status(401).json({ message: "Current password is incorrect" });
+      }
+      
+      // Update password
+      const updatedUser = await storage.updateUser(userId, {
+        password: newPassword,
+        updatedAt: new Date()
+      });
+      
+      if (!updatedUser) {
+        return res.status(500).json({ message: "Failed to update password" });
+      }
+      
+      return res.status(200).json({ message: "Password updated successfully" });
+    } catch (error) {
+      console.error("Error updating password:", error);
+      return res.status(500).json({ message: "Error updating password" });
+    }
+  });
+  
   // Post routes
   app.get("/api/posts", async (req, res) => {
     try {
