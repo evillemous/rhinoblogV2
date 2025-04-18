@@ -9,6 +9,78 @@ interface GeneratedPost {
   tags: string[];
 }
 
+export async function generateCustomContent(
+  customPrompt: string,
+  contentType: 'personal' | 'educational' = 'educational'
+): Promise<GeneratedPost | null> {
+  try {
+    if (!openaiClient) {
+      console.error("OpenAI client is not initialized");
+      throw new Error("OpenAI client is not initialized");
+    }
+
+    // Create a comprehensive prompt that ensures the response is detailed enough (at least 1200 words)
+    const prompt = `Create a comprehensive, well-structured article about rhinoplasty based on the following request:
+    
+${customPrompt}
+
+Important requirements:
+1. The article must be AT LEAST 1200 words in length
+2. Write it in a ${contentType === 'educational' ? 'professional, expert tone' : 'personal, conversational Reddit-style tone'}
+3. Include proper markdown formatting with headings (##), subheadings (###), and lists
+4. Include at least 5-7 distinct sections with headings
+5. For educational content: include medical terminology, evidence-based explanations, and professional recommendations
+6. For personal stories: include emotional journey, specific timeline details, and personal reflections
+7. End with a conclusion summarizing key points
+
+Format the response as a JSON object with the following structure:
+{
+  "title": "A descriptive, engaging title for this article",
+  "content": "The full article content with markdown formatting (at least 1200 words)",
+  "tags": ["tag1", "tag2", "tag3", "tag4", "tag5"] - array of 5 relevant tags based on the content
+}`;
+
+    console.log(`Sending request to OpenAI to generate custom ${contentType} content...`);
+    const response = await openaiClient.chat.completions.create({
+      model: "gpt-4o",
+      messages: [{ role: "user", content: prompt }],
+      response_format: { type: "json_object" },
+      temperature: 0.7,
+      max_tokens: 3000  // Increased token limit to accommodate longer articles
+    });
+
+    // Parse the response
+    const content = response.choices[0].message.content;
+    if (!content) {
+      console.error("Empty response from OpenAI");
+      return null;
+    }
+
+    try {
+      const parsedResponse = JSON.parse(content);
+      
+      // Verify the content meets minimum word count (approximately 1200 words ≈ 6000-7000 characters)
+      const wordCount = parsedResponse.content.split(/\s+/).length;
+      if (wordCount < 1000) {  // A bit of buffer below 1200 to account for different counting methods
+        console.error(`Generated content too short: ${wordCount} words`);
+        return null;
+      }
+      
+      return {
+        title: parsedResponse.title,
+        content: parsedResponse.content,
+        tags: parsedResponse.tags.map((tag: string) => tag.replace('#', '').toLowerCase())
+      };
+    } catch (parseError) {
+      console.error("Failed to parse OpenAI response:", parseError);
+      return null;
+    }
+  } catch (error) {
+    console.error("Error generating custom content with OpenAI:", error);
+    return null;
+  }
+}
+
 export async function generatePost(
   age: string,
   gender: string,

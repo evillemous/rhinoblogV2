@@ -10,7 +10,7 @@ import {
   insertCommentSchema,
   insertVoteSchema
 } from "@shared/schema";
-import { generatePost } from "./openai";
+import { generatePost, generateCustomContent } from "./openai";
 import jwt from "jsonwebtoken";
 import cron from "node-cron";
 
