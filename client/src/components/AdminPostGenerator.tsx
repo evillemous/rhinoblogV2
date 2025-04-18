@@ -23,18 +23,27 @@ const generatorSchema = z.object({
   reason: z.string().min(1, "Reason is required")
 });
 
+const customContentSchema = z.object({
+  customPrompt: z.string().min(10, "Prompt must be at least 10 characters"),
+  contentType: z.enum(["educational", "personal"], {
+    required_error: "Please select a content type",
+  })
+});
+
 const scheduleSchema = z.object({
   enabled: z.boolean(),
   cronExpression: z.string().min(1, "Cron expression is required")
 });
 
 type GeneratorFormValues = z.infer<typeof generatorSchema>;
+type CustomContentFormValues = z.infer<typeof customContentSchema>;
 type ScheduleFormValues = z.infer<typeof scheduleSchema>;
 
 const AdminPostGenerator = () => {
   const { toast } = useToast();
   const [isGenerating, setIsGenerating] = useState(false);
   const [isBatchGenerating, setIsBatchGenerating] = useState(false);
+  const [isCustomGenerating, setIsCustomGenerating] = useState(false);
   
   // Form for generating posts
   const generatorForm = useForm<GeneratorFormValues>({
@@ -44,6 +53,15 @@ const AdminPostGenerator = () => {
       gender: "",
       procedure: "",
       reason: ""
+    }
+  });
+  
+  // Form for custom content
+  const customContentForm = useForm<CustomContentFormValues>({
+    resolver: zodResolver(customContentSchema),
+    defaultValues: {
+      customPrompt: "",
+      contentType: "educational"
     }
   });
   
@@ -151,8 +169,43 @@ const AdminPostGenerator = () => {
     }
   });
   
+  // Mutation for custom content generation
+  const customContentMutation = useMutation({
+    mutationFn: async (data: CustomContentFormValues) => {
+      setIsCustomGenerating(true);
+      const res = await apiRequest("POST", "/api/admin/generate-custom", data);
+      return res.json();
+    },
+    onSuccess: () => {
+      toast({
+        title: "Custom content generated",
+        description: "The AI content has been generated successfully from your prompt",
+      });
+      // Reset form
+      customContentForm.reset({
+        customPrompt: "",
+        contentType: "educational"
+      });
+      // Refetch posts in the admin list
+      queryClient.invalidateQueries({ queryKey: ["/api/posts"] });
+      setIsCustomGenerating(false);
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "Custom generation failed",
+        description: error.message || "Failed to generate custom content",
+        variant: "destructive",
+      });
+      setIsCustomGenerating(false);
+    }
+  });
+
   const onGenerateSubmit = (data: GeneratorFormValues) => {
     generateMutation.mutate(data);
+  };
+  
+  const onCustomSubmit = (data: CustomContentFormValues) => {
+    customContentMutation.mutate(data);
   };
   
   const onScheduleSubmit = (data: ScheduleFormValues) => {
