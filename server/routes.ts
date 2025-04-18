@@ -1126,7 +1126,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/admin/update-openai-key", authenticate, hasRole(['admin', 'superadmin']), async (req, res) => {
+  app.post("/api/admin/update-openai-key", authenticate, async (req, res) => {
+    console.log("Update OpenAI key - User:", req.user?.username, "Role:", req.user?.role);
+    
+    // Check if user has admin or superadmin role
+    if (!(req.user?.role === 'admin' || req.user?.role === 'superadmin')) {
+      console.log("Access denied - insufficient role:", req.user?.role);
+      return res.status(403).json({ message: "Access denied. Required role: admin or superadmin" });
+    }
     try {
       const { apiKey } = req.body;
       
