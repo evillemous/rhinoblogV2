@@ -1214,6 +1214,35 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Get AI-generated posts
+  app.get("/api/admin/ai-posts", authenticate, async (req, res) => {
+    try {
+      // More permissive checks for admin access - accept any indication of admin status
+      const isAdmin = req.user?.role === 'admin' || 
+                    req.user?.role === 'superadmin' || 
+                    req.user?.isAdmin === true || 
+                    req.user?.role?.includes('admin');
+      
+      if (!isAdmin) {
+        return res.status(403).json({ message: "Access denied. Required role: admin or superadmin" });
+      }
+      
+      // Get the most recent AI-generated posts
+      const limit = req.query.limit ? parseInt(req.query.limit as string) : 20;
+      const posts = await storage.getPosts(limit, 0);
+      
+      // Return only AI-generated posts with their tags
+      const aiPosts = posts
+        .filter(post => post.isAiGenerated)
+        .sort((a, b) => new Date(b.createdAt || 0).getTime() - new Date(a.createdAt || 0).getTime());
+      
+      return res.json(aiPosts);
+    } catch (error) {
+      console.error("Error fetching AI posts:", error);
+      return res.status(500).json({ message: "Error fetching AI-generated posts" });
+    }
+  });
+
   app.post("/api/admin/generate-batch", authenticate, hasRole(['admin', 'superadmin']), async (req, res) => {
     try {
       // Get admin user
