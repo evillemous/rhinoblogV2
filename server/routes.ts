@@ -399,14 +399,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
   
   app.post("/api/posts", authenticate, async (req, res) => {
     try {
-      const postData = insertPostSchema.parse(req.body);
+      console.log('Request body for post creation:', JSON.stringify(req.body));
       
-      // Set user ID from authenticated user
-      postData.userId = req.user.id;
-      
-      // Convert topicId from string to number if needed
-      if (typeof req.body.topicId === 'string' && req.body.topicId.trim() !== '') {
-        postData.topicId = parseInt(req.body.topicId, 10);
+      let postData;
+      try {
+        postData = insertPostSchema.parse(req.body);
+        
+        // Set user ID from authenticated user
+        postData.userId = req.user.id;
+        
+        // Convert topicId from string to number if needed
+        if (typeof req.body.topicId === 'string' && req.body.topicId.trim() !== '') {
+          postData.topicId = parseInt(req.body.topicId, 10);
+        }
+        
+        console.log('Parsed post data:', JSON.stringify(postData));
+      } catch (parseError: any) {
+        console.error('Schema validation error:', parseError);
+        return res.status(400).json({ message: parseError.errors || 'Schema validation failed' });
       }
       
       // Create post
@@ -964,8 +974,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
   
   // Generate multiple posts (batch content creation)
   // API key management
-  app.get("/api/admin/openai-status", authenticate, hasRole(['admin', 'superadmin']), async (req, res) => {
+  app.get("/api/admin/openai-status", authenticate, async (req, res) => {
     try {
+      console.log("OpenAI status check - User:", req.user?.username, "Role:", req.user?.role);
+      
+      // Check if user has admin or superadmin role
+      if (!(req.user?.role === 'admin' || req.user?.role === 'superadmin')) {
+        console.log("Access denied - insufficient role:", req.user?.role);
+        return res.status(403).json({ message: "Access denied. Required role: admin or superadmin" });
+      }
+
       // Check if OpenAI API key is available
       const apiKey = process.env.OPENAI_API_KEY;
       if (!apiKey) {
@@ -980,11 +998,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
         fullKey: apiKey // This will be used to populate the form
       });
     } catch (error) {
+      console.error("Error checking OpenAI API status:", error);
       return res.status(500).json({ message: "Error checking OpenAI API status" });
     }
   });
 
-  app.post("/api/admin/test-openai", authenticate, hasRole(['admin', 'superadmin']), async (req, res) => {
+  app.post("/api/admin/test-openai", authenticate, async (req, res) => {
+    console.log("Test OpenAI - User:", req.user?.username, "Role:", req.user?.role);
+    
+    // Check if user has admin or superadmin role
+    if (!(req.user?.role === 'admin' || req.user?.role === 'superadmin')) {
+      console.log("Access denied - insufficient role:", req.user?.role);
+      return res.status(403).json({ message: "Access denied. Required role: admin or superadmin" });
+    }
     try {
       // If a test key is provided, use it temporarily (but don't save it)
       const testKey = req.body.apiKey;

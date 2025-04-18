@@ -173,7 +173,9 @@ export class MemStorage implements IStorage {
       password: 'rhinoadmin123',
       email: 'admin@rhinoplastyblogs.com',
       avatarUrl: null,
-      isAdmin: true
+      isAdmin: true,
+      role: 'superadmin',
+      contributorType: null
     };
     
     // Check if admin user already exists (for hot reloads)
