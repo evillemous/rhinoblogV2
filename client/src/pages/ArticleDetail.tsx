@@ -1,5 +1,6 @@
 import { useRoute } from "wouter";
 import { useQuery } from "@tanstack/react-query";
+import { useState, useEffect } from "react";
 import { PostWithTags } from "@shared/schema";
 import Sidebar from "@/components/Sidebar";
 import RightSidebar from "@/components/RightSidebar";
@@ -10,7 +11,8 @@ import { Link } from "wouter";
 import { ChevronLeft, Calendar, Clock, User, BookOpen, Share2, Bookmark, Heart } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import { formatDistanceToNow, format } from "date-fns";
-import { getArticleImage } from "@/lib/articleImageMapping";
+import { getArticleImage, getUnsplashImageForArticle } from "@/lib/articleImageMapping";
+import { isUnsplashConfigured } from "@/lib/unsplashApi";
 
 const ArticleDetail = () => {
   const [, params] = useRoute("/article/:id");
@@ -38,13 +40,41 @@ const ArticleDetail = () => {
     ? format(new Date(article.createdAt), 'MMMM d, yyyy')
     : "";
   
+  // State for storing image
+  const [articleImage, setArticleImage] = useState<any>(null);
+  
   // Get appropriate image based on article title and tags
-  const articleImage = article
-    ? getArticleImage(
+  useEffect(() => {
+    if (article) {
+      // Start with default SVG image
+      const defaultImage = getArticleImage(
         article.title || "", 
         article.tags?.map(t => t.name) || []
-      )
-    : null;
+      );
+      
+      setArticleImage(defaultImage);
+      
+      // If Unsplash is configured, try to get a real image
+      if (isUnsplashConfigured()) {
+        const fetchUnsplashImage = async () => {
+          try {
+            const unsplashImage = await getUnsplashImageForArticle(
+              article.title || "", 
+              article.tags?.map(t => t.name) || []
+            );
+            
+            if (unsplashImage) {
+              setArticleImage(unsplashImage);
+            }
+          } catch (error) {
+            console.error("Error fetching Unsplash image:", error);
+          }
+        };
+        
+        fetchUnsplashImage();
+      }
+    }
+  }, [article]);
   
   // Find related articles that share tags with the current article
   const relatedArticles = allPosts 
@@ -231,6 +261,8 @@ const ArticleDetail = () => {
                 <CardContent>
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                     {relatedArticles.map(relatedPost => {
+                      // We'll use a standard image for related articles to avoid too many API calls
+                      // This could be enhanced to use a cache or to stagger the requests
                       const relatedImage = getArticleImage(
                         relatedPost.title || "", 
                         relatedPost.tags?.map(t => t.name) || []
