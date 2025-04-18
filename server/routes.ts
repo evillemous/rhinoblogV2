@@ -617,6 +617,78 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
     }
   });
+  
+  // Custom content generator endpoint
+  app.post("/api/admin/generate-custom", authenticate, isAdmin, async (req, res) => {
+    try {
+      const { customPrompt, contentType } = req.body;
+      
+      if (!customPrompt) {
+        return res.status(400).json({ message: "Custom prompt is required" });
+      }
+      
+      // Get admin user
+      const user = await storage.getUser(req.user.id);
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
+      
+      console.log(`Generating custom ${contentType} content with prompt: ${customPrompt.substring(0, 50)}...`);
+      
+      // Generate content using OpenAI with custom prompt
+      const generatedPost = await generateCustomContent(
+        customPrompt,
+        contentType || 'educational'
+      );
+      
+      if (!generatedPost) {
+        return res.status(500).json({ message: "Failed to generate content" });
+      }
+      
+      // Create post in database
+      const post = await storage.createPost({
+        userId: user.id,
+        title: generatedPost.title,
+        content: generatedPost.content,
+        imageUrl: null,
+        upvotes: 0,
+        downvotes: 0
+      });
+      
+      // Handle tags
+      const tagsToAdd = [...generatedPost.tags];
+      
+      // Add content type tag if it's educational
+      if (contentType === 'educational') {
+        tagsToAdd.push('educational');
+      }
+      
+      // Process all tags
+      for (const tagName of tagsToAdd) {
+        // Find or create tag
+        let tag = await storage.getTagByName(tagName);
+        
+        if (!tag) {
+          // Create a random color for the tag
+          const colors = ["blue", "green", "red", "yellow", "purple", "pink", "indigo", "gray", "orange"];
+          const randomColor = colors[Math.floor(Math.random() * colors.length)];
+          
+          tag = await storage.createTag({ name: tagName, color: randomColor });
+        }
+        
+        // Create post-tag association
+        await storage.createPostTag({ postId: post.id, tagId: tag.id });
+      }
+      
+      console.log(`Created custom ${contentType} post: ${generatedPost.title}`);
+      
+      const postWithTags = await storage.getPostWithTags(post.id);
+      return res.status(201).json({ message: "Successfully generated custom content", post: postWithTags });
+    } catch (error) {
+      console.error("Error generating custom content:", error);
+      return res.status(500).json({ message: "Error generating custom content" });
+    }
+  });
 
   app.post("/api/admin/update-openai-key", authenticate, isAdmin, async (req, res) => {
     try {
