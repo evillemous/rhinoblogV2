@@ -62,6 +62,37 @@ const isAdmin = (req: express.Request, res: express.Response, next: express.Next
   next();
 };
 
+// Role-based middleware
+const hasRole = (roles: string[]) => {
+  return (req: express.Request, res: express.Response, next: express.NextFunction) => {
+    if (!req.user || !req.user.role || !roles.includes(req.user.role)) {
+      return res.status(403).json({ 
+        message: `Access denied. Required role: ${roles.join(' or ')}` 
+      });
+    }
+    next();
+  };
+};
+
+// Check if user is superadmin
+const isSuperAdmin = (req: express.Request, res: express.Response, next: express.NextFunction) => {
+  if (!req.user || req.user.role !== 'superadmin') {
+    return res.status(403).json({ message: "Superadmin access required" });
+  }
+  next();
+};
+
+// Contributor middleware (contributor, admin, or superadmin)
+const isContributor = (req: express.Request, res: express.Response, next: express.NextFunction) => {
+  if (!req.user || 
+      (req.user.role !== 'contributor' && 
+       req.user.role !== 'admin' && 
+       req.user.role !== 'superadmin')) {
+    return res.status(403).json({ message: "Contributor access required" });
+  }
+  next();
+};
+
 export async function registerRoutes(app: Express): Promise<Server> {
   app.use(express.json());
   
@@ -81,7 +112,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       // Generate JWT
       const token = jwt.sign(
-        { id: user.id, username: user.username, isAdmin: user.isAdmin },
+        { 
+          id: user.id, 
+          username: user.username, 
+          isAdmin: user.isAdmin,
+          role: user.role || 'user',
+          contributorType: user.contributorType
+        },
         JWT_SECRET,
         { expiresIn: "7d" }
       );
@@ -113,7 +150,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       // Generate JWT
       const token = jwt.sign(
-        { id: user.id, username: user.username, isAdmin: user.isAdmin },
+        { 
+          id: user.id, 
+          username: user.username, 
+          isAdmin: user.isAdmin,
+          role: user.role || 'user',
+          contributorType: user.contributorType
+        },
         JWT_SECRET,
         { expiresIn: "7d" }
       );
@@ -145,7 +188,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
   
   // Get all users (for admin purposes)
-  app.get("/api/users", authenticate, isAdmin, async (req, res) => {
+  app.get("/api/users", authenticate, hasRole(['admin', 'superadmin']), async (req, res) => {
     try {
       const users = await storage.getUsers();
       // Return users without passwords
@@ -211,7 +254,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
           id: updatedUser.id, 
           username: updatedUser.username, 
           isAdmin: updatedUser.isAdmin,
-          role: updatedUser.role
+          role: updatedUser.role || 'user',
+          contributorType: updatedUser.contributorType
         },
         JWT_SECRET,
         { expiresIn: "7d" }
@@ -401,8 +445,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ message: "Post not found" });
       }
       
-      // Check if user owns the post or is admin
-      if (post.userId !== req.user.id && !req.user.isAdmin) {
+      // Check if user owns the post or has appropriate role
+      const userIsAdmin = req.user.role === 'admin' || req.user.role === 'superadmin';
+      const userIsContributor = req.user.role === 'contributor';
+      
+      if (post.userId !== req.user.id && !userIsAdmin && !(userIsContributor && post.userId === req.user.id)) {
         return res.status(403).json({ message: "Not authorized to update this post" });
       }
       
@@ -422,8 +469,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ message: "Post not found" });
       }
       
-      // Check if user owns the post or is admin
-      if (post.userId !== req.user.id && !req.user.isAdmin) {
+      // Check if user owns the post or has appropriate role
+      const userIsAdmin = req.user.role === 'admin' || req.user.role === 'superadmin';
+      const userIsContributor = req.user.role === 'contributor';
+      
+      if (post.userId !== req.user.id && !userIsAdmin && !(userIsContributor && post.userId === req.user.id)) {
         return res.status(403).json({ message: "Not authorized to delete this post" });
       }
       
@@ -674,7 +724,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
   
-  app.post("/api/topics", authenticate, isAdmin, async (req, res) => {
+  app.post("/api/topics", authenticate, hasRole(['admin', 'superadmin']), async (req, res) => {
     try {
       const topicData = insertTopicSchema.parse(req.body);
       
@@ -694,7 +744,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
   
-  app.put("/api/topics/:id", authenticate, isAdmin, async (req, res) => {
+  app.put("/api/topics/:id", authenticate, hasRole(['admin', 'superadmin']), async (req, res) => {
     try {
       const topicId = parseInt(req.params.id);
       const topic = await storage.getTopic(topicId);
