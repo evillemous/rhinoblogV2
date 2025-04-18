@@ -1,0 +1,98 @@
+🧑‍💻 User Roles & Architecture for RhinoplastyBlogs.com
+🔒 Role Hierarchy (Top-down)
+Superuser / Owner (role: "superadmin")
+
+👑 You — full platform control
+
+Can manage users, roles, posts, AI generation settings, and monetization
+
+Can impersonate other users for debugging
+
+Access to full analytics, logs, cron jobs, and admin dashboard
+
+Admin / Moderator (role: "admin")
+
+Can approve, edit, or remove user posts and comments
+
+Can flag or suppress AI-generated posts
+
+Can manage tags and moderate flagged content
+
+Cannot manage superuser accounts or system settings
+
+Verified Contributor (role: "contributor")
+
+Optional class for trusted users (e.g., real patients, influencers, surgeons)
+
+Posts are auto-approved and marked “Verified”
+
+Can submit longform stories with optional images
+
+May be featured in homepage rotation
+
+Registered User (role: "user")
+
+Can create an account, post stories, comment, upvote
+
+Posts may be held for moderation (based on trust score)
+
+Can save favorites, follow tags, build a profile
+
+Anonymous / Guest (role: "guest")
+
+Can browse all public content
+
+Cannot post, comment, or upvote
+
+May be shown lead capture prompts (e.g., "Join to see more before/afters")
+
+🗃️ Suggested DB Schema (Users Table)
+ts
+Copy
+Edit
+model User {
+  id          String   @id @default(cuid())
+  email       String   @unique
+  username    String   @unique
+  password    String?
+  role        Role     @default(USER)
+  bio         String?
+  avatarUrl   String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  posts       Post[]
+  comments    Comment[]
+}
+
+enum Role {
+  SUPERADMIN
+  ADMIN
+  CONTRIBUTOR
+  USER
+  GUEST
+}
+🔐 Permissions (API-Level)
+
+Action	Superadmin	Admin	Contributor	User	Guest
+Create posts	✅	✅	✅	✅	❌
+Auto-publish posts	✅	✅	✅	❌	❌
+Comment	✅	✅	✅	✅	❌
+Upvote	✅	✅	✅	✅	❌
+Edit or remove any post	✅	✅	❌	❌	❌
+Moderate flagged content	✅	✅	❌	❌	❌
+Run AI post generation	✅	✅	❌	❌	❌
+Access analytics and logs	✅	❌	❌	❌	❌
+Manage roles/users/system settings	✅	❌	❌	❌	❌
+🧠 Developer Notes
+Auth should use NextAuth with roles embedded in JWT/session
+
+Role-based access middleware should protect:
+
+Admin dashboard
+
+API routes (/api/admin/*, /api/ai/*)
+
+Use RBAC pattern (Role-Based Access Control)
+
+Consider adding trust score, email verification, or reputation later for user ranking
+

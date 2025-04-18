@@ -2,6 +2,23 @@ import { pgTable, text, serial, integer, boolean, timestamp, varchar } from "dri
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
+// User Roles
+export const UserRole = {
+  SUPERADMIN: 'superadmin',
+  ADMIN: 'admin',
+  CONTRIBUTOR: 'contributor',
+  USER: 'user',
+  GUEST: 'guest',
+} as const;
+
+// Contributor Types
+export const ContributorType = {
+  SURGEON: 'surgeon',
+  PATIENT: 'patient',
+  INFLUENCER: 'influencer',
+  BLOGGER: 'blogger',
+} as const;
+
 // User Schema
 export const users = pgTable("users", {
   id: serial("id").primaryKey(),
@@ -9,7 +26,14 @@ export const users = pgTable("users", {
   password: text("password").notNull(),
   email: text("email"),
   avatarUrl: text("avatar_url"),
-  isAdmin: boolean("is_admin").default(false),
+  role: text("role").notNull().default(UserRole.USER),
+  contributorType: text("contributor_type"),
+  verified: boolean("verified").default(false),
+  bio: text("bio"),
+  trustScore: integer("trust_score").default(0),
+  isAdmin: boolean("is_admin").default(false), // Keeping for backward compatibility
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at"),
 });
 
 export const insertUserSchema = createInsertSchema(users).pick({
@@ -17,6 +41,11 @@ export const insertUserSchema = createInsertSchema(users).pick({
   password: true,
   email: true,
   avatarUrl: true,
+  role: true,
+  contributorType: true,
+  verified: true,
+  bio: true,
+  trustScore: true,
   isAdmin: true,
 });
 
