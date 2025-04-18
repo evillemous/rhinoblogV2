@@ -64,8 +64,16 @@ const PostForm = ({ isOpen, onClose, defaultTopicId }: PostFormProps) => {
     }
   });
   
+  // Define an interface for the data we're submitting
+  interface PostSubmissionData {
+    title: string;
+    content: string;
+    tags: string[];
+    topicId?: number;
+  }
+
   const postMutation = useMutation({
-    mutationFn: async (data: PostFormValues) => {
+    mutationFn: async (data: PostSubmissionData) => {
       if (!isAuthenticated) {
         throw new Error("You must be logged in to create a post");
       }
@@ -95,14 +103,18 @@ const PostForm = ({ isOpen, onClose, defaultTopicId }: PostFormProps) => {
   });
   
   const onSubmit = (data: PostFormValues) => {
-    // If no topicId is selected but there's a default, use that
-    if (!data.topicId && defaultTopicId) {
-      data.topicId = defaultTopicId;
-    }
+    // Create a new object for submission to ensure type safety
+    const submissionData: PostSubmissionData = {
+      title: data.title,
+      content: data.content,
+      tags: data.tags,
+      // Convert topicId to number if it exists, otherwise use the default or undefined
+      topicId: data.topicId 
+        ? parseInt(data.topicId, 10)
+        : (defaultTopicId || undefined)
+    };
     
-    // The topicId should be properly transformed by the schema
-    // so we can submit the data directly
-    postMutation.mutate(data);
+    postMutation.mutate(submissionData);
   };
   
   const addTag = () => {
