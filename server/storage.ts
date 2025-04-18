@@ -37,6 +37,9 @@ export interface IStorage {
   getTag(id: number): Promise<Tag | undefined>;
   getTagByName(name: string): Promise<Tag | undefined>;
   createTag(tag: InsertTag): Promise<Tag>;
+  updateTag(id: number, tag: Partial<Tag>): Promise<Tag | undefined>;
+  deleteTag(id: number): Promise<boolean>;
+  deleteTagAssociations(tagId: number): Promise<void>;
   getTags(): Promise<Tag[]>;
   getPostTags(postId: number): Promise<Tag[]>;
 
@@ -306,6 +309,28 @@ export class MemStorage implements IStorage {
     const tag: Tag = { ...insertTag, id };
     this.tags.set(id, tag);
     return tag;
+  }
+  
+  async updateTag(id: number, tagData: Partial<Tag>): Promise<Tag | undefined> {
+    const tag = this.tags.get(id);
+    if (!tag) return undefined;
+    
+    const updatedTag = { ...tag, ...tagData };
+    this.tags.set(id, updatedTag);
+    return updatedTag;
+  }
+
+  async deleteTag(id: number): Promise<boolean> {
+    return this.tags.delete(id);
+  }
+
+  async deleteTagAssociations(tagId: number): Promise<void> {
+    // Remove all post-tag associations for this tag
+    for (const [id, postTag] of this.postTags.entries()) {
+      if (postTag.tagId === tagId) {
+        this.postTags.delete(id);
+      }
+    }
   }
 
   async getTags(): Promise<Tag[]> {
