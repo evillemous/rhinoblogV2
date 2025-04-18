@@ -534,10 +534,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
   
-  app.get("/api/topics/:id", async (req, res) => {
+  app.get("/api/topics/slug/:slug", async (req, res) => {
     try {
-      const topicId = parseInt(req.params.id);
-      const topic = await storage.getTopic(topicId);
+      const { slug } = req.params;
+      const topic = await storage.getTopicBySlug(slug);
       
       if (!topic) {
         return res.status(404).json({ message: "Topic not found" });
@@ -549,10 +549,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
   
-  app.get("/api/topics/slug/:slug", async (req, res) => {
+  app.get("/api/topics/:id", async (req, res) => {
     try {
-      const { slug } = req.params;
-      const topic = await storage.getTopicBySlug(slug);
+      const topicId = parseInt(req.params.id);
+      const topic = await storage.getTopic(topicId);
       
       if (!topic) {
         return res.status(404).json({ message: "Topic not found" });

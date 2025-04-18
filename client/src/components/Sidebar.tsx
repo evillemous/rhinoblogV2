@@ -9,10 +9,17 @@ import TagList from "@/components/TagList";
 const Sidebar = () => {
   const { isAuthenticated } = useAuth();
   const [showCreatePost, setShowCreatePost] = useState(false);
+  const [location] = useLocation();
   
   // Fetch tags
   const { data: tags } = useQuery<Tag[]>({
     queryKey: ["/api/tags"],
+    staleTime: 300000, // 5 minutes cache
+  });
+  
+  // Fetch topics
+  const { data: topics, isLoading: topicsLoading } = useQuery<Topic[]>({
+    queryKey: ["/api/topics"],
     staleTime: 300000, // 5 minutes cache
   });
   
@@ -49,6 +56,40 @@ const Sidebar = () => {
           >
             Create Post
           </Button>
+        </div>
+      </div>
+
+      {/* Topics Section */}
+      <div className="bg-white dark:bg-reddit-darkCard rounded-md shadow mb-4">
+        <div className="p-4 border-b border-gray-200 dark:border-gray-700">
+          <h2 className="font-ibm-plex font-bold">Browse Topics</h2>
+        </div>
+        <div className="p-4">
+          {topicsLoading ? (
+            <div className="flex justify-center py-2">
+              <div className="animate-spin h-5 w-5 border-2 border-rhino-navy rounded-full border-t-transparent"></div>
+            </div>
+          ) : topics && topics.length > 0 ? (
+            <ul className="space-y-2">
+              {topics.map((topic) => (
+                <li key={topic.id}>
+                  <Link
+                    href={`/topic/${topic.slug}`}
+                    className={`flex items-center p-2 rounded-md transition-colors hover:bg-gray-100 dark:hover:bg-gray-800 ${
+                      location.includes(`/topic/${topic.slug}`) 
+                        ? "bg-gray-100 dark:bg-gray-800 font-medium" 
+                        : ""
+                    }`}
+                  >
+                    <span className="mr-2 text-lg">{topic.icon}</span>
+                    <span>{topic.name}</span>
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <p className="text-sm text-gray-500 dark:text-gray-400">No topics available</p>
+          )}
         </div>
       </div>
       
