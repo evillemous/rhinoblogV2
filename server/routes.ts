@@ -1222,7 +1222,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ message: "User not found" });
       }
       
-      // Create informational post topics
+      // Create a large variety of informational post topics
       const informationalTopics = [
         {
           title: "What to Expect After Rhinoplasty: A Complete Day-by-Day Recovery Guide",
@@ -1243,28 +1243,73 @@ export async function registerRoutes(app: Express): Promise<Server> {
         {
           title: "Rhinoplasty Cost Guide: Understanding What You're Paying For",
           topic: "rhinoplasty pricing and financing options"
+        },
+        {
+          title: "Ethnic Rhinoplasty: Preserving Heritage While Enhancing Features",
+          topic: "ethnic rhinoplasty techniques and considerations"
+        },
+        {
+          title: "Revision Rhinoplasty: What You Need to Know for Second Surgeries",
+          topic: "revision rhinoplasty challenges and solutions"
+        },
+        {
+          title: "Correcting a Deviated Septum: More Than Just Cosmetic Benefits",
+          topic: "septoplasty benefits and procedures"
+        },
+        {
+          title: "Non-Surgical Rhinoplasty: Pros, Cons, and Limitations",
+          topic: "liquid rhinoplasty alternatives"
+        },
+        {
+          title: "Post-Rhinoplasty Exercise Guide: When Can You Safely Resume Activities?",
+          topic: "physical activity after rhinoplasty"
+        },
+        {
+          title: "Sleeping Positions After Rhinoplasty: Protecting Your Results",
+          topic: "post-rhinoplasty sleeping recommendations"
+        },
+        {
+          title: "Rhinoplasty for Teenagers: Special Considerations and Guidelines",
+          topic: "teenage rhinoplasty appropriate timing"
         }
       ];
       
-      // User experience parameters for diverse stories
+      // Expanded list of user experiences with more diversity
       const userExperiences = [
-        // Success stories
+        // Success stories - women
         { age: "24", gender: "female", procedure: "closed", reason: "fixing a dorsal hump", outcome: "positive" },
-        { age: "32", gender: "male", procedure: "open", reason: "improving breathing", outcome: "positive" },
         { age: "19", gender: "female", procedure: "tip plasty", reason: "refining a bulbous tip", outcome: "positive" },
+        { age: "28", gender: "female", procedure: "ethnic", reason: "balancing facial features", outcome: "positive" },
+        { age: "35", gender: "female", procedure: "revision", reason: "correcting previous surgery", outcome: "positive" },
+        
+        // Success stories - men
+        { age: "32", gender: "male", procedure: "open", reason: "improving breathing", outcome: "positive" },
+        { age: "27", gender: "male", procedure: "closed", reason: "straightening after sports injury", outcome: "positive" },
+        { age: "41", gender: "male", procedure: "revision", reason: "refining previous work", outcome: "positive" },
+        
+        // Success stories - non-binary and other genders
+        { age: "25", gender: "non-binary", procedure: "closed", reason: "achieving desired appearance", outcome: "positive" },
+        { age: "31", gender: "transgender", procedure: "feminization", reason: "gender-affirming care", outcome: "positive" },
         
         // Mixed results
         { age: "26", gender: "female", procedure: "closed", reason: "fixing a deviated septum", outcome: "mixed" },
+        { age: "33", gender: "male", procedure: "ethnic", reason: "maintaining ethnic features", outcome: "mixed" },
+        { age: "22", gender: "female", procedure: "tip plasty", reason: "reducing nostril flare", outcome: "mixed" },
         
         // Challenging recoveries
-        { age: "30", gender: "female", procedure: "open", reason: "correcting a dorsal hump", outcome: "challenging" }
+        { age: "30", gender: "female", procedure: "open", reason: "correcting a dorsal hump", outcome: "challenging" },
+        { age: "38", gender: "male", procedure: "revision", reason: "third attempt at correction", outcome: "challenging" },
+        { age: "45", gender: "female", procedure: "open", reason: "age-related changes", outcome: "challenging" }
       ];
 
       const createdPosts = [];
       
-      // Generate 2 informational posts
+      // Generate 2 informational posts with random selection
       for (let i = 0; i < 2; i++) {
-        const topic = informationalTopics[i];
+        // Get a random topic that hasn't been used recently
+        // Generate a random index between 0 and the topics length
+        const randomIndex = Math.floor(Math.random() * informationalTopics.length);
+        const topic = informationalTopics[randomIndex];
         console.log(`Generating informational post: ${topic.title}`);
         
         try {
@@ -1316,9 +1361,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
         await new Promise(resolve => setTimeout(resolve, 2000));
       }
       
-      // Generate 2 user experiences
+      // Generate 2 user experiences with random selection
       for (let i = 0; i < 2; i++) {
-        const exp = userExperiences[i];
+        // Choose a random experience from the array
+        const randomIndex = Math.floor(Math.random() * userExperiences.length);
+        const exp = userExperiences[randomIndex];
         console.log(`Generating user experience: ${exp.age}-year-old ${exp.gender}, ${exp.procedure} rhinoplasty`);
         
         try {
