@@ -466,6 +466,90 @@ export async function registerRoutes(app: Express): Promise<Server> {
       return res.status(500).json({ message: "Error fetching tags" });
     }
   });
+
+  app.get("/api/tags/:id", async (req, res) => {
+    try {
+      const tagId = parseInt(req.params.id);
+      const tag = await storage.getTag(tagId);
+      
+      if (!tag) {
+        return res.status(404).json({ message: "Tag not found" });
+      }
+      
+      return res.status(200).json(tag);
+    } catch (error) {
+      return res.status(500).json({ message: "Error fetching tag" });
+    }
+  });
+
+  app.post("/api/tags", authenticate, isAdmin, async (req, res) => {
+    try {
+      const tagData = insertTagSchema.parse(req.body);
+      
+      // Check if tag already exists
+      const existingTag = await storage.getTagByName(tagData.name);
+      if (existingTag) {
+        return res.status(400).json({ message: "Tag already exists" });
+      }
+      
+      const tag = await storage.createTag(tagData);
+      return res.status(201).json(tag);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: error.errors });
+      }
+      return res.status(500).json({ message: "Error creating tag" });
+    }
+  });
+
+  app.put("/api/tags/:id", authenticate, isAdmin, async (req, res) => {
+    try {
+      const tagId = parseInt(req.params.id);
+      const tag = await storage.getTag(tagId);
+      
+      if (!tag) {
+        return res.status(404).json({ message: "Tag not found" });
+      }
+      
+      // Check if new name already exists (for another tag)
+      if (req.body.name && req.body.name !== tag.name) {
+        const existingTag = await storage.getTagByName(req.body.name);
+        if (existingTag && existingTag.id !== tagId) {
+          return res.status(400).json({ message: "Tag name already exists" });
+        }
+      }
+      
+      const updatedTag = await storage.updateTag(tagId, req.body);
+      return res.status(200).json(updatedTag);
+    } catch (error) {
+      return res.status(500).json({ message: "Error updating tag" });
+    }
+  });
+
+  app.delete("/api/tags/:id", authenticate, isAdmin, async (req, res) => {
+    try {
+      const tagId = parseInt(req.params.id);
+      const tag = await storage.getTag(tagId);
+      
+      if (!tag) {
+        return res.status(404).json({ message: "Tag not found" });
+      }
+      
+      // Delete all post-tag associations for this tag
+      // Note: This could be moved to a transaction or handled in the storage layer
+      await storage.deleteTagAssociations(tagId);
+      
+      // Delete the tag
+      const deleted = await storage.deleteTag(tagId);
+      if (deleted) {
+        return res.status(200).json({ message: "Tag deleted successfully" });
+      } else {
+        return res.status(500).json({ message: "Failed to delete tag" });
+      }
+    } catch (error) {
+      return res.status(500).json({ message: "Error deleting tag" });
+    }
+  });
   
   // Admin routes (AI post generation)
   app.post("/api/admin/generate-post", authenticate, isAdmin, async (req, res) => {

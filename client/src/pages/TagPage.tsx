@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useParams } from "wouter";
+import { useParams, Link } from "wouter";
 import { useQuery } from "@tanstack/react-query";
 import { PostWithTags, Tag } from "@shared/schema";
 import PostCard from "@/components/PostCard";
@@ -114,7 +114,7 @@ const TagPage = () => {
         <h2 className="text-lg font-semibold mb-2">Related Tags</h2>
         <div className="flex flex-wrap gap-2">
           {allTags?.slice(0, 10).map((tag) => (
-            <a
+            <Link
               key={tag.id}
               href={`/tag/${encodeURIComponent(tag.name)}`}
               className={`text-sm font-medium px-3 py-1 rounded-full ${
@@ -124,7 +124,7 @@ const TagPage = () => {
               }`}
             >
               #{tag.name}
-            </a>
+            </Link>
           ))}
         </div>
       </div>
