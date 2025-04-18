@@ -8,7 +8,7 @@ const AdminLink = () => {
   return (
     <div className="container mx-auto px-4 py-12">
       <div className="max-w-md mx-auto bg-white dark:bg-gray-800 rounded-lg shadow-lg p-8">
-        <h1 className="text-2xl font-bold text-center mb-6">Admin Access</h1>
+        <h1 className="text-2xl font-bold text-center mb-6">Admin Login</h1>
         
         <div className="space-y-6">
           <div className="text-center">

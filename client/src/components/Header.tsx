@@ -54,10 +54,12 @@ const Header = () => {
             </Link>
           </div>
           
-          {/* Direct Admin Link - Always Visible */}
-          <Link href="/admin-link" className="ml-4 px-3 py-1 bg-red-600 text-white rounded-md font-bold text-sm border-2 border-white shadow-lg hover:bg-red-700">
-            ADMIN ACCESS
-          </Link>
+          {/* Only show this admin link when NOT logged in */}
+          {!isAuthenticated && (
+            <Link href="/admin-link" className="ml-4 px-3 py-1 bg-red-600 text-white rounded-md font-bold text-sm border-2 border-white shadow-lg hover:bg-red-700">
+              ADMIN LOGIN
+            </Link>
+          )}
         </div>
         
         {/* Search bar */}
@@ -78,15 +80,15 @@ const Header = () => {
         
         {/* Right actions */}
         <div className="flex items-center space-x-4">
-          {/* Admin Dashboard Button - only visible for admins */}
+          {/* Admin Dashboard Button - only visible for logged-in users */}
           {isAuthenticated && (
             <>
-              {/* Debug button to show current admin status */}
+              {/* Status indicator showing if user has admin privileges */}
               <div className="text-xs text-gray-500 mr-2">
                 {user?.isAdmin ? "Admin Mode" : "User Mode"}
               </div>
               
-              {/* Always visible Admin Dashboard Button for logged in users */}
+              {/* Admin Dashboard Button */}
               <Button
                 variant="destructive"
                 className="flex items-center gap-1 text-white font-bold border bg-rhino-navy hover:bg-rhino-navy/90"
@@ -209,18 +211,20 @@ const Header = () => {
               </Button>
             </div>
 
-            {/* Direct Admin Access - Always visible in mobile menu */}
-            <Button
-              variant="destructive"
-              className="w-full justify-start font-bold bg-rhino-navy hover:bg-rhino-navy/90 text-white border"
-              onClick={() => {
-                setLocation("/admin-link");
-                setMobileMenuOpen(false);
-              }}
-            >
-              <i className="fas fa-user-shield mr-2"></i>
-              ADMIN ACCESS
-            </Button>
+            {/* Direct Admin Access - Only shown when not logged in */}
+            {!isAuthenticated && (
+              <Button
+                variant="destructive"
+                className="w-full justify-start font-bold bg-rhino-navy hover:bg-rhino-navy/90 text-white border"
+                onClick={() => {
+                  setLocation("/admin-link");
+                  setMobileMenuOpen(false);
+                }}
+              >
+                <i className="fas fa-user-shield mr-2"></i>
+                ADMIN LOGIN
+              </Button>
+            )}
             
             {isAuthenticated ? (
               <>
