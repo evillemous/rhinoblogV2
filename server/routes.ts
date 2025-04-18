@@ -164,11 +164,67 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const limit = req.query.limit ? parseInt(req.query.limit as string) : 10;
       const offset = req.query.offset ? parseInt(req.query.offset as string) : 0;
+      const tagFilter = req.query.tag as string | undefined;
       
+      // Get all posts with their tags
       const posts = await storage.getPostsWithTags(limit, offset);
+      
+      // If a tag filter is specified, filter posts that have that tag
+      if (tagFilter) {
+        const filteredPosts = posts.filter(post => 
+          post.tags.some(tag => tag.name.toLowerCase() === tagFilter.toLowerCase())
+        );
+        return res.status(200).json(filteredPosts);
+      }
+      
       return res.status(200).json(posts);
     } catch (error) {
       return res.status(500).json({ message: "Error fetching posts" });
+    }
+  });
+  
+  // Get posts by topic
+  app.get("/api/topics/:slug/posts", async (req, res) => {
+    try {
+      const { slug } = req.params;
+      const limit = req.query.limit ? parseInt(req.query.limit as string) : 10;
+      const offset = req.query.offset ? parseInt(req.query.offset as string) : 0;
+      
+      // Verify topic exists
+      const topic = await storage.getTopicBySlug(slug);
+      if (!topic) {
+        return res.status(404).json({ message: "Topic not found" });
+      }
+      
+      // Get all posts
+      const allPosts = await storage.getPostsWithTags();
+      
+      // Filter posts based on relevance to the topic
+      // This is a simple implementation - in a real system, you might have a more complex
+      // algorithm or a direct database relationship between posts and topics
+      const topicKeywords = [
+        topic.name.toLowerCase(),
+        topic.slug.toLowerCase(),
+        ...(topic.description ? topic.description.toLowerCase().split(/\s+/) : [])
+      ];
+      
+      const filteredPosts = allPosts.filter(post => {
+        // Check post title and content for topic relevance
+        const postText = `${post.title.toLowerCase()} ${post.content.toLowerCase()}`;
+        const tagsText = post.tags.map(t => t.name.toLowerCase()).join(' ');
+        
+        // Check if any topic keyword is found in the post text or tags
+        return topicKeywords.some(keyword => 
+          keyword.length > 3 && (postText.includes(keyword) || tagsText.includes(keyword))
+        );
+      });
+      
+      // Apply pagination
+      const paginatedPosts = filteredPosts.slice(offset, offset + limit);
+      
+      return res.status(200).json(paginatedPosts);
+    } catch (error) {
+      return res.status(500).json({ message: "Error fetching posts for topic" });
     }
   });
   
@@ -465,6 +521,111 @@ export async function registerRoutes(app: Express): Promise<Server> {
       return res.status(200).json(tags);
     } catch (error) {
       return res.status(500).json({ message: "Error fetching tags" });
+    }
+  });
+  
+  // Topic routes
+  app.get("/api/topics", async (req, res) => {
+    try {
+      const topics = await storage.getTopics();
+      return res.status(200).json(topics);
+    } catch (error) {
+      return res.status(500).json({ message: "Error fetching topics" });
+    }
+  });
+  
+  app.get("/api/topics/:id", async (req, res) => {
+    try {
+      const topicId = parseInt(req.params.id);
+      const topic = await storage.getTopic(topicId);
+      
+      if (!topic) {
+        return res.status(404).json({ message: "Topic not found" });
+      }
+      
+      return res.status(200).json(topic);
+    } catch (error) {
+      return res.status(500).json({ message: "Error fetching topic" });
+    }
+  });
+  
+  app.get("/api/topics/slug/:slug", async (req, res) => {
+    try {
+      const { slug } = req.params;
+      const topic = await storage.getTopicBySlug(slug);
+      
+      if (!topic) {
+        return res.status(404).json({ message: "Topic not found" });
+      }
+      
+      return res.status(200).json(topic);
+    } catch (error) {
+      return res.status(500).json({ message: "Error fetching topic" });
+    }
+  });
+  
+  app.post("/api/topics", authenticate, isAdmin, async (req, res) => {
+    try {
+      const topicData = insertTopicSchema.parse(req.body);
+      
+      // Check if topic with same slug already exists
+      const existingTopic = await storage.getTopicBySlug(topicData.slug);
+      if (existingTopic) {
+        return res.status(400).json({ message: "Topic with this slug already exists" });
+      }
+      
+      const topic = await storage.createTopic(topicData);
+      return res.status(201).json(topic);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: error.errors });
+      }
+      return res.status(500).json({ message: "Error creating topic" });
+    }
+  });
+  
+  app.put("/api/topics/:id", authenticate, isAdmin, async (req, res) => {
+    try {
+      const topicId = parseInt(req.params.id);
+      const topic = await storage.getTopic(topicId);
+      
+      if (!topic) {
+        return res.status(404).json({ message: "Topic not found" });
+      }
+      
+      // Check if new slug already exists (for another topic)
+      if (req.body.slug && req.body.slug !== topic.slug) {
+        const existingTopic = await storage.getTopicBySlug(req.body.slug);
+        if (existingTopic && existingTopic.id !== topicId) {
+          return res.status(400).json({ message: "Topic slug already exists" });
+        }
+      }
+      
+      const updatedTopic = await storage.updateTopic(topicId, req.body);
+      return res.status(200).json(updatedTopic);
+    } catch (error) {
+      return res.status(500).json({ message: "Error updating topic" });
+    }
+  });
+  
+  app.delete("/api/topics/:id", authenticate, isAdmin, async (req, res) => {
+    try {
+      const topicId = parseInt(req.params.id);
+      const topic = await storage.getTopic(topicId);
+      
+      if (!topic) {
+        return res.status(404).json({ message: "Topic not found" });
+      }
+      
+      // Delete the topic
+      const deleted = await storage.deleteTopic(topicId);
+      if (deleted) {
+        return res.status(200).json({ message: "Topic deleted successfully" });
+      } else {
+        return res.status(500).json({ message: "Failed to delete topic" });
+      }
+    } catch (error) {
+      return res.status(500).json({ message: "Error deleting topic" });
     }
   });
 

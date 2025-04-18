@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { Tag } from "@shared/schema";
-import { Link } from "wouter";
+import { Tag, Topic } from "@shared/schema";
+import { Link, useLocation } from "wouter";
 import { useAuth } from "@/context/AuthContext";
 import { Button } from "@/components/ui/button";
 import TagList from "@/components/TagList";

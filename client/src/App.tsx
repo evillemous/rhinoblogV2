@@ -11,6 +11,7 @@ import Admin from "@/pages/Admin";
 import AdminLink from "@/pages/AdminLink";
 import Login from "@/pages/Login";
 import TagPage from "@/pages/TagPage";
+import TopicPage from "@/pages/TopicPage";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { ThemeProvider, useTheme } from "@/context/ThemeContext";
@@ -25,6 +26,7 @@ function Router() {
       <Route path="/articles" component={Articles} />
       <Route path="/article/:id" component={ArticleDetail} />
       <Route path="/tag/:tagName" component={TagPage} />
+      <Route path="/topic/:topicSlug" component={TopicPage} />
       <Route path="/login" component={Login} />
       <Route path="/admin" component={Admin} />
       <Route path="/admin-link" component={AdminLink} />
