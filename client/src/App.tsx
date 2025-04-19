@@ -20,6 +20,7 @@ import Footer from "@/components/Footer";
 import { ThemeProvider, useTheme } from "@/context/ThemeContext";
 import { AuthProvider } from "@/context/AuthContext";
 import UserGuard from "@/lib/guards/UserGuard";
+import SuperAdminGuard from "@/lib/guards/SuperAdminGuard";
 
 // Admin Dashboard Pages
 import AdminDashboard from "@/pages/admin/Dashboard";
