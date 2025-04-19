@@ -2125,6 +2125,56 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
   
+  // Get user comments with stats
+  app.get("/api/user/comments", authenticate, async (req, res) => {
+    try {
+      const userId = req.user.id;
+      
+      // Get all posts
+      const allPosts = await storage.getPosts();
+      
+      // Create a map for quick post title lookup
+      const postMap = new Map();
+      for (const post of allPosts) {
+        postMap.set(post.id, post.title);
+      }
+      
+      // Get all comments (this is a simplified approach - in a real app we would query by userId)
+      const allComments = [];
+      for (const post of allPosts) {
+        const postComments = await storage.getComments(post.id);
+        // Filter for comments by this user
+        const userComments = postComments.filter(comment => comment.userId === userId);
+        
+        // Add post title to each comment
+        for (const comment of userComments) {
+          allComments.push({
+            ...comment,
+            postTitle: postMap.get(comment.postId) || "Unknown Post",
+            // Default all comments to published if status doesn't exist 
+            status: comment.status || "published"
+          });
+        }
+      }
+      
+      // Calculate statistics
+      const stats = {
+        total: allComments.length,
+        published: allComments.filter(c => c.status === "published").length,
+        removed: allComments.filter(c => c.status === "removed").length,
+        flagged: allComments.filter(c => c.status === "flagged").length
+      };
+      
+      res.status(200).json({ 
+        comments: allComments,
+        stats
+      });
+    } catch (error) {
+      console.error("Error fetching user comments:", error);
+      res.status(500).json({ message: "Failed to fetch comments" });
+    }
+  });
+  
   // Get user profile settings
   app.get("/api/user/settings", authenticate, async (req, res) => {
     try {
@@ -2265,43 +2315,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
   
-  // Get user comments
-  app.get("/api/user/comments", authenticate, async (req, res) => {
-    try {
-      const posts = await storage.getPosts();
-      
-      // Get all comments
-      const allComments = [];
-      for (const post of posts) {
-        const comments = await storage.getComments(post.id);
-        // Filter for user's comments and add post title
-        const userComments = comments
-          .filter(comment => comment.userId === req.user.id)
-          .map(comment => ({
-            ...comment,
-            postTitle: post.title
-          }));
-        
-        allComments.push(...userComments);
-      }
-      
-      // Calculate stats
-      const stats = {
-        total: allComments.length,
-        published: allComments.filter(c => !c.moderationReason).length,
-        removed: allComments.filter(c => c.status === 'removed').length,
-        flagged: allComments.filter(c => c.status === 'flagged').length
-      };
-      
-      res.status(200).json({
-        comments: allComments,
-        stats
-      });
-    } catch (error) {
-      console.error("Error fetching user comments:", error);
-      res.status(500).json({ message: "Failed to fetch user comments" });
-    }
-  });
+  // Comments endpoint already defined above
   
   // Get user saved content
   app.get("/api/user/saved", authenticate, async (req, res) => {
