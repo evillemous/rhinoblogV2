@@ -70,7 +70,7 @@ import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { 
   PlusCircle, FileText, Clock, Eye, MoreHorizontal, Edit, Trash2, 
-  MessageCircle, ThumbsUp, BarChart3, Image
+  MessageCircle, ThumbsUp, BarChart3, Image, ExternalLink
 } from "lucide-react";
 
 // Form schema for creating a new post
@@ -369,6 +369,14 @@ const ContributorContent = () => {
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">
                       <DropdownMenuItem
+                        asChild
+                      >
+                        <a href={`/post/${post.id}`} target="_blank" rel="noopener noreferrer" className="flex items-center">
+                          <ExternalLink className="mr-2 h-4 w-4" />
+                          View
+                        </a>
+                      </DropdownMenuItem>
+                      <DropdownMenuItem
                         onClick={() => handleEditPost(post)}
                       >
                         <Edit className="mr-2 h-4 w-4" />
@@ -581,7 +589,7 @@ const ContributorContent = () => {
                     <FormItem>
                       <FormLabel>Featured Image URL (Optional)</FormLabel>
                       <FormControl>
-                        <Input placeholder="https://image-url.com/your-image.jpg" {...field} />
+                        <Input placeholder="https://image-url.com/your-image.jpg" {...field} value={field.value || ""} />
                       </FormControl>
                       <FormDescription>
                         Add a featured image to make your post stand out
