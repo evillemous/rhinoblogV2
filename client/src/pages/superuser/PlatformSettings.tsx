@@ -23,6 +23,7 @@ import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import AdminTopicManagement from "@/components/AdminTopicManagement";
 
 // Tag Management Component
 const TagManagement = () => {
@@ -364,7 +365,198 @@ const PlatformSettings = () => {
   return (
     <SuperAdminGuard>
       <SuperuserLayout title="Platform Settings">
-        <TagManagement />
+        <Tabs defaultValue="tags" className="w-full mb-8">
+          <TabsList className="mb-6">
+            <TabsTrigger value="tags">Tags</TabsTrigger>
+            <TabsTrigger value="topics">Topics</TabsTrigger>
+            <TabsTrigger value="features">Featured Content</TabsTrigger>
+            <TabsTrigger value="branding">Branding</TabsTrigger>
+            <TabsTrigger value="maintenance">Maintenance</TabsTrigger>
+          </TabsList>
+          
+          <TabsContent value="tags">
+            <TagManagement />
+          </TabsContent>
+          
+          <TabsContent value="topics">
+            <Card>
+              <CardHeader>
+                <CardTitle>Manage Topics</CardTitle>
+                <CardDescription>
+                  Create, edit, and delete content topics for your platform
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <AdminTopicManagement />
+              </CardContent>
+            </Card>
+          </TabsContent>
+          
+          <TabsContent value="features">
+            <Card>
+              <CardHeader>
+                <CardTitle>Featured Posts Settings</CardTitle>
+                <CardDescription>
+                  Configure how featured posts are displayed and rotated
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  <div className="grid gap-4 sm:grid-cols-2">
+                    <div className="space-y-2">
+                      <Label htmlFor="rotation-interval">Rotation Interval</Label>
+                      <Select defaultValue="weekly">
+                        <SelectTrigger id="rotation-interval">
+                          <SelectValue placeholder="Select rotation interval" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="daily">Daily</SelectItem>
+                          <SelectItem value="weekly">Weekly</SelectItem>
+                          <SelectItem value="monthly">Monthly</SelectItem>
+                          <SelectItem value="manual">Manual Only</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      <p className="text-xs text-gray-500">
+                        How often featured posts should be automatically rotated
+                      </p>
+                    </div>
+                    
+                    <div className="space-y-2">
+                      <Label htmlFor="featured-count">Number of Featured Posts</Label>
+                      <Input id="featured-count" type="number" defaultValue="3" min="1" max="10" />
+                      <p className="text-xs text-gray-500">
+                        How many posts should be featured at once
+                      </p>
+                    </div>
+                  </div>
+                  
+                  <div className="flex items-center space-x-2">
+                    <Switch id="auto-feature-popular" />
+                    <Label htmlFor="auto-feature-popular">Automatically feature popular posts</Label>
+                  </div>
+                  
+                  <div className="flex justify-end">
+                    <Button>Save Feature Settings</Button>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+          
+          <TabsContent value="branding">
+            <Card>
+              <CardHeader>
+                <CardTitle>Branding Settings</CardTitle>
+                <CardDescription>
+                  Upload and manage site branding elements
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="grid gap-6 sm:grid-cols-2">
+                  <div className="space-y-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="site-title">Site Title</Label>
+                      <Input id="site-title" defaultValue="RhinoplastyBlogs" />
+                    </div>
+                    
+                    <div className="space-y-2">
+                      <Label htmlFor="site-description">Site Description</Label>
+                      <Textarea 
+                        id="site-description" 
+                        defaultValue="A community for sharing rhinoplasty experiences and information"
+                        className="min-h-[80px]"
+                      />
+                    </div>
+                  </div>
+                  
+                  <div className="space-y-4">
+                    <div className="space-y-2">
+                      <Label>Logo</Label>
+                      <div className="flex items-center justify-center h-32 rounded-md border border-dashed border-gray-300 bg-gray-50">
+                        <div className="text-center">
+                          <Upload className="mx-auto h-10 w-10 text-gray-400" />
+                          <div className="mt-2">
+                            <Button variant="outline" size="sm">Upload Logo</Button>
+                          </div>
+                          <p className="mt-1 text-xs text-gray-500">
+                            SVG, PNG, or JPG (max. 2MB)
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                    
+                    <div className="space-y-2">
+                      <Label>Favicon</Label>
+                      <div className="flex items-center justify-center h-24 rounded-md border border-dashed border-gray-300 bg-gray-50">
+                        <div className="text-center">
+                          <Upload className="mx-auto h-8 w-8 text-gray-400" />
+                          <div className="mt-2">
+                            <Button variant="outline" size="sm">Upload Favicon</Button>
+                          </div>
+                          <p className="mt-1 text-xs text-gray-500">
+                            ICO or PNG (32x32px)
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                
+                <div className="mt-6 flex justify-end">
+                  <Button>Save Branding Settings</Button>
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+          
+          <TabsContent value="maintenance">
+            <Card>
+              <CardHeader>
+                <CardTitle>Maintenance Mode</CardTitle>
+                <CardDescription>
+                  Configure maintenance mode and related settings
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between">
+                    <div className="space-y-0.5">
+                      <Label className="text-base" htmlFor="maintenance-mode">Maintenance Mode</Label>
+                      <p className="text-sm text-gray-500">
+                        Site will be unavailable to regular users when enabled
+                      </p>
+                    </div>
+                    <Switch id="maintenance-mode" />
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <Label htmlFor="allowed-ips">Allowed IP Addresses</Label>
+                    <Textarea 
+                      id="allowed-ips" 
+                      placeholder="127.0.0.1, 192.168.1.1"
+                      className="font-mono text-sm"
+                    />
+                    <p className="text-xs text-gray-500">
+                      Comma-separated list of IPs that can access the site during maintenance
+                    </p>
+                  </div>
+                  
+                  <div className="mt-4 space-y-2">
+                    <Label htmlFor="maintenance-message">Maintenance Message</Label>
+                    <Textarea 
+                      id="maintenance-message" 
+                      placeholder="We're currently performing some maintenance. Please check back later."
+                      className="min-h-[100px]"
+                    />
+                  </div>
+                </div>
+              </CardContent>
+              <CardFooter className="flex justify-end border-t bg-gray-50 px-6 py-3">
+                <Button>Save Maintenance Settings</Button>
+              </CardFooter>
+            </Card>
+          </TabsContent>
+        </Tabs>
       </SuperuserLayout>
     </SuperAdminGuard>
   );
