@@ -35,6 +35,11 @@ import ContributorContent from "@/pages/contributor/Content";
 import ContributorSettings from "@/pages/contributor/Settings";
 import ContributorComments from "@/pages/contributor/Comments";
 
+// User Dashboard Pages
+import UserDashboard from "@/pages/user/Dashboard";
+import UserSettings from "@/pages/user/Settings";
+import UserPosts from "@/pages/user/Posts";
+
 // Superuser Dashboard Pages
 import AIEngine from "@/pages/superuser/AIEngine";
 import PlatformSettings from "@/pages/superuser/PlatformSettings";
@@ -76,6 +81,11 @@ function Router() {
       <Route path="/contributor/settings" component={ContributorSettings} />
       <Route path="/contributor/comments" component={ContributorComments} />
       
+      {/* User Dashboard Routes */}
+      <Route path="/user/dashboard" component={UserDashboard} />
+      <Route path="/user/settings" component={UserSettings} />
+      <Route path="/user/posts" component={UserPosts} />
+      
       {/* Superuser Dashboard Routes */}
       <Route path="/super/ai-engine" component={AIEngine} />
       <Route path="/super/platform-settings" component={PlatformSettings} />
@@ -106,11 +116,12 @@ function AppContent() {
   const { theme } = useTheme();
   const [location] = useLocation();
   
-  // Check if current route is a dashboard route (superuser, admin, or contributor)
+  // Check if current route is a dashboard route (superuser, admin, contributor, or user)
   const isSuperuserRoute = location.includes('/super/');
   const isAdminRoute = location.includes('/admin/') && location !== '/admin-link';
   const isContributorRoute = location.includes('/contributor/');
-  const isDashboardRoute = isSuperuserRoute || isAdminRoute || isContributorRoute;
+  const isUserRoute = location.includes('/user/');
+  const isDashboardRoute = isSuperuserRoute || isAdminRoute || isContributorRoute || isUserRoute;
   
   return (
     <div className={theme === "dark" ? "dark" : ""}>
