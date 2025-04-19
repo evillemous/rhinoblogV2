@@ -24,6 +24,10 @@ import AdminDashboard from "@/pages/admin/Dashboard";
 import AdminModeration from "@/pages/admin/Moderation";
 import AdminPosts from "@/pages/admin/Posts";
 import AdminContributors from "@/pages/admin/Contributors";
+import AdminUsers from "@/pages/admin/Users";
+import AdminTags from "@/pages/admin/Tags";
+import AdminStats from "@/pages/admin/Stats";
+import AdminInbox from "@/pages/admin/Inbox";
 
 // Superuser Dashboard Pages
 import AIEngine from "@/pages/superuser/AIEngine";
@@ -55,6 +59,10 @@ function Router() {
       <Route path="/admin/moderation" component={AdminModeration} />
       <Route path="/admin/posts" component={AdminPosts} />
       <Route path="/admin/contributors" component={AdminContributors} />
+      <Route path="/admin/users" component={AdminUsers} />
+      <Route path="/admin/tags" component={AdminTags} />
+      <Route path="/admin/stats" component={AdminStats} />
+      <Route path="/admin/inbox" component={AdminInbox} />
       
       {/* Superuser Dashboard Routes */}
       <Route path="/super/ai-engine" component={AIEngine} />
