@@ -1,5 +1,5 @@
 // Script to create test users with different roles
-import { storage } from '../server/storage.js';
+import { storage } from '../server/storage.ts';
 
 async function createTestUsers() {
   try {
