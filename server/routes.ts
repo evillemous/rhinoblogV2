@@ -2175,6 +2175,25 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
   
+  // Debugging endpoint to see all users (temporary)
+  app.get("/api/debug/users", async (req, res) => {
+    try {
+      const users = await storage.getUsers();
+      // Return basic info without passwords
+      const safeUsers = users.map(u => ({
+        id: u.id,
+        username: u.username,
+        role: u.role,
+        isAdmin: u.isAdmin,
+        email: u.email
+      }));
+      res.status(200).json(safeUsers);
+    } catch (error) {
+      console.error("Error fetching users:", error);
+      res.status(500).json({ message: "Failed to fetch users" });
+    }
+  });
+  
   // Get user profile settings
   app.get("/api/user/settings", authenticate, async (req, res) => {
     try {
@@ -2440,7 +2459,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Create HTTP server
   const httpServer = createServer(app);
   
-  // Initialize with an admin user
+  // Initialize with admin and superadmin users
   const adminUser = await storage.getUserByUsername("admin");
   if (!adminUser) {
     await storage.createUser({
@@ -2448,9 +2467,52 @@ export async function registerRoutes(app: Express): Promise<Server> {
       password: "rhinoadmin123",
       email: "admin@rhinoplastyblogs.com",
       avatarUrl: null,
+      role: "admin",
       isAdmin: true
     });
     console.log("Admin user created: admin/rhinoadmin123");
+  }
+  
+  // Create superadmin user
+  const superadminUser = await storage.getUserByUsername("superadmin");
+  if (!superadminUser) {
+    await storage.createUser({
+      username: "superadmin",
+      password: "super123",
+      email: "superadmin@rhinoplastyblogs.com",
+      avatarUrl: null,
+      role: "superadmin",
+      isAdmin: true
+    });
+    console.log("Superadmin user created: superadmin/super123");
+  }
+  
+  // Create contributor (surgeon) user
+  const surgeonUser = await storage.getUserByUsername("drsurgeon");
+  if (!surgeonUser) {
+    await storage.createUser({
+      username: "drsurgeon",
+      password: "surgeon123",
+      email: "surgeon@rhinoplastyblogs.com",
+      role: "contributor",
+      contributorType: "surgeon",
+      bio: "Board-certified rhinoplasty specialist with 15 years of experience.",
+      avatarUrl: null
+    });
+    console.log("Surgeon contributor created: drsurgeon/surgeon123");
+  }
+  
+  // Create regular user
+  const regularUser = await storage.getUserByUsername("user");
+  if (!regularUser) {
+    await storage.createUser({
+      username: "user",
+      password: "user123",
+      email: "user@rhinoplastyblogs.com",
+      role: "user",
+      avatarUrl: null
+    });
+    console.log("Regular user created: user/user123");
   }
   
   return httpServer;
