@@ -253,15 +253,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const user = await storage.createUser({
         username,
         email: email || null,
-        password, // The storage implementation should hash this
+        password, // Store password as is - login compares directly
         role: role || "user",
         contributorType: contributorType || null,
         isAdmin: role === "admin" || role === "superadmin",
-        isVerified: role === "admin" || role === "superadmin" || role === "contributor",
-        createdAt: new Date(),
+        verified: role === "admin" || role === "superadmin" || role === "contributor",
         avatarUrl: null,
-        bio: null,
-        isLocked: false
+        bio: null
       });
       
       // Return user without password
