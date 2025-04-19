@@ -103,7 +103,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   
   // Role-based helper functions
   const isSuperAdmin = () => {
-    return user?.role === UserRole.SUPERADMIN || user?.isAdmin === true;
+    return user?.role === UserRole.SUPERADMIN;
   };
 
   const isAdmin = () => {
