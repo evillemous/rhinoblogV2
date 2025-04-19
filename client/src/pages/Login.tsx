@@ -65,7 +65,7 @@ const Login = () => {
         title: "Login successful",
         description: "Welcome back!",
       });
-      navigate("/user/dashboard");
+      navigate("/");
     },
     onError: (error) => {
       toast({
@@ -89,7 +89,7 @@ const Login = () => {
         title: "Registration successful",
         description: "Your account has been created!",
       });
-      navigate("/user/dashboard");
+      navigate("/");
     },
     onError: (error) => {
       toast({
