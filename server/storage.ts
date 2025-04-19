@@ -162,6 +162,65 @@ export class MemStorage implements IStorage {
         parentId: null
       });
       
+      // Create flagged content for moderation testing
+      
+      // Flagged post 1
+      const flaggedPost1 = await this.createPost({
+        title: "My rhinoplasty failed - help!",
+        content: "I had rhinoplasty 3 weeks ago and my nose looks terrible. The surgeon clearly messed up. I want to warn everyone about this doctor who ruined my life!",
+        imageUrl: null,
+        isAiGenerated: false,
+        userId: admin.id
+      });
+      
+      // Update the post to be flagged
+      await this.updatePost(flaggedPost1.id, {
+        status: "flagged",
+        moderationReason: "Potentially misleading medical claims",
+        reports: 3
+      });
+      
+      // Flagged post 2
+      const flaggedPost2 = await this.createPost({
+        title: "Best surgeons in Los Angeles area",
+        content: "After extensive research, I'm excited to share my findings about the best surgeons in LA. Dr. Smith at Beverly Hills Rhinoplasty Center is offering 20% off for new patients!",
+        imageUrl: null,
+        isAiGenerated: false,
+        userId: admin.id
+      });
+      
+      // Update the post to be flagged
+      await this.updatePost(flaggedPost2.id, {
+        status: "flagged",
+        moderationReason: "Promotional content / spam",
+        reports: 5
+      });
+      
+      // Flagged comment
+      const flaggedComment = await this.createComment({
+        userId: admin.id,
+        postId: demoPost.id,
+        content: "This is terrible advice! You should never do this procedure!",
+        parentId: null
+      });
+      
+      // Update the comment to be flagged
+      await this.updateComment(flaggedComment.id, {
+        status: "flagged",
+        moderationReason: "Harassment/rude",
+        reports: 4
+      });
+      
+      // Create pending posts for unverified content
+      const pendingPost = await this.createPost({
+        title: "My recovery experience with Dr. Smith",
+        content: "I just had rhinoplasty with Dr. Smith in Chicago and wanted to share my initial recovery experience...",
+        imageUrl: null,
+        isAiGenerated: false,
+        userId: admin.id,
+        status: "pending"
+      });
+      
       console.log('Demo content created successfully');
     } catch (error) {
       console.error('Error creating demo content:', error);

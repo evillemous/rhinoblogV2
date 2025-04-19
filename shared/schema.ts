@@ -62,6 +62,11 @@ export const posts = pgTable("posts", {
   createdAt: timestamp("created_at").defaultNow(),
   isAiGenerated: boolean("is_ai_generated").default(false),
   topicId: integer("topic_id"),
+  status: text("status").default("published"),
+  moderationReason: text("moderation_reason"),
+  reports: integer("reports").default(0),
+  moderatedAt: timestamp("moderated_at"),
+  moderatedBy: integer("moderated_by"),
 });
 
 export const insertPostSchema = createInsertSchema(posts)
@@ -111,6 +116,11 @@ export const comments = pgTable("comments", {
   downvotes: integer("downvotes").default(0),
   createdAt: timestamp("created_at").defaultNow(),
   parentId: integer("parent_id"),
+  status: text("status").default("published"),
+  moderationReason: text("moderation_reason"),
+  reports: integer("reports").default(0),
+  moderatedAt: timestamp("moderated_at"),
+  moderatedBy: integer("moderated_by"),
 });
 
 export const insertCommentSchema = createInsertSchema(comments).pick({
