@@ -53,6 +53,7 @@ export interface IStorage {
   // Comment operations
   getComment(id: number): Promise<Comment | undefined>;
   createComment(comment: InsertComment): Promise<Comment>;
+  updateComment(id: number, commentData: Partial<Comment>): Promise<Comment | undefined>;
   deleteComment(id: number): Promise<boolean>;
   getComments(postId: number): Promise<Comment[]>;
   getCommentsWithUsers(postId: number): Promise<CommentWithUser[]>;
@@ -460,6 +461,15 @@ export class MemStorage implements IStorage {
     return comment;
   }
 
+  async updateComment(id: number, commentData: Partial<Comment>): Promise<Comment | undefined> {
+    const comment = this.comments.get(id);
+    if (!comment) return undefined;
+    
+    const updatedComment = { ...comment, ...commentData };
+    this.comments.set(id, updatedComment);
+    return updatedComment;
+  }
+  
   async deleteComment(id: number): Promise<boolean> {
     const comment = this.comments.get(id);
     if (!comment) return false;

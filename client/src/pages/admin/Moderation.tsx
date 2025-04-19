@@ -55,10 +55,20 @@ const ContentModerationPage = () => {
       
       // Fetch flagged content from API
       const response = await apiRequest("GET", "/api/admin/moderation/flagged");
+      
+      if (!response.ok) {
+        throw new Error(`Failed to fetch flagged content: ${response.status} ${response.statusText}`);
+      }
+      
       const data = await response.json();
+      console.log("Flagged content data:", data);
+      
+      // Default empty arrays if data is missing
+      const posts = data.posts || [];
+      const comments = data.comments || [];
       
       // Add UI-friendly information to posts
-      const enhancedPosts = data.posts.map(post => ({
+      const enhancedPosts = posts.map(post => ({
         ...post,
         author: post.user?.username || 'Unknown',
         flagReason: post.moderationReason || 'Flagged for review',
@@ -67,7 +77,7 @@ const ContentModerationPage = () => {
       }));
       
       // Add UI-friendly information to comments
-      const enhancedComments = data.comments.map(comment => ({
+      const enhancedComments = comments.map(comment => ({
         ...comment,
         author: comment.user?.username || 'Unknown',
         postTitle: comment.post?.title || 'Unknown Post',
