@@ -80,24 +80,36 @@ const Header = () => {
         
         {/* Right actions */}
         <div className="flex items-center space-x-4">
-          {/* Admin Dashboard Button - only visible for admin users */}
+          {/* Admin/Superadmin Dashboard Button */}
           {isAuthenticated && user?.isAdmin && (
             <>
-              {/* Status indicator showing admin mode */}
+              {/* Status indicator showing admin/superadmin mode */}
               <div className="text-xs text-gray-500 mr-2">
-                Admin Mode
+                {user.role === 'superadmin' ? 'Superadmin Mode' : 'Admin Mode'}
               </div>
               
-              {/* Admin Dashboard Button */}
-              <Button
-                variant="destructive"
-                className="flex items-center gap-1 text-white font-bold border bg-rhino-navy hover:bg-rhino-navy/90"
-                size="default"
-                onClick={() => setLocation("/admin")}
-              >
-                <i className="fas fa-user-shield mr-1"></i>
-                Admin Dashboard
-              </Button>
+              {/* Dashboard Button based on role */}
+              {user.role === 'superadmin' ? (
+                <Button
+                  variant="destructive"
+                  className="flex items-center gap-1 text-white font-bold border bg-red-600 hover:bg-red-700"
+                  size="default"
+                  onClick={() => setLocation("/super/ai-engine")}
+                >
+                  <i className="fas fa-user-shield mr-1"></i>
+                  Superadmin Dashboard
+                </Button>
+              ) : (
+                <Button
+                  variant="destructive"
+                  className="flex items-center gap-1 text-white font-bold border bg-rhino-navy hover:bg-rhino-navy/90"
+                  size="default"
+                  onClick={() => setLocation("/admin")}
+                >
+                  <i className="fas fa-user-shield mr-1"></i>
+                  Admin Dashboard
+                </Button>
+              )}
             </>
           )}
         
@@ -131,14 +143,22 @@ const Header = () => {
               <DropdownMenuContent align="end">
                 <DropdownMenuLabel>
                   {user?.username}
-                  {user?.isAdmin && (
+                  {user?.role === 'superadmin' ? (
+                    <span className="ml-2 px-1 py-0.5 text-xs bg-red-100 dark:bg-red-900 text-red-800 dark:text-red-200 rounded">
+                      Superadmin
+                    </span>
+                  ) : user?.isAdmin && (
                     <span className="ml-2 px-1 py-0.5 text-xs bg-red-100 dark:bg-red-900 text-red-800 dark:text-red-200 rounded">
                       Admin
                     </span>
                   )}
                 </DropdownMenuLabel>
                 <DropdownMenuSeparator />
-                {user?.isAdmin && (
+                {user?.role === 'superadmin' ? (
+                  <DropdownMenuItem onClick={() => setLocation("/super/ai-engine")}>
+                    Superadmin Dashboard
+                  </DropdownMenuItem>
+                ) : user?.isAdmin && (
                   <DropdownMenuItem onClick={() => setLocation("/admin")}>
                     Admin Dashboard
                   </DropdownMenuItem>
@@ -241,13 +261,29 @@ const Header = () => {
                     </AvatarFallback>
                   </Avatar>
                   <span className="font-medium">{user?.username}</span>
-                  {user?.isAdmin && (
+                  {user?.role === 'superadmin' ? (
+                    <span className="ml-2 px-1 py-0.5 text-xs bg-red-100 dark:bg-red-900 text-red-800 dark:text-red-200 rounded">
+                      Superadmin
+                    </span>
+                  ) : user?.isAdmin && (
                     <span className="ml-2 px-1 py-0.5 text-xs bg-red-100 dark:bg-red-900 text-red-800 dark:text-red-200 rounded">
                       Admin
                     </span>
                   )}
                 </div>
-                {user?.isAdmin && (
+                {user?.role === 'superadmin' ? (
+                  <Button
+                    variant="default"
+                    className="w-full justify-start bg-red-600 hover:bg-red-700 text-white"
+                    onClick={() => {
+                      setLocation("/super/ai-engine");
+                      setMobileMenuOpen(false);
+                    }}
+                  >
+                    <i className="fas fa-user-shield mr-2"></i>
+                    Superadmin Dashboard
+                  </Button>
+                ) : user?.isAdmin && (
                   <Button
                     variant="default"
                     className="w-full justify-start bg-rhino-navy hover:bg-rhino-navy/90 text-white"

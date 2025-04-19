@@ -151,14 +151,56 @@ function Router() {
         )}
       </Route>
       
-      {/* Superuser Dashboard Routes */}
-      <Route path="/super/ai-engine" component={AIEngine} />
-      <Route path="/super/platform-settings" component={PlatformSettings} />
-      <Route path="/super/users" component={UserManagement} />
-      <Route path="/super/moderation" component={Moderation} />
-      <Route path="/super/analytics" component={Analytics} />
-      <Route path="/super/dev-tools" component={DevTools} />
-      <Route path="/super/content" component={ContentManagement} />
+      {/* Superuser Dashboard Routes - Protected with SuperAdminGuard */}
+      <Route path="/super/ai-engine">
+        {() => (
+          <SuperAdminGuard>
+            <AIEngine />
+          </SuperAdminGuard>
+        )}
+      </Route>
+      <Route path="/super/platform-settings">
+        {() => (
+          <SuperAdminGuard>
+            <PlatformSettings />
+          </SuperAdminGuard>
+        )}
+      </Route>
+      <Route path="/super/users">
+        {() => (
+          <SuperAdminGuard>
+            <UserManagement />
+          </SuperAdminGuard>
+        )}
+      </Route>
+      <Route path="/super/moderation">
+        {() => (
+          <SuperAdminGuard>
+            <Moderation />
+          </SuperAdminGuard>
+        )}
+      </Route>
+      <Route path="/super/analytics">
+        {() => (
+          <SuperAdminGuard>
+            <Analytics />
+          </SuperAdminGuard>
+        )}
+      </Route>
+      <Route path="/super/dev-tools">
+        {() => (
+          <SuperAdminGuard>
+            <DevTools />
+          </SuperAdminGuard>
+        )}
+      </Route>
+      <Route path="/super/content">
+        {() => (
+          <SuperAdminGuard>
+            <ContentManagement />
+          </SuperAdminGuard>
+        )}
+      </Route>
       
       <Route component={NotFound} />
     </Switch>
