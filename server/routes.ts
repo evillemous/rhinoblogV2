@@ -1243,6 +1243,209 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // ============= Moderation Endpoints ============= //
+  
+  // Perform moderation action on a post
+  app.post("/api/admin/moderation/posts/:id", authenticate, hasRole(['admin', 'superadmin']), async (req, res) => {
+    try {
+      const postId = parseInt(req.params.id);
+      const { action, reason } = req.body;
+      
+      // Validate action
+      const validActions = ['approve', 'reject', 'flag', 'pin', 'unpin'];
+      if (!validActions.includes(action)) {
+        return res.status(400).json({ 
+          success: false, 
+          message: `Invalid action. Valid actions are: ${validActions.join(', ')}` 
+        });
+      }
+      
+      // Get the post
+      const post = await storage.getPost(postId);
+      if (!post) {
+        return res.status(404).json({ success: false, message: "Post not found" });
+      }
+      
+      // Process action
+      let updatedPost;
+      switch (action) {
+        case 'approve':
+          updatedPost = await storage.updatePost(postId, {
+            status: 'published',
+            moderatedAt: new Date(),
+            moderatedBy: req.user.id,
+            moderationReason: reason || 'Content approved by moderator'
+          });
+          break;
+        case 'reject':
+          updatedPost = await storage.updatePost(postId, {
+            status: 'rejected',
+            moderatedAt: new Date(),
+            moderatedBy: req.user.id,
+            moderationReason: reason || 'Content rejected by moderator'
+          });
+          break;
+        case 'flag':
+          updatedPost = await storage.updatePost(postId, {
+            status: 'flagged',
+            moderatedAt: new Date(),
+            moderatedBy: req.user.id,
+            moderationReason: reason || 'Content flagged for review'
+          });
+          break;
+        case 'pin':
+          updatedPost = await storage.updatePost(postId, {
+            isPinned: true,
+            updatedAt: new Date()
+          });
+          break;
+        case 'unpin':
+          updatedPost = await storage.updatePost(postId, {
+            isPinned: false,
+            updatedAt: new Date()
+          });
+          break;
+      }
+      
+      if (!updatedPost) {
+        return res.status(500).json({ success: false, message: "Failed to update post" });
+      }
+      
+      return res.json({ 
+        success: true, 
+        message: `Post successfully ${action}ed`, 
+        data: updatedPost 
+      });
+    } catch (error) {
+      console.error(`Error performing moderation action:`, error);
+      return res.status(500).json({ success: false, message: "Error processing moderation action" });
+    }
+  });
+  
+  // Perform moderation action on a comment
+  app.post("/api/admin/moderation/comments/:id", authenticate, hasRole(['admin', 'superadmin']), async (req, res) => {
+    try {
+      const commentId = parseInt(req.params.id);
+      const { action, reason } = req.body;
+      
+      // Validate action
+      const validActions = ['approve', 'reject', 'flag'];
+      if (!validActions.includes(action)) {
+        return res.status(400).json({ 
+          success: false, 
+          message: `Invalid action. Valid actions are: ${validActions.join(', ')}` 
+        });
+      }
+      
+      // Get the comment
+      const comment = await storage.getComment(commentId);
+      if (!comment) {
+        return res.status(404).json({ success: false, message: "Comment not found" });
+      }
+      
+      // Process action
+      let updatedComment;
+      switch (action) {
+        case 'approve':
+          updatedComment = await storage.updateComment(commentId, {
+            status: 'published',
+            moderatedAt: new Date(),
+            moderatedBy: req.user.id,
+            moderationReason: reason || 'Comment approved by moderator'
+          });
+          break;
+        case 'reject':
+          updatedComment = await storage.updateComment(commentId, {
+            status: 'rejected',
+            moderatedAt: new Date(),
+            moderatedBy: req.user.id,
+            moderationReason: reason || 'Comment rejected by moderator'
+          });
+          break;
+        case 'flag':
+          updatedComment = await storage.updateComment(commentId, {
+            status: 'flagged',
+            moderatedAt: new Date(),
+            moderatedBy: req.user.id,
+            moderationReason: reason || 'Comment flagged for review'
+          });
+          break;
+      }
+      
+      if (!updatedComment) {
+        return res.status(500).json({ success: false, message: "Failed to update comment" });
+      }
+      
+      return res.json({ 
+        success: true, 
+        message: `Comment successfully ${action}ed`, 
+        data: updatedComment 
+      });
+    } catch (error) {
+      console.error(`Error performing moderation action:`, error);
+      return res.status(500).json({ success: false, message: "Error processing moderation action" });
+    }
+  });
+  
+  // Get flagged content that needs moderation
+  app.get("/api/admin/moderation/flagged", authenticate, hasRole(['admin', 'superadmin']), async (req, res) => {
+    try {
+      // Get all posts and comments
+      const posts = await storage.getPostsWithTags();
+      const allComments = await storage.getCommentsWithUsers();
+      
+      // Filter flagged content
+      const flaggedPosts = posts.filter(post => post.status === 'flagged');
+      const flaggedComments = allComments.filter(comment => comment.status === 'flagged');
+      
+      return res.json({
+        posts: flaggedPosts,
+        comments: flaggedComments
+      });
+    } catch (error) {
+      console.error(`Error fetching flagged content:`, error);
+      return res.status(500).json({ message: "Error fetching flagged content" });
+    }
+  });
+  
+  // Get moderation stats
+  app.get("/api/admin/moderation/stats", authenticate, hasRole(['admin', 'superadmin']), async (req, res) => {
+    try {
+      // Get all posts and comments
+      const posts = await storage.getPostsWithTags();
+      const allComments = await storage.getCommentsWithUsers();
+      
+      // Calculate stats
+      const totalPosts = posts.length;
+      const flaggedPosts = posts.filter(post => post.status === 'flagged').length;
+      const approvedPosts = posts.filter(post => post.status === 'published').length;
+      const rejectedPosts = posts.filter(post => post.status === 'rejected').length;
+      
+      const totalComments = allComments.length;
+      const flaggedComments = allComments.filter(comment => comment.status === 'flagged').length;
+      const approvedComments = allComments.filter(comment => comment.status === 'published').length;
+      const rejectedComments = allComments.filter(comment => comment.status === 'rejected').length;
+      
+      return res.json({
+        posts: {
+          total: totalPosts,
+          flagged: flaggedPosts,
+          approved: approvedPosts,
+          rejected: rejectedPosts
+        },
+        comments: {
+          total: totalComments,
+          flagged: flaggedComments,
+          approved: approvedComments,
+          rejected: rejectedComments
+        }
+      });
+    } catch (error) {
+      console.error(`Error fetching moderation stats:`, error);
+      return res.status(500).json({ message: "Error fetching moderation stats" });
+    }
+  });
+  
   app.post("/api/admin/generate-batch", authenticate, hasRole(['admin', 'superadmin']), async (req, res) => {
     try {
       // Get admin user
