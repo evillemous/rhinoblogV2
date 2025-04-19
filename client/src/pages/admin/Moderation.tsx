@@ -24,20 +24,81 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+  DialogFooter,
+} from "@/components/ui/dialog";
 import { format } from "date-fns";
+
+// Define TypeScript interfaces for our data structures
+interface FlaggedPost {
+  id: number;
+  title: string;
+  content?: string; // Optional because some mock data might not have it
+  author: string;
+  flagReason: string;
+  flagCount: number;
+  date: Date;
+  status: string;
+  user?: {
+    username: string;
+  };
+  createdAt?: string | Date; // From the original API response
+  reports?: number; // From the original API response
+  moderationReason?: string; // From the original API response
+}
+
+interface FlaggedComment {
+  id: number;
+  content: string;
+  author: string;
+  postTitle: string;
+  flagReason: string;
+  flagCount: number;
+  date: Date;
+  status: string;
+  post?: {
+    title: string;
+  };
+  createdAt?: string | Date; // From the original API response
+  reports?: number; // From the original API response
+  moderationReason?: string; // From the original API response
+}
+
+interface UnverifiedPost {
+  id: number;
+  title: string;
+  content?: string; // Sometimes we only have the preview
+  author: string;
+  preview: string;
+  date: Date;
+  status: string;
+  user?: {
+    username: string;
+  };
+  createdAt?: string | Date; // From the original API response
+}
 
 const ContentModerationPage = () => {
   const [activeTab, setActiveTab] = useState("flagged-posts");
   const { toast } = useToast();
   
   // State for storing content that needs moderation
-  const [flaggedContent, setFlaggedContent] = useState({
+  const [flaggedContent, setFlaggedContent] = useState<{
+    posts: FlaggedPost[],
+    comments: FlaggedComment[]
+  }>({
     posts: [],
     comments: [],
   });
   
   // State for storing unverified content
-  const [unverifiedPosts, setUnverifiedPosts] = useState([]);
+  const [unverifiedPosts, setUnverifiedPosts] = useState<UnverifiedPost[]>([]);
   
   // Loading states
   const [isLoading, setIsLoading] = useState(true);
@@ -68,7 +129,7 @@ const ContentModerationPage = () => {
       const comments = data.comments || [];
       
       // Add UI-friendly information to posts
-      const enhancedPosts = posts.map(post => ({
+      const enhancedPosts = posts.map((post: any) => ({
         ...post,
         author: post.user?.username || 'Unknown',
         flagReason: post.moderationReason || 'Flagged for review',
@@ -77,7 +138,7 @@ const ContentModerationPage = () => {
       }));
       
       // Add UI-friendly information to comments
-      const enhancedComments = comments.map(comment => ({
+      const enhancedComments = comments.map((comment: any) => ({
         ...comment,
         author: comment.user?.username || 'Unknown',
         postTitle: comment.post?.title || 'Unknown Post',
@@ -87,8 +148,8 @@ const ContentModerationPage = () => {
       }));
       
       setFlaggedContent({
-        posts: enhancedPosts,
-        comments: enhancedComments,
+        posts: enhancedPosts as FlaggedPost[],
+        comments: enhancedComments as FlaggedComment[],
       });
       
       // Also fetch unverified posts
@@ -97,8 +158,8 @@ const ContentModerationPage = () => {
       
       // Filter and format unverified posts
       const pendingPosts = allPostsData
-        .filter(post => post.status === 'pending')
-        .map(post => ({
+        .filter((post: any) => post.status === 'pending')
+        .map((post: any) => ({
           ...post,
           author: post.user?.username || 'Unknown',
           preview: post.content?.substring(0, 100) + '...' || 'No content',
@@ -406,10 +467,62 @@ const ContentModerationPage = () => {
                                   </Button>
                                 </DropdownMenuTrigger>
                                 <DropdownMenuContent align="end">
-                                  <DropdownMenuItem>
-                                    <Eye className="mr-2 h-4 w-4" />
-                                    View
-                                  </DropdownMenuItem>
+                                  <Dialog>
+                                    <DialogTrigger asChild>
+                                      <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
+                                        <Eye className="mr-2 h-4 w-4" />
+                                        View
+                                      </DropdownMenuItem>
+                                    </DialogTrigger>
+                                    <DialogContent className="max-w-3xl max-h-[80vh] overflow-y-auto">
+                                      <DialogHeader>
+                                        <DialogTitle>{post.title}</DialogTitle>
+                                        <DialogDescription>
+                                          Posted by {post.author} • {format(post.date, "PPP")}
+                                        </DialogDescription>
+                                      </DialogHeader>
+                                      <div className="mt-4 space-y-4">
+                                        <div className="bg-muted/30 p-4 rounded-md">
+                                          <h3 className="font-semibold mb-2">Flag Reason:</h3>
+                                          <div className="flex items-center text-red-500">
+                                            <Flag className="h-4 w-4 mr-2" /> 
+                                            {post.flagReason}
+                                          </div>
+                                          <div className="text-muted-foreground mt-1 text-sm">
+                                            Reported {post.flagCount} times
+                                          </div>
+                                        </div>
+                                        <div>
+                                          <h3 className="font-semibold mb-2">Content:</h3>
+                                          <div className="prose prose-sm max-w-none">
+                                            {post.content}
+                                          </div>
+                                        </div>
+                                      </div>
+                                      <DialogFooter className="mt-6 flex items-center justify-between">
+                                        <div className="flex gap-2">
+                                          <Button
+                                            variant="default"
+                                            size="sm"
+                                            onClick={() => approveFlaggedItem(post.id, 'post')}
+                                            disabled={isActionLoading}
+                                          >
+                                            <CheckCircle className="h-4 w-4 mr-2" />
+                                            Approve
+                                          </Button>
+                                          <Button
+                                            variant="destructive"
+                                            size="sm"
+                                            onClick={() => rejectFlaggedItem(post.id, 'post')}
+                                            disabled={isActionLoading}
+                                          >
+                                            <X className="h-4 w-4 mr-2" />
+                                            Reject
+                                          </Button>
+                                        </div>
+                                      </DialogFooter>
+                                    </DialogContent>
+                                  </Dialog>
                                   <DropdownMenuItem>
                                     <Edit className="mr-2 h-4 w-4" />
                                     Edit
@@ -488,10 +601,62 @@ const ContentModerationPage = () => {
                                   </Button>
                                 </DropdownMenuTrigger>
                                 <DropdownMenuContent align="end">
-                                  <DropdownMenuItem>
-                                    <Eye className="mr-2 h-4 w-4" />
-                                    View Context
-                                  </DropdownMenuItem>
+                                  <Dialog>
+                                    <DialogTrigger asChild>
+                                      <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
+                                        <Eye className="mr-2 h-4 w-4" />
+                                        View Context
+                                      </DropdownMenuItem>
+                                    </DialogTrigger>
+                                    <DialogContent className="max-w-3xl max-h-[80vh] overflow-y-auto">
+                                      <DialogHeader>
+                                        <DialogTitle>Comment on "{comment.postTitle}"</DialogTitle>
+                                        <DialogDescription>
+                                          Posted by {comment.author} • {format(comment.date, "PPP")}
+                                        </DialogDescription>
+                                      </DialogHeader>
+                                      <div className="mt-4 space-y-4">
+                                        <div className="bg-muted/30 p-4 rounded-md">
+                                          <h3 className="font-semibold mb-2">Flag Reason:</h3>
+                                          <div className="flex items-center text-red-500">
+                                            <Flag className="h-4 w-4 mr-2" /> 
+                                            {comment.flagReason}
+                                          </div>
+                                          <div className="text-muted-foreground mt-1 text-sm">
+                                            Reported {comment.flagCount} times
+                                          </div>
+                                        </div>
+                                        <div>
+                                          <h3 className="font-semibold mb-2">Comment Content:</h3>
+                                          <div className="prose prose-sm max-w-none">
+                                            {comment.content}
+                                          </div>
+                                        </div>
+                                      </div>
+                                      <DialogFooter className="mt-6 flex items-center justify-between">
+                                        <div className="flex gap-2">
+                                          <Button
+                                            variant="default"
+                                            size="sm"
+                                            onClick={() => approveFlaggedItem(comment.id, 'comment')}
+                                            disabled={isActionLoading}
+                                          >
+                                            <CheckCircle className="h-4 w-4 mr-2" />
+                                            Approve
+                                          </Button>
+                                          <Button
+                                            variant="destructive"
+                                            size="sm"
+                                            onClick={() => rejectFlaggedItem(comment.id, 'comment')}
+                                            disabled={isActionLoading}
+                                          >
+                                            <X className="h-4 w-4 mr-2" />
+                                            Reject
+                                          </Button>
+                                        </div>
+                                      </DialogFooter>
+                                    </DialogContent>
+                                  </Dialog>
                                   <DropdownMenuItem>
                                     <Edit className="mr-2 h-4 w-4" />
                                     Edit
@@ -560,10 +725,68 @@ const ContentModerationPage = () => {
                                   </Button>
                                 </DropdownMenuTrigger>
                                 <DropdownMenuContent align="end">
-                                  <DropdownMenuItem>
-                                    <Eye className="mr-2 h-4 w-4" />
-                                    View
-                                  </DropdownMenuItem>
+                                  <Dialog>
+                                    <DialogTrigger asChild>
+                                      <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
+                                        <Eye className="mr-2 h-4 w-4" />
+                                        View
+                                      </DropdownMenuItem>
+                                    </DialogTrigger>
+                                    <DialogContent className="max-w-3xl max-h-[80vh] overflow-y-auto">
+                                      <DialogHeader>
+                                        <DialogTitle>{post.title}</DialogTitle>
+                                        <DialogDescription>
+                                          Posted by {post.author} • {format(post.date, "PPP")}
+                                        </DialogDescription>
+                                      </DialogHeader>
+                                      <div className="mt-4 space-y-4">
+                                        <div className="bg-muted/30 p-4 rounded-md">
+                                          <h3 className="font-semibold mb-2">Status:</h3>
+                                          <div className="flex items-center text-amber-500">
+                                            <Clock className="h-4 w-4 mr-2" /> 
+                                            Pending verification
+                                          </div>
+                                          <div className="text-muted-foreground mt-1 text-sm">
+                                            New user content requires review
+                                          </div>
+                                        </div>
+                                        <div>
+                                          <h3 className="font-semibold mb-2">Content Preview:</h3>
+                                          <div className="prose prose-sm max-w-none">
+                                            {post.preview}
+                                            {post.content && (
+                                              <div className="mt-2">
+                                                <h4 className="font-medium text-sm">Full Content:</h4>
+                                                <p>{post.content}</p>
+                                              </div>
+                                            )}
+                                          </div>
+                                        </div>
+                                      </div>
+                                      <DialogFooter className="mt-6 flex items-center justify-between">
+                                        <div className="flex gap-2">
+                                          <Button
+                                            variant="default"
+                                            size="sm"
+                                            onClick={() => approveFlaggedItem(post.id, 'post')}
+                                            disabled={isActionLoading}
+                                          >
+                                            <CheckCircle className="h-4 w-4 mr-2" />
+                                            Approve
+                                          </Button>
+                                          <Button
+                                            variant="destructive"
+                                            size="sm"
+                                            onClick={() => rejectFlaggedItem(post.id, 'post')}
+                                            disabled={isActionLoading}
+                                          >
+                                            <X className="h-4 w-4 mr-2" />
+                                            Reject
+                                          </Button>
+                                        </div>
+                                      </DialogFooter>
+                                    </DialogContent>
+                                  </Dialog>
                                   <DropdownMenuItem>
                                     <Edit className="mr-2 h-4 w-4" />
                                     Edit
