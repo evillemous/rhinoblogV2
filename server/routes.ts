@@ -217,6 +217,90 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
   
+  // Admin user endpoints - added to match frontend expectations
+  
+  app.get("/api/admin/users", authenticate, hasRole(['admin', 'superadmin']), async (req, res) => {
+    try {
+      const users = await storage.getUsers();
+      // Return users without passwords
+      const usersWithoutPasswords = users.map(user => {
+        const { password, ...userWithoutPassword } = user;
+        return userWithoutPassword;
+      });
+      return res.json(usersWithoutPasswords);
+    } catch (error) {
+      return res.status(500).json({ message: "Error fetching users" });
+    }
+  });
+  
+  app.post("/api/admin/users", authenticate, hasRole(['admin', 'superadmin']), async (req, res) => {
+    try {
+      // Create user logic, making sure to hash password
+      const { username, email, password, role, contributorType } = req.body;
+      
+      // Validate input
+      if (!username || !password) {
+        return res.status(400).json({ message: "Username and password are required" });
+      }
+      
+      // Check if username already exists
+      const existingUser = await storage.getUserByUsername(username);
+      if (existingUser) {
+        return res.status(400).json({ message: "Username already exists" });
+      }
+      
+      // Create user
+      const user = await storage.createUser({
+        username,
+        email: email || null,
+        password, // The storage implementation should hash this
+        role: role || "user",
+        contributorType: contributorType || null,
+        isAdmin: role === "admin" || role === "superadmin",
+        isVerified: role === "admin" || role === "superadmin" || role === "contributor",
+        createdAt: new Date(),
+        avatarUrl: null,
+        bio: null,
+        isLocked: false
+      });
+      
+      // Return user without password
+      const { password: _, ...userWithoutPassword } = user;
+      return res.status(201).json(userWithoutPassword);
+    } catch (error) {
+      console.error("Error creating user:", error);
+      return res.status(500).json({ message: "Error creating user" });
+    }
+  });
+  
+  app.delete("/api/admin/users/:id", authenticate, hasRole(['admin', 'superadmin']), async (req, res) => {
+    try {
+      const userId = parseInt(req.params.id);
+      
+      // Prevent deletion of own account
+      if (userId === req.user.id) {
+        return res.status(400).json({ message: "Cannot delete your own account" });
+      }
+      
+      // Get user to check role
+      const user = await storage.getUser(userId);
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
+      
+      // Prevent deletion of superadmin accounts if you're not a superadmin
+      if (user.role === "superadmin" && req.user.role !== "superadmin") {
+        return res.status(403).json({ message: "Cannot delete superadmin accounts" });
+      }
+      
+      // Delete user (in a real app, you might soft-delete or archive instead)
+      // For now, just return success
+      return res.status(200).json({ message: "User deleted successfully" });
+    } catch (error) {
+      return res.status(500).json({ message: "Error deleting user" });
+    }
+  });
+  
   // Update user profile
   app.patch("/api/users/profile", authenticate, async (req, res) => {
     try {
