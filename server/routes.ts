@@ -96,6 +96,9 @@ const isContributor = (req: express.Request, res: express.Response, next: expres
 export async function registerRoutes(app: Express): Promise<Server> {
   app.use(express.json());
   
+  // Import UserRole and ContributorType
+  const { UserRole, ContributorType } = await import("@shared/schema");
+  
   // Auth routes
   app.post("/api/register", async (req, res) => {
     try {
@@ -322,6 +325,257 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error updating password:", error);
       return res.status(500).json({ message: "Error updating password" });
+    }
+  });
+  
+  // Contributor endpoints
+  
+  // Get contributor profile with external links
+  app.get("/api/contributor/profile", authenticate, isContributor, async (req, res) => {
+    try {
+      const userId = req.user.id;
+      const user = await storage.getUser(userId);
+      
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
+      
+      // Process profileLinks if available
+      let profileData = { ...user };
+      delete profileData.password; // Remove password
+      
+      if (profileData.profileLinks && typeof profileData.profileLinks === 'string') {
+        try {
+          profileData.profileLinks = JSON.parse(profileData.profileLinks);
+        } catch (e) {
+          console.error("Error parsing profile links:", e);
+          profileData.profileLinks = {}; // Default to empty object if parsing fails
+        }
+      } else if (!profileData.profileLinks) {
+        profileData.profileLinks = {};
+      }
+      
+      return res.status(200).json(profileData);
+    } catch (error) {
+      console.error("Error fetching contributor profile:", error);
+      return res.status(500).json({ message: "Error fetching contributor profile" });
+    }
+  });
+  
+  // Update contributor profile
+  app.patch("/api/contributor/profile", authenticate, isContributor, async (req, res) => {
+    try {
+      const userId = req.user.id;
+      const { bio, profileLinks } = req.body;
+      
+      // Process profile links based on contributor type
+      let storedProfileLinks = profileLinks;
+      if (profileLinks && typeof profileLinks === 'object') {
+        storedProfileLinks = JSON.stringify(profileLinks);
+      }
+      
+      // Update user profile
+      const updateData: any = {};
+      if (bio !== undefined) updateData.bio = bio;
+      if (storedProfileLinks !== undefined) updateData.profileLinks = storedProfileLinks;
+      
+      const updatedUser = await storage.updateUser(userId, updateData);
+      
+      if (!updatedUser) {
+        return res.status(404).json({ message: "User not found" });
+      }
+      
+      // Don't send password to client
+      const { password, ...userWithoutPassword } = updatedUser;
+      
+      // Parse profileLinks for response
+      let responseData = { ...userWithoutPassword };
+      if (responseData.profileLinks && typeof responseData.profileLinks === 'string') {
+        try {
+          responseData.profileLinks = JSON.parse(responseData.profileLinks);
+        } catch (e) {
+          console.error("Error parsing profile links for response:", e);
+          responseData.profileLinks = {};
+        }
+      }
+      
+      return res.status(200).json(responseData);
+    } catch (error) {
+      console.error("Error updating contributor profile:", error);
+      return res.status(500).json({ message: "Error updating contributor profile" });
+    }
+  });
+  
+  // Get contributor content (posts, comments, analytics)
+  app.get("/api/contributor/content", authenticate, isContributor, async (req, res) => {
+    try {
+      const userId = req.user.id;
+      const allPosts = await storage.getPostsWithTags();
+      
+      // Filter for the contributor's posts
+      const contributorPosts = allPosts.filter(post => post.userId === userId);
+      
+      // Get basic analytics for each post
+      const postsWithAnalytics = await Promise.all(contributorPosts.map(async post => {
+        const comments = await storage.getCommentsWithUsers(post.id);
+        
+        return {
+          ...post,
+          commentCount: comments.length,
+          analytics: {
+            views: post.upvotes + post.downvotes + comments.length * 2, // Simple estimation for demo
+            upvotes: post.upvotes,
+            downvotes: post.downvotes,
+            comments: comments.length
+          }
+        };
+      }));
+      
+      return res.status(200).json({
+        posts: postsWithAnalytics,
+        totalPosts: postsWithAnalytics.length,
+        summary: {
+          totalUpvotes: postsWithAnalytics.reduce((sum, post) => sum + post.upvotes, 0),
+          totalComments: postsWithAnalytics.reduce((sum, post) => sum + post.commentCount, 0),
+          totalViews: postsWithAnalytics.reduce((sum, post) => sum + post.analytics.views, 0)
+        }
+      });
+    } catch (error) {
+      console.error("Error fetching contributor content:", error);
+      return res.status(500).json({ message: "Error fetching contributor content" });
+    }
+  });
+  
+  // Admin contributor management endpoints
+  app.get("/api/admin/contributors", authenticate, hasRole(['admin', 'superadmin']), async (req, res) => {
+    try {
+      const users = await storage.getUsers();
+      const contributors = users.filter(user => user.role === 'contributor');
+      
+      // Process each contributor to handle profileLinks and remove passwords
+      const processedContributors = contributors.map(contributor => {
+        const { password, ...noPassword } = contributor;
+        
+        // Parse profileLinks if it exists
+        if (noPassword.profileLinks && typeof noPassword.profileLinks === 'string') {
+          try {
+            return {
+              ...noPassword,
+              profileLinks: JSON.parse(noPassword.profileLinks)
+            };
+          } catch (e) {
+            console.error("Error parsing profile links:", e);
+            return {
+              ...noPassword,
+              profileLinks: {}
+            };
+          }
+        }
+        
+        return {
+          ...noPassword,
+          profileLinks: {}
+        };
+      });
+      
+      return res.status(200).json(processedContributors);
+    } catch (error) {
+      console.error("Error fetching contributors:", error);
+      return res.status(500).json({ message: "Error fetching contributors" });
+    }
+  });
+  
+  // Update contributor status (admin endpoint)
+  app.patch("/api/admin/contributors/:id", authenticate, hasRole(['admin', 'superadmin']), async (req, res) => {
+    try {
+      const contributorId = parseInt(req.params.id);
+      const { verified, contributorType, trustScore } = req.body;
+      
+      // Get the contributor
+      const contributor = await storage.getUser(contributorId);
+      
+      if (!contributor) {
+        return res.status(404).json({ message: "Contributor not found" });
+      }
+      
+      if (contributor.role !== 'contributor') {
+        return res.status(400).json({ message: "User is not a contributor" });
+      }
+      
+      // Only allow updating specific contributor fields
+      const updateData: any = {};
+      if (verified !== undefined) updateData.verified = verified;
+      if (contributorType !== undefined) updateData.contributorType = contributorType;
+      if (trustScore !== undefined) updateData.trustScore = trustScore;
+      
+      // Update contributor
+      const updatedContributor = await storage.updateUser(contributorId, updateData);
+      
+      if (!updatedContributor) {
+        return res.status(500).json({ message: "Failed to update contributor" });
+      }
+      
+      // Don't send password to client
+      const { password, ...contributorWithoutPassword } = updatedContributor;
+      
+      return res.status(200).json(contributorWithoutPassword);
+    } catch (error) {
+      console.error("Error updating contributor:", error);
+      return res.status(500).json({ message: "Error updating contributor" });
+    }
+  });
+  
+  // Convert user to contributor (admin endpoint)
+  app.post("/api/admin/contributors/promote/:id", authenticate, hasRole(['admin', 'superadmin']), async (req, res) => {
+    try {
+      const userId = parseInt(req.params.id);
+      const { contributorType } = req.body;
+      
+      if (!contributorType || !Object.values(ContributorType).includes(contributorType)) {
+        return res.status(400).json({ 
+          message: "Valid contributor type required",
+          validTypes: Object.values(ContributorType)
+        });
+      }
+      
+      // Get the user
+      const user = await storage.getUser(userId);
+      
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
+      
+      if (user.role === 'contributor') {
+        return res.status(400).json({ message: "User is already a contributor" });
+      }
+      
+      // Don't allow promoting admins or superadmins
+      if (user.role === 'admin' || user.role === 'superadmin') {
+        return res.status(400).json({ message: "Cannot convert admin or superadmin to contributor" });
+      }
+      
+      // Promote to contributor
+      const updatedUser = await storage.updateUser(userId, {
+        role: 'contributor',
+        contributorType,
+        verified: false, // Default to unverified when first promoted
+        trustScore: 10 // Default starting trust score
+      });
+      
+      if (!updatedUser) {
+        return res.status(500).json({ message: "Failed to promote user to contributor" });
+      }
+      
+      // Don't send password to client
+      const { password, ...userWithoutPassword } = updatedUser;
+      
+      return res.status(200).json({
+        message: "User successfully promoted to contributor",
+        user: userWithoutPassword
+      });
+    } catch (error) {
+      console.error("Error promoting user to contributor:", error);
+      return res.status(500).json({ message: "Error promoting user to contributor" });
     }
   });
   
