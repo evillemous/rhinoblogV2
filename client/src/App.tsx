@@ -110,7 +110,7 @@ function Router() {
         {() => (
           <UserGuard>
             <Suspense fallback={<div className="flex items-center justify-center min-h-screen"><div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div></div>}>
-              {lazy(() => import("@/pages/user/Comments"))()}
+              {lazy(() => import("@/pages/user/Comments"))({})}
             </Suspense>
           </UserGuard>
         )}
@@ -119,7 +119,7 @@ function Router() {
         {() => (
           <UserGuard>
             <Suspense fallback={<div className="flex items-center justify-center min-h-screen"><div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div></div>}>
-              {lazy(() => import("@/pages/user/Saved"))()}
+              {lazy(() => import("@/pages/user/Saved"))({})}
             </Suspense>
           </UserGuard>
         )}
@@ -128,7 +128,7 @@ function Router() {
         {() => (
           <UserGuard>
             <Suspense fallback={<div className="flex items-center justify-center min-h-screen"><div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div></div>}>
-              {lazy(() => import("@/pages/user/Tags"))()}
+              {lazy(() => import("@/pages/user/Tags"))({})}
             </Suspense>
           </UserGuard>
         )}
@@ -137,7 +137,7 @@ function Router() {
         {() => (
           <UserGuard>
             <Suspense fallback={<div className="flex items-center justify-center min-h-screen"><div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div></div>}>
-              {lazy(() => import("@/pages/user/CreatePost"))()}
+              {lazy(() => import("@/pages/user/CreatePost"))({})}
             </Suspense>
           </UserGuard>
         )}
@@ -146,7 +146,7 @@ function Router() {
         {() => (
           <UserGuard>
             <Suspense fallback={<div className="flex items-center justify-center min-h-screen"><div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div></div>}>
-              {lazy(() => import("@/pages/user/ApplyContributor"))()}
+              {lazy(() => import("@/pages/user/ApplyContributor"))({})}
             </Suspense>
           </UserGuard>
         )}
