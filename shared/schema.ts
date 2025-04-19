@@ -31,6 +31,7 @@ export const users = pgTable("users", {
   verified: boolean("verified").default(false),
   bio: text("bio"),
   trustScore: integer("trust_score").default(0),
+  profileLinks: text("profile_links"), // Stored as JSON string for external links
   isAdmin: boolean("is_admin").default(false), // Keeping for backward compatibility
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at"),
@@ -46,6 +47,7 @@ export const insertUserSchema = createInsertSchema(users).pick({
   verified: true,
   bio: true,
   trustScore: true,
+  profileLinks: true,
   isAdmin: true,
 });
 
