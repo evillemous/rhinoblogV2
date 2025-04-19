@@ -81,7 +81,7 @@ const Header = () => {
         {/* Right actions */}
         <div className="flex items-center space-x-4">
           {/* Admin/Superadmin Dashboard Button */}
-          {isAuthenticated && user?.isAdmin && (
+          {isAuthenticated && (user?.role === 'admin' || user?.role === 'superadmin') && (
             <>
               {/* Status indicator showing admin/superadmin mode */}
               <div className="text-xs text-gray-500 mr-2">
@@ -104,7 +104,7 @@ const Header = () => {
                   variant="destructive"
                   className="flex items-center gap-1 text-white font-bold border bg-rhino-navy hover:bg-rhino-navy/90"
                   size="default"
-                  onClick={() => setLocation("/admin")}
+                  onClick={() => setLocation("/admin/dashboard")}
                 >
                   <i className="fas fa-user-shield mr-1"></i>
                   Admin Dashboard
@@ -147,8 +147,8 @@ const Header = () => {
                     <span className="ml-2 px-1 py-0.5 text-xs bg-red-100 dark:bg-red-900 text-red-800 dark:text-red-200 rounded">
                       Superadmin
                     </span>
-                  ) : user?.isAdmin && (
-                    <span className="ml-2 px-1 py-0.5 text-xs bg-red-100 dark:bg-red-900 text-red-800 dark:text-red-200 rounded">
+                  ) : user?.role === 'admin' && (
+                    <span className="ml-2 px-1 py-0.5 text-xs bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 rounded">
                       Admin
                     </span>
                   )}
@@ -158,8 +158,8 @@ const Header = () => {
                   <DropdownMenuItem onClick={() => setLocation("/super/ai-engine")}>
                     Superadmin Dashboard
                   </DropdownMenuItem>
-                ) : user?.isAdmin && (
-                  <DropdownMenuItem onClick={() => setLocation("/admin")}>
+                ) : user?.role === 'admin' && (
+                  <DropdownMenuItem onClick={() => setLocation("/admin/dashboard")}>
                     Admin Dashboard
                   </DropdownMenuItem>
                 )}
@@ -265,8 +265,8 @@ const Header = () => {
                     <span className="ml-2 px-1 py-0.5 text-xs bg-red-100 dark:bg-red-900 text-red-800 dark:text-red-200 rounded">
                       Superadmin
                     </span>
-                  ) : user?.isAdmin && (
-                    <span className="ml-2 px-1 py-0.5 text-xs bg-red-100 dark:bg-red-900 text-red-800 dark:text-red-200 rounded">
+                  ) : user?.role === 'admin' && (
+                    <span className="ml-2 px-1 py-0.5 text-xs bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 rounded">
                       Admin
                     </span>
                   )}
@@ -283,12 +283,12 @@ const Header = () => {
                     <i className="fas fa-user-shield mr-2"></i>
                     Superadmin Dashboard
                   </Button>
-                ) : user?.isAdmin && (
+                ) : user?.role === 'admin' && (
                   <Button
                     variant="default"
                     className="w-full justify-start bg-rhino-navy hover:bg-rhino-navy/90 text-white"
                     onClick={() => {
-                      setLocation("/admin");
+                      setLocation("/admin/dashboard");
                       setMobileMenuOpen(false);
                     }}
                   >
