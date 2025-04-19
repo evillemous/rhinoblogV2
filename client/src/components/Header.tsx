@@ -143,8 +143,14 @@ const Header = () => {
                     Admin Dashboard
                   </DropdownMenuItem>
                 )}
-                <DropdownMenuItem onClick={() => setLocation("/")}>
-                  My Profile
+                <DropdownMenuItem onClick={() => setLocation("/user/dashboard")}>
+                  Dashboard
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => setLocation("/user/posts")}>
+                  My Posts
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => setLocation("/user/saved")}>
+                  Saved Content
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem onClick={logout}>
@@ -258,11 +264,31 @@ const Header = () => {
                   variant="ghost"
                   className="w-full justify-start"
                   onClick={() => {
-                    setLocation("/");
+                    setLocation("/user/dashboard");
                     setMobileMenuOpen(false);
                   }}
                 >
-                  My Profile
+                  Dashboard
+                </Button>
+                <Button
+                  variant="ghost"
+                  className="w-full justify-start"
+                  onClick={() => {
+                    setLocation("/user/posts");
+                    setMobileMenuOpen(false);
+                  }}
+                >
+                  My Posts
+                </Button>
+                <Button
+                  variant="ghost"
+                  className="w-full justify-start"
+                  onClick={() => {
+                    setLocation("/user/saved");
+                    setMobileMenuOpen(false);
+                  }}
+                >
+                  Saved Content
                 </Button>
                 <Button
                   variant="ghost"
