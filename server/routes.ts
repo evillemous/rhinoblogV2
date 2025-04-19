@@ -2014,6 +2014,262 @@ export async function registerRoutes(app: Express): Promise<Server> {
     setupScheduledTask();
   }, 60000); // Check every minute
 
+  // ============= User Dashboard Routes ============= //
+
+  // Get user dashboard stats and activity
+  app.get("/api/user/dashboard", authenticate, async (req, res) => {
+    try {
+      // Get user's posts
+      const posts = await storage.getPosts();
+      const userPosts = posts.filter(post => post.userId === req.user.id);
+      
+      // Get user's comments
+      const allComments = [];
+      for (const post of posts) {
+        const comments = await storage.getComments(post.id);
+        allComments.push(...comments);
+      }
+      const userComments = allComments.filter(comment => comment.userId === req.user.id);
+      
+      // Calculate trust score based on activity and engagement
+      const postCount = userPosts.length;
+      const commentCount = userComments.length;
+      const upvotesReceived = userPosts.reduce((sum, post) => sum + (post.upvotes || 0), 0);
+      
+      // Simple algorithm for trust score (0-100)
+      // Base: 15 points for new users
+      // +5 points per post (up to 25 points)
+      // +2 points per comment (up to 20 points)
+      // +1 point per 3 upvotes received (up to 40 points)
+      const trustScore = Math.min(100, 
+        15 + 
+        Math.min(25, postCount * 5) + 
+        Math.min(20, commentCount * 2) + 
+        Math.min(40, Math.floor(upvotesReceived / 3))
+      );
+      
+      // Get recent user activity (posts, comments, votes)
+      const recentActivity = [
+        ...userPosts.map(post => ({
+          id: post.id,
+          type: 'post',
+          title: post.title,
+          createdAt: post.createdAt
+        })),
+        ...userComments.map(comment => ({
+          id: comment.id,
+          type: 'comment',
+          postId: comment.postId,
+          title: posts.find(p => p.id === comment.postId)?.title || 'Unknown Post',
+          createdAt: comment.createdAt
+        }))
+      ]
+      .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+      .slice(0, 5); // Get most recent 5 activities
+      
+      // User stats
+      const stats = {
+        totalPosts: postCount,
+        totalComments: commentCount,
+        pendingPosts: userPosts.filter(post => !post.approved && !post.rejected).length,
+        publishedPosts: userPosts.filter(post => post.approved).length,
+        rejectedPosts: userPosts.filter(post => post.rejected).length,
+        totalUpvotes: upvotesReceived,
+        trustScore
+      };
+      
+      res.status(200).json({
+        stats,
+        recentActivity
+      });
+    } catch (error) {
+      console.error("Error fetching dashboard data:", error);
+      res.status(500).json({ message: "Failed to fetch dashboard data" });
+    }
+  });
+  
+  // Get user posts with stats
+  app.get("/api/user/posts", authenticate, async (req, res) => {
+    try {
+      // Get user's posts with tags
+      const allPosts = await storage.getPostsWithTags();
+      const userPosts = allPosts.filter(post => post.userId === req.user.id);
+      
+      // Get comments for each post to count them
+      const postsWithCounts = await Promise.all(userPosts.map(async post => {
+        const comments = await storage.getComments(post.id);
+        
+        return {
+          ...post,
+          status: post.approved ? 'published' : post.rejected ? 'rejected' : 'pending',
+          commentCount: comments.length,
+          rejectionReason: post.rejected ? (post.rejectionReason || "Content not approved") : null
+        };
+      }));
+      
+      // Calculate post stats
+      const stats = {
+        total: userPosts.length,
+        published: userPosts.filter(post => post.approved).length,
+        pending: userPosts.filter(post => !post.approved && !post.rejected).length,
+        rejected: userPosts.filter(post => post.rejected).length
+      };
+      
+      res.status(200).json({
+        posts: postsWithCounts,
+        stats
+      });
+    } catch (error) {
+      console.error("Error fetching user posts:", error);
+      res.status(500).json({ message: "Failed to fetch user posts" });
+    }
+  });
+  
+  // Get user profile settings
+  app.get("/api/user/settings", authenticate, async (req, res) => {
+    try {
+      const user = await storage.getUser(req.user.id);
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
+      
+      // Default settings if not present
+      const settings = {
+        displayName: user.displayName || user.username,
+        bio: user.bio || "",
+        isProfilePublic: true,
+        emailNotifications: true,
+        showActivityFeed: true,
+        trustScore: 0, // Will be calculated in the dashboard endpoint
+        social: {
+          twitter: "",
+          instagram: "",
+          website: ""
+        }
+      };
+      
+      res.status(200).json({
+        ...user,
+        settings
+      });
+    } catch (error) {
+      console.error("Error fetching user settings:", error);
+      res.status(500).json({ message: "Failed to fetch user settings" });
+    }
+  });
+  
+  // Update user profile
+  app.patch("/api/user/profile", authenticate, async (req, res) => {
+    try {
+      const user = await storage.updateUser(req.user.id, {
+        displayName: req.body.displayName,
+        bio: req.body.bio,
+        avatarUrl: req.body.avatarUrl
+      });
+      
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
+      
+      res.status(200).json(user);
+    } catch (error) {
+      console.error("Error updating user profile:", error);
+      res.status(500).json({ message: "Failed to update user profile" });
+    }
+  });
+  
+  // Update user notification settings
+  app.patch("/api/user/settings/notifications", authenticate, async (req, res) => {
+    try {
+      // In a real implementation, we would save these to the database
+      // For now, we'll just return success
+      res.status(200).json({ 
+        message: "Notification settings updated successfully",
+        settings: req.body
+      });
+    } catch (error) {
+      console.error("Error updating notification settings:", error);
+      res.status(500).json({ message: "Failed to update notification settings" });
+    }
+  });
+  
+  // Update user privacy settings
+  app.patch("/api/user/settings/privacy", authenticate, async (req, res) => {
+    try {
+      // In a real implementation, we would save these to the database
+      // For now, we'll just return success
+      res.status(200).json({ 
+        message: "Privacy settings updated successfully",
+        settings: req.body
+      });
+    } catch (error) {
+      console.error("Error updating privacy settings:", error);
+      res.status(500).json({ message: "Failed to update privacy settings" });
+    }
+  });
+  
+  // Apply to become a contributor
+  app.post("/api/user/contributor-application", authenticate, async (req, res) => {
+    try {
+      const { contributorType, motivation, experience, portfolioLinks } = req.body;
+      
+      // In a real implementation, we would save the application to the database
+      // and notify admins for review
+      
+      // For now, we'll just return success
+      res.status(200).json({ 
+        message: "Application submitted successfully. Our team will review your application and get back to you soon.",
+        applicationStatus: "pending"
+      });
+    } catch (error) {
+      console.error("Error submitting contributor application:", error);
+      res.status(500).json({ message: "Failed to submit contributor application" });
+    }
+  });
+  
+  // Create new user post
+  app.post("/api/user/posts", authenticate, async (req, res) => {
+    try {
+      const postData = insertPostSchema.parse({
+        ...req.body,
+        userId: req.user.id,
+        createdAt: new Date(),
+        isAiGenerated: false,
+        reviewRequired: true, // User posts always require review
+      });
+      
+      const post = await storage.createPost(postData);
+      
+      // Add tags if provided
+      if (req.body.tags && Array.isArray(req.body.tags)) {
+        for (const tagName of req.body.tags) {
+          let tag = await storage.getTagByName(tagName);
+          
+          if (!tag) {
+            // Create tag if it doesn't exist
+            const colors = ["blue", "green", "red", "yellow", "purple", "pink", "indigo", "gray", "orange"];
+            const randomColor = colors[Math.floor(Math.random() * colors.length)];
+            tag = await storage.createTag({ name: tagName, color: randomColor });
+          }
+          
+          // Create post-tag association
+          await storage.createPostTag({ postId: post.id, tagId: tag.id });
+        }
+      }
+      
+      res.status(201).json({
+        ...post,
+        message: "Post submitted successfully and is pending review."
+      });
+    } catch (error) {
+      console.error("Error creating user post:", error);
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: error.errors });
+      }
+      res.status(500).json({ message: "Failed to create post" });
+    }
+  });
+
   // Create HTTP server
   const httpServer = createServer(app);
   
