@@ -81,10 +81,10 @@ const AdminLayout = ({ title, children }: AdminLayoutProps) => {
               Logged in as <span className="font-medium text-foreground">{user?.username || "Admin"}</span>
             </span>
             <Link href="/">
-              <a className="flex items-center text-sm text-primary">
+              <button className="flex items-center text-sm text-primary">
                 <Home className="mr-1 h-4 w-4" />
                 Back to Site
-              </a>
+              </button>
             </Link>
           </div>
         </div>
@@ -97,9 +97,9 @@ const AdminLayout = ({ title, children }: AdminLayoutProps) => {
             <div className="flex flex-col gap-1 p-4">
               {navigation.map((item) => (
                 <Link key={item.name} href={item.href}>
-                  <a
+                  <div
                     className={cn(
-                      "flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-colors",
+                      "flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-colors cursor-pointer",
                       item.active
                         ? "bg-primary text-primary-foreground"
                         : "hover:bg-muted/80"
@@ -107,7 +107,7 @@ const AdminLayout = ({ title, children }: AdminLayoutProps) => {
                   >
                     <item.icon className="h-4 w-4" />
                     {item.name}
-                  </a>
+                  </div>
                 </Link>
               ))}
             </div>
