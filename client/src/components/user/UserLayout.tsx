@@ -2,7 +2,8 @@ import { ReactNode } from "react";
 import { Link, useLocation } from "wouter";
 import { 
   User, Settings, FileText, MessageSquare, 
-  Bookmark, Tag, PlusCircle, BarChart
+  Bookmark, Tag, PlusCircle, BarChart,
+  Home
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/hooks/use-auth";
@@ -19,6 +20,11 @@ export default function UserLayout({ children, title }: UserLayoutProps) {
   
   // Navigation items for the user dashboard
   const navigationItems = [
+    {
+      name: "Back to Main Site",
+      href: "/",
+      icon: <Home className="h-5 w-5" />,
+    },
     {
       name: "Dashboard",
       href: "/user/dashboard",
@@ -165,7 +171,14 @@ export default function UserLayout({ children, title }: UserLayoutProps) {
       {/* Main content */}
       <div className="flex-1 flex flex-col overflow-hidden">
         <header className="bg-white border-b border-gray-200 md:hidden p-4 flex justify-between items-center">
-          <h1 className="text-xl font-semibold text-gray-900">{title}</h1>
+          <div className="flex items-center space-x-3">
+            <Link href="/">
+              <a className="p-1 rounded-md text-gray-500 hover:text-gray-600 hover:bg-gray-100">
+                <Home className="h-5 w-5" />
+              </a>
+            </Link>
+            <h1 className="text-xl font-semibold text-gray-900">{title}</h1>
+          </div>
           <button className="p-2 rounded-md text-gray-500 hover:text-gray-600 hover:bg-gray-100">
             <svg
               className="h-6 w-6"

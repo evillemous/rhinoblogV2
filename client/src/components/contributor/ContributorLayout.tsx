@@ -2,7 +2,8 @@ import { ReactNode } from "react";
 import { Link, useLocation } from "wouter";
 import { 
   Briefcase, FileText, Settings, BarChart2, 
-  MessageSquare, User, PenTool, CheckCircle 
+  MessageSquare, User, PenTool, CheckCircle,
+  Home
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/hooks/use-auth";
@@ -46,6 +47,11 @@ export default function ContributorLayout({ children, title }: ContributorLayout
   };
   
   const navigationItems = [
+    {
+      name: "Back to Main Site",
+      href: "/",
+      icon: <Home className="h-5 w-5" />,
+    },
     {
       name: "Dashboard",
       href: "/contributor/dashboard",
