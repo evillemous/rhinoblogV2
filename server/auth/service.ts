@@ -52,15 +52,28 @@ export function verifyToken(token: string): JwtPayload | null {
  */
 export async function authenticateUser(username: string, password: string): Promise<{ user: User; token: string } | null> {
   try {
+    console.log(`Login attempt with: ${username}, ${password}`);
     const user = await storage.getUserByUsername(username);
     
+    // Debug info
+    console.log(`User found:`, user ? "YES" : "none");
+    
     // If user doesn't exist or password doesn't match
-    if (!user || user.password !== password) {
+    if (!user) {
+      console.log("Login failed: User not found");
+      return null;
+    }
+    
+    if (user.password !== password) {
+      console.log("Login failed: Password mismatch");
+      console.log(`Stored password: ${user.password}`);
+      console.log(`Provided password: ${password}`);
       return null;
     }
     
     // Generate token
     const token = generateToken(user);
+    console.log(`Login successful for: ${username}, role: ${user.role}`);
     
     return { user, token };
   } catch (error) {

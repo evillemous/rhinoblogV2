@@ -229,8 +229,11 @@ const Login = () => {
           <div className="text-sm text-gray-500">
             Admin login: <span className="font-bold">admin</span> / <span className="font-bold">rhinoadmin123</span>
           </div>
+          <div className="text-sm text-gray-500">
+            Superadmin login: <span className="font-bold">superadmin</span> / <span className="font-bold">super123</span>
+          </div>
           <div className="text-xs text-gray-500">
-            After logging in as admin, click the red "Admin Dashboard" button in the header
+            After logging in, click the red "Admin Dashboard" button in the header
           </div>
         </CardFooter>
       </Card>
