@@ -15,7 +15,7 @@ import {
   Eye, 
   Trash2, 
   MoreHorizontal,
-  Robot,
+  Bot,
   User,
   Flag,
   CheckCircle,
@@ -157,10 +157,10 @@ const PostsManagementPage = () => {
     { original: "cost", duplicates: ["pricing", "expenses", "fees"] },
   ];
 
-  const getPostTypeIcon = (type) => {
+  const getPostTypeIcon = (type: string) => {
     switch (type) {
       case "ai":
-        return <Robot className="h-4 w-4 text-purple-500" />;
+        return <Bot className="h-4 w-4 text-purple-500" />;
       case "human":
         return <User className="h-4 w-4 text-blue-500" />;
       default:
@@ -168,7 +168,7 @@ const PostsManagementPage = () => {
     }
   };
 
-  const getStatusBadge = (status) => {
+  const getStatusBadge = (status: string) => {
     switch (status) {
       case "published":
         return <Badge variant="outline" className="bg-green-50 text-green-700 hover:bg-green-50">Published</Badge>;
@@ -343,7 +343,7 @@ const PostsManagementPage = () => {
                       {posts.filter(post => post.type === "ai").map((post) => (
                         <div key={post.id} className="grid grid-cols-12 p-3 text-sm items-center">
                           <div className="col-span-5 font-medium flex items-center">
-                            <Robot className="h-4 w-4 mr-1 text-purple-500" />
+                            <Bot className="h-4 w-4 mr-1 text-purple-500" />
                             {post.title}
                           </div>
                           <div className="col-span-2">

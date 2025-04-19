@@ -19,6 +19,12 @@ import Footer from "@/components/Footer";
 import { ThemeProvider, useTheme } from "@/context/ThemeContext";
 import { AuthProvider } from "@/context/AuthContext";
 
+// Admin Dashboard Pages
+import AdminDashboard from "@/pages/admin/Dashboard";
+import AdminModeration from "@/pages/admin/Moderation";
+import AdminPosts from "@/pages/admin/Posts";
+import AdminContributors from "@/pages/admin/Contributors";
+
 // Superuser Dashboard Pages
 import AIEngine from "@/pages/superuser/AIEngine";
 import PlatformSettings from "@/pages/superuser/PlatformSettings";
@@ -43,6 +49,12 @@ function Router() {
       <Route path="/profile/settings" component={ProfileSettings} />
       <Route path="/admin" component={Admin} />
       <Route path="/admin-link" component={AdminLink} />
+      
+      {/* Admin Dashboard Routes */}
+      <Route path="/admin/dashboard" component={AdminDashboard} />
+      <Route path="/admin/moderation" component={AdminModeration} />
+      <Route path="/admin/posts" component={AdminPosts} />
+      <Route path="/admin/contributors" component={AdminContributors} />
       
       {/* Superuser Dashboard Routes */}
       <Route path="/super/ai-engine" component={AIEngine} />
@@ -74,17 +86,19 @@ function AppContent() {
   const { theme } = useTheme();
   const [location] = useLocation();
   
-  // Check if current route is a superuser dashboard route
+  // Check if current route is a dashboard route (superuser or admin)
   const isSuperuserRoute = location.includes('/super/');
+  const isAdminRoute = location.includes('/admin/') && location !== '/admin-link';
+  const isDashboardRoute = isSuperuserRoute || isAdminRoute;
   
   return (
     <div className={theme === "dark" ? "dark" : ""}>
       <div className="bg-white dark:bg-gray-900 min-h-screen flex flex-col">
-        {!isSuperuserRoute && <Header />}
+        {!isDashboardRoute && <Header />}
         <main className="flex-grow">
           <Router />
         </main>
-        {!isSuperuserRoute && <Footer />}
+        {!isDashboardRoute && <Footer />}
         <Toaster />
       </div>
     </div>
