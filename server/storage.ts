@@ -130,10 +130,15 @@ export class MemStorage implements IStorage {
   
   private async createDemoContent() {
     try {
-      // Get admin user (should have been created by now)
+      // Get admin or superadmin user (should have been created by now)
       const admin = await this.getUserByUsername('admin');
-      if (!admin) {
-        console.log('Admin user not found. Demo content creation skipped.');
+      const superadmin = await this.getUserByUsername('superadmin');
+      
+      // Use either admin or superadmin for creating demo content
+      const contentCreator = admin || superadmin;
+      
+      if (!contentCreator) {
+        console.log('Admin users not found. Demo content creation skipped.');
         return;
       }
 
@@ -143,7 +148,7 @@ export class MemStorage implements IStorage {
         content: "# My Rhinoplasty Journey\n\nJust wanted to share my experience after one month post-op. The swelling has gone down significantly and I'm really happy with the results so far!",
         imageUrl: null,
         isAiGenerated: false,
-        userId: admin.id
+        userId: contentCreator.id
       });
       
       // Add tags to demo post
@@ -157,7 +162,7 @@ export class MemStorage implements IStorage {
       
       // Add a comment to the demo post
       await this.createComment({
-        userId: admin.id,
+        userId: contentCreator.id,
         postId: demoPost.id,
         content: "This is a sample comment on the demo post!",
         parentId: null
@@ -171,7 +176,7 @@ export class MemStorage implements IStorage {
         content: "I had rhinoplasty 3 weeks ago and my nose looks terrible. The surgeon clearly messed up. I want to warn everyone about this doctor who ruined my life!",
         imageUrl: null,
         isAiGenerated: false,
-        userId: admin.id
+        userId: contentCreator.id
       });
       
       // Update the post to be flagged
@@ -187,7 +192,7 @@ export class MemStorage implements IStorage {
         content: "After extensive research, I'm excited to share my findings about the best surgeons in LA. Dr. Smith at Beverly Hills Rhinoplasty Center is offering 20% off for new patients!",
         imageUrl: null,
         isAiGenerated: false,
-        userId: admin.id
+        userId: contentCreator.id
       });
       
       // Update the post to be flagged
@@ -199,7 +204,7 @@ export class MemStorage implements IStorage {
       
       // Flagged comment
       const flaggedComment = await this.createComment({
-        userId: admin.id,
+        userId: contentCreator.id,
         postId: demoPost.id,
         content: "This is terrible advice! You should never do this procedure!",
         parentId: null
@@ -218,7 +223,7 @@ export class MemStorage implements IStorage {
         content: "I just had rhinoplasty with Dr. Smith in Chicago and wanted to share my initial recovery experience...",
         imageUrl: null,
         isAiGenerated: false,
-        userId: admin.id,
+        userId: contentCreator.id,
         status: "pending"
       });
       
@@ -229,10 +234,22 @@ export class MemStorage implements IStorage {
   }
   
   private async createDefaultAdmin() {
+    // Create regular admin user
     const admin = {
       username: 'admin',
       password: 'rhinoadmin123',
       email: 'admin@rhinoplastyblogs.com',
+      avatarUrl: null,
+      isAdmin: true,
+      role: 'admin',
+      contributorType: null
+    };
+    
+    // Create separate superadmin user
+    const superadmin = {
+      username: 'superadmin',
+      password: 'super123',
+      email: 'superadmin@rhinoplastyblogs.com',
       avatarUrl: null,
       isAdmin: true,
       role: 'superadmin',
@@ -244,6 +261,47 @@ export class MemStorage implements IStorage {
     if (!existingAdmin) {
       await this.createUser(admin);
       console.log('Default admin user created');
+    }
+    
+    // Check if superadmin user already exists
+    const existingSuperadmin = await this.getUserByUsername('superadmin');
+    if (!existingSuperadmin) {
+      await this.createUser(superadmin);
+      console.log('Superadmin user created: superadmin/super123');
+    }
+    
+    // Create a regular contributor (surgeon)
+    const surgeon = {
+      username: 'drsurgeon',
+      password: 'surgeon123',
+      email: 'surgeon@rhinoplastyblogs.com',
+      avatarUrl: null,
+      isAdmin: false,
+      role: 'contributor',
+      contributorType: 'surgeon'
+    };
+    
+    const existingSurgeon = await this.getUserByUsername('drsurgeon');
+    if (!existingSurgeon) {
+      await this.createUser(surgeon);
+      console.log('Surgeon contributor created: drsurgeon/surgeon123');
+    }
+    
+    // Create a regular user
+    const regularUser = {
+      username: 'user',
+      password: 'user123',
+      email: 'user@example.com',
+      avatarUrl: null,
+      isAdmin: false,
+      role: 'user',
+      contributorType: null
+    };
+    
+    const existingUser = await this.getUserByUsername('user');
+    if (!existingUser) {
+      await this.createUser(regularUser);
+      console.log('Regular user created: user/user123');
     }
   }
 
