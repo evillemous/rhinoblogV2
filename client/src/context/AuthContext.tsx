@@ -107,7 +107,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   };
 
   const isAdmin = () => {
-    return user?.role === UserRole.ADMIN || user?.role === UserRole.SUPERADMIN || user?.isAdmin === true;
+    return user?.role === UserRole.ADMIN || user?.role === UserRole.SUPERADMIN;
   };
 
   const isContributor = () => {

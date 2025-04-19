@@ -22,8 +22,7 @@ const AdminGuard = ({ children }: { children: React.ReactNode }) => {
   // Check if user has admin or superadmin role
   const isAdminOrSuperAdmin = 
     user.role === 'admin' || 
-    user.role === 'superadmin' || 
-    user.isAdmin === true;
+    user.role === 'superadmin';
 
   if (!isAdminOrSuperAdmin) {
     return <Redirect to="/" />;
