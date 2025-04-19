@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Link } from "wouter";
 import { format } from "date-fns";
-import { useAuth } from "@/hooks/use-auth";
+import { useAuth } from "@/context/AuthContext";
 import UserGuard from "@/lib/guards/UserGuard";
 import UserLayout from "@/components/user/UserLayout";
 import {

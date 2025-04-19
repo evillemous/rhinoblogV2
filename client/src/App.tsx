@@ -19,6 +19,7 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { ThemeProvider, useTheme } from "@/context/ThemeContext";
 import { AuthProvider } from "@/context/AuthContext";
+import UserGuard from "@/lib/guards/UserGuard";
 
 // Admin Dashboard Pages
 import AdminDashboard from "@/pages/admin/Dashboard";
@@ -82,15 +83,73 @@ function Router() {
       <Route path="/contributor/settings" component={ContributorSettings} />
       <Route path="/contributor/comments" component={ContributorComments} />
       
-      {/* User Dashboard Routes */}
-      <Route path="/user/dashboard" component={UserDashboard} />
-      <Route path="/user/settings" component={UserSettings} />
-      <Route path="/user/posts" component={UserPosts} />
-      <Route path="/user/comments" component={lazy(() => import("@/pages/user/Comments"))} />
-      <Route path="/user/saved" component={lazy(() => import("@/pages/user/Saved"))} />
-      <Route path="/user/tags" component={lazy(() => import("@/pages/user/Tags"))} />
-      <Route path="/user/create-post" component={lazy(() => import("@/pages/user/CreatePost"))} />
-      <Route path="/user/apply-contributor" component={lazy(() => import("@/pages/user/ApplyContributor"))} />
+      {/* User Dashboard Routes - Protected with UserGuard */}
+      <Route path="/user/dashboard">
+        {() => (
+          <UserGuard>
+            <UserDashboard />
+          </UserGuard>
+        )}
+      </Route>
+      <Route path="/user/settings">
+        {() => (
+          <UserGuard>
+            <UserSettings />
+          </UserGuard>
+        )}
+      </Route>
+      <Route path="/user/posts">
+        {() => (
+          <UserGuard>
+            <UserPosts />
+          </UserGuard>
+        )}
+      </Route>
+      <Route path="/user/comments">
+        {() => (
+          <UserGuard>
+            <Suspense fallback={<div className="flex items-center justify-center min-h-screen"><div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div></div>}>
+              {lazy(() => import("@/pages/user/Comments"))()}
+            </Suspense>
+          </UserGuard>
+        )}
+      </Route>
+      <Route path="/user/saved">
+        {() => (
+          <UserGuard>
+            <Suspense fallback={<div className="flex items-center justify-center min-h-screen"><div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div></div>}>
+              {lazy(() => import("@/pages/user/Saved"))()}
+            </Suspense>
+          </UserGuard>
+        )}
+      </Route>
+      <Route path="/user/tags">
+        {() => (
+          <UserGuard>
+            <Suspense fallback={<div className="flex items-center justify-center min-h-screen"><div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div></div>}>
+              {lazy(() => import("@/pages/user/Tags"))()}
+            </Suspense>
+          </UserGuard>
+        )}
+      </Route>
+      <Route path="/user/create-post">
+        {() => (
+          <UserGuard>
+            <Suspense fallback={<div className="flex items-center justify-center min-h-screen"><div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div></div>}>
+              {lazy(() => import("@/pages/user/CreatePost"))()}
+            </Suspense>
+          </UserGuard>
+        )}
+      </Route>
+      <Route path="/user/apply-contributor">
+        {() => (
+          <UserGuard>
+            <Suspense fallback={<div className="flex items-center justify-center min-h-screen"><div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div></div>}>
+              {lazy(() => import("@/pages/user/ApplyContributor"))()}
+            </Suspense>
+          </UserGuard>
+        )}
+      </Route>
       
       {/* Superuser Dashboard Routes */}
       <Route path="/super/ai-engine" component={AIEngine} />

@@ -1,6 +1,6 @@
 import { ReactNode } from 'react';
 import { Redirect } from 'wouter';
-import { useAuth } from '@/hooks/use-auth';
+import { useAuth } from '@/context/AuthContext';
 import { UserRole } from '@shared/schema';
 
 interface UserGuardProps {
@@ -18,13 +18,8 @@ const UserGuard = ({ children }: UserGuardProps) => {
     );
   }
 
-  // Allow access to users with USER role or higher (CONTRIBUTOR, ADMIN, SUPERADMIN)
-  const hasAccess = user && (
-    user.role === UserRole.USER || 
-    user.role === UserRole.CONTRIBUTOR || 
-    user.role === UserRole.ADMIN || 
-    user.role === UserRole.SUPERADMIN
-  );
+  // Allow access to any authenticated user
+  const hasAccess = !!user;
 
   if (!hasAccess) {
     return <Redirect to="/login" />;
