@@ -1,3 +1,4 @@
+import { lazy, Suspense } from "react";
 import { Switch, Route, useLocation } from "wouter";
 import { queryClient } from "./lib/queryClient";
 import { QueryClientProvider } from "@tanstack/react-query";
@@ -85,6 +86,11 @@ function Router() {
       <Route path="/user/dashboard" component={UserDashboard} />
       <Route path="/user/settings" component={UserSettings} />
       <Route path="/user/posts" component={UserPosts} />
+      <Route path="/user/comments" component={lazy(() => import("@/pages/user/Comments"))} />
+      <Route path="/user/saved" component={lazy(() => import("@/pages/user/Saved"))} />
+      <Route path="/user/tags" component={lazy(() => import("@/pages/user/Tags"))} />
+      <Route path="/user/create-post" component={lazy(() => import("@/pages/user/CreatePost"))} />
+      <Route path="/user/apply-contributor" component={lazy(() => import("@/pages/user/ApplyContributor"))} />
       
       {/* Superuser Dashboard Routes */}
       <Route path="/super/ai-engine" component={AIEngine} />
@@ -128,7 +134,9 @@ function AppContent() {
       <div className="bg-white dark:bg-gray-900 min-h-screen flex flex-col">
         {!isDashboardRoute && <Header />}
         <main className="flex-grow">
-          <Router />
+          <Suspense fallback={<div className="flex items-center justify-center min-h-screen"><div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div></div>}>
+            <Router />
+          </Suspense>
         </main>
         {!isDashboardRoute && <Footer />}
         <Toaster />

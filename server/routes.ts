@@ -2242,18 +2242,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       // Add tags if provided
       if (req.body.tags && Array.isArray(req.body.tags)) {
-        for (const tagName of req.body.tags) {
-          let tag = await storage.getTagByName(tagName);
+        for (const tagId of req.body.tags) {
+          const tag = await storage.getTag(tagId);
           
-          if (!tag) {
-            // Create tag if it doesn't exist
-            const colors = ["blue", "green", "red", "yellow", "purple", "pink", "indigo", "gray", "orange"];
-            const randomColor = colors[Math.floor(Math.random() * colors.length)];
-            tag = await storage.createTag({ name: tagName, color: randomColor });
+          if (tag) {
+            // Create post-tag association
+            await storage.createPostTag({ postId: post.id, tagId: tag.id });
           }
-          
-          // Create post-tag association
-          await storage.createPostTag({ postId: post.id, tagId: tag.id });
         }
       }
       
@@ -2267,6 +2262,164 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: error.errors });
       }
       res.status(500).json({ message: "Failed to create post" });
+    }
+  });
+  
+  // Get user comments
+  app.get("/api/user/comments", authenticate, async (req, res) => {
+    try {
+      const posts = await storage.getPosts();
+      
+      // Get all comments
+      const allComments = [];
+      for (const post of posts) {
+        const comments = await storage.getComments(post.id);
+        // Filter for user's comments and add post title
+        const userComments = comments
+          .filter(comment => comment.userId === req.user.id)
+          .map(comment => ({
+            ...comment,
+            postTitle: post.title
+          }));
+        
+        allComments.push(...userComments);
+      }
+      
+      // Calculate stats
+      const stats = {
+        total: allComments.length,
+        published: allComments.filter(c => !c.moderationReason).length,
+        removed: allComments.filter(c => c.status === 'removed').length,
+        flagged: allComments.filter(c => c.status === 'flagged').length
+      };
+      
+      res.status(200).json({
+        comments: allComments,
+        stats
+      });
+    } catch (error) {
+      console.error("Error fetching user comments:", error);
+      res.status(500).json({ message: "Failed to fetch user comments" });
+    }
+  });
+  
+  // Get user saved content
+  app.get("/api/user/saved", authenticate, async (req, res) => {
+    try {
+      // Mock data for saved posts until we implement the saved posts feature
+      const posts = await storage.getPostsWithTags();
+      const mockSavedPosts = posts.slice(0, 5).map((post, index) => ({
+        id: index + 1,
+        postId: post.id,
+        title: post.title,
+        content: post.content,
+        createdAt: post.createdAt,
+        savedAt: new Date(Date.now() - (index * 86400000)).toISOString(), // Different days
+        type: index % 2 === 0 ? 'post' : 'article',
+        author: post.user,
+        commentCount: Math.floor(Math.random() * 20),
+        upvotes: post.upvotes,
+        imageUrl: post.imageUrl,
+        tags: post.tags
+      }));
+      
+      // Stats
+      const stats = {
+        total: mockSavedPosts.length,
+        posts: mockSavedPosts.filter(p => p.type === 'post').length,
+        articles: mockSavedPosts.filter(p => p.type === 'article').length
+      };
+      
+      res.status(200).json({
+        savedPosts: mockSavedPosts,
+        stats
+      });
+    } catch (error) {
+      console.error("Error fetching saved content:", error);
+      res.status(500).json({ message: "Failed to fetch saved content" });
+    }
+  });
+  
+  // Get user tags
+  app.get("/api/user/tags", authenticate, async (req, res) => {
+    try {
+      // Get all tags
+      const allTags = await storage.getTags();
+      
+      // Mock followed tags
+      const followedTagIds = [1, 3, 5]; // Simulating user following some tags
+      const followedTags = allTags
+        .filter(tag => followedTagIds.includes(tag.id))
+        .map((tag, index) => ({
+          id: index + 1,
+          tagId: tag.id,
+          name: tag.name,
+          color: tag.color,
+          followedAt: new Date(Date.now() - (index * 86400000)).toISOString(),
+          postCount: Math.floor(Math.random() * 50) + 10
+        }));
+      
+      // Mock popular tags
+      const popularTags = allTags
+        .filter(tag => !followedTagIds.includes(tag.id))
+        .map(tag => ({
+          id: tag.id,
+          name: tag.name,
+          color: tag.color,
+          postCount: Math.floor(Math.random() * 100) + 20,
+          isFollowed: false
+        }));
+      
+      const stats = {
+        totalFollowed: followedTags.length
+      };
+      
+      res.status(200).json({
+        followedTags,
+        popularTags,
+        stats
+      });
+    } catch (error) {
+      console.error("Error fetching user tags:", error);
+      res.status(500).json({ message: "Failed to fetch user tags" });
+    }
+  });
+  
+  // Follow tag
+  app.post("/api/user/tags/:id/follow", authenticate, async (req, res) => {
+    try {
+      const tagId = parseInt(req.params.id);
+      const tag = await storage.getTag(tagId);
+      
+      if (!tag) {
+        return res.status(404).json({ message: "Tag not found" });
+      }
+      
+      // We'll implement tag following in a future update
+      // For now, just return success
+      res.status(200).json({ message: "Tag followed successfully" });
+    } catch (error) {
+      console.error("Error following tag:", error);
+      res.status(500).json({ message: "Failed to follow tag" });
+    }
+  });
+  
+  // Unfollow tag
+  app.delete("/api/user/tags/:id/follow", authenticate, async (req, res) => {
+    try {
+      const tagId = parseInt(req.params.id);
+      const tag = await storage.getTag(tagId);
+      
+      if (!tag) {
+        return res.status(404).json({ message: "Tag not found" });
+      }
+      
+      // We'll implement tag unfollowing in a future update
+      // For now, just return success
+      res.status(200).json({ message: "Tag unfollowed successfully" });
+    } catch (error) {
+      console.error("Error unfollowing tag:", error);
+      res.status(500).json({ message: "Failed to unfollow tag" });
     }
   });
 
