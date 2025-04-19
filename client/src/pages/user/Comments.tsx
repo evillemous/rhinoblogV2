@@ -3,7 +3,7 @@ import { useQuery, useMutation } from "@tanstack/react-query";
 import { format } from "date-fns";
 import { Link } from "wouter";
 import { apiRequest, queryClient } from "@/lib/queryClient";
-import { useAuth } from "@/hooks/use-auth";
+import { useAuth } from "@/context/AuthContext";
 import { useToast } from "@/hooks/use-toast";
 import UserGuard from "@/lib/guards/UserGuard";
 import UserLayout from "@/components/user/UserLayout";
@@ -247,15 +247,21 @@ const UserComments = () => {
                                 {truncateContent(comment.content)}
                               </div>
                               <div className="md:hidden mt-1 text-xs text-muted-foreground">
-                                <Link href={`/post/${comment.postId}`}>{truncateContent(comment.postTitle, 50)}</Link>
+                                <span 
+                                  className="cursor-pointer hover:underline"
+                                  onClick={() => window.location.href = `/post/${comment.postId}`}
+                                >
+                                  {truncateContent(comment.postTitle, 50)}
+                                </span>
                               </div>
                             </TableCell>
                             <TableCell className="hidden md:table-cell">
-                              <Link href={`/post/${comment.postId}`}>
-                                <a className="text-sm hover:underline max-w-[200px] truncate block">
-                                  {comment.postTitle}
-                                </a>
-                              </Link>
+                              <span 
+                                className="text-sm hover:underline max-w-[200px] truncate block cursor-pointer"
+                                onClick={() => window.location.href = `/post/${comment.postId}`}
+                              >
+                                {comment.postTitle}
+                              </span>
                             </TableCell>
                             <TableCell className="hidden md:table-cell">
                               <div className="flex items-center">
@@ -277,26 +283,25 @@ const UserComments = () => {
                                   </Button>
                                 </DropdownMenuTrigger>
                                 <DropdownMenuContent align="end">
-                                  <DropdownMenuItem asChild>
-                                    <a 
-                                      href={`/post/${comment.postId}`} 
-                                      target="_blank" 
-                                      rel="noopener noreferrer"
-                                      className="flex items-center"
-                                    >
-                                      <ExternalLink className="mr-2 h-4 w-4" />
-                                      View Post
-                                    </a>
+                                  <DropdownMenuItem 
+                                    onClick={() => {
+                                      window.open(`/post/${comment.postId}`, '_blank');
+                                    }}
+                                    className="flex items-center"
+                                  >
+                                    <ExternalLink className="mr-2 h-4 w-4" />
+                                    View Post
                                   </DropdownMenuItem>
                                   
                                   {comment.status === "published" && (
-                                    <DropdownMenuItem asChild>
-                                      <Link href={`/user/edit-comment/${comment.id}`}>
-                                        <a className="flex items-center">
-                                          <Edit className="mr-2 h-4 w-4" />
-                                          Edit
-                                        </a>
-                                      </Link>
+                                    <DropdownMenuItem 
+                                      onClick={() => {
+                                        window.location.href = `/user/edit-comment/${comment.id}`;
+                                      }}
+                                      className="flex items-center"
+                                    >
+                                      <Edit className="mr-2 h-4 w-4" />
+                                      Edit
                                     </DropdownMenuItem>
                                   )}
                                   
