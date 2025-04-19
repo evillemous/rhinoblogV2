@@ -61,7 +61,7 @@ git add .
 
 # Commit changes
 TIMESTAMP=$(date +"%Y-%m-%d %H:%M:%S")
-git commit -m "Update: RBAC implementation - $TIMESTAMP"
+git commit -m "Update: Fixed user dashboard comments and added test users - $TIMESTAMP"
 
 # Get current branch name
 current_branch=$(git branch --show-current || echo "main")
